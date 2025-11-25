@@ -14,4 +14,3 @@ interface SignalActionHandler
      */
     public function handle(SignalAction $action, array $payload, string $eventClass): ?array;
 }
-

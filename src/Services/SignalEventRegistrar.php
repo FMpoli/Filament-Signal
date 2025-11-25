@@ -5,7 +5,6 @@ namespace Base33\FilamentSignal\Services;
 use Base33\FilamentSignal\Models\SignalTrigger;
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Log;
 use Throwable;
 
@@ -47,4 +46,3 @@ class SignalEventRegistrar
         return $configured->merge($databaseEvents)->filter()->unique()->values();
     }
 }
-

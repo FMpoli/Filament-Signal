@@ -16,4 +16,3 @@ class ListSignalTriggers extends ListRecords
         ];
     }
 }
-

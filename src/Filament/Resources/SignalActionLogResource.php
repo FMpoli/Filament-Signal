@@ -4,14 +4,14 @@ namespace Base33\FilamentSignal\Filament\Resources;
 
 use Base33\FilamentSignal\Filament\Resources\SignalActionLogResource\Pages;
 use Base33\FilamentSignal\Models\SignalActionLog;
-use Filament\Resources\Resource;
-use Filament\Tables;
-use Filament\Tables\Table;
-use Filament\Infolists\Infolist;
 use Filament\Infolists\Components\Section as InfoSection;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Components\ViewEntry;
+use Filament\Infolists\Infolist;
+use Filament\Resources\Resource;
+use Filament\Tables;
 use Filament\Tables\Actions\Action;
+use Filament\Tables\Table;
 
 class SignalActionLogResource extends Resource
 {
@@ -117,4 +117,3 @@ class SignalActionLogResource extends Resource
         ];
     }
 }
-

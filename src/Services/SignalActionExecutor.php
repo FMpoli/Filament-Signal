@@ -7,7 +7,6 @@ use Base33\FilamentSignal\Models\SignalAction;
 use Base33\FilamentSignal\Models\SignalActionLog;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\App;
-use Illuminate\Support\Str;
 use InvalidArgumentException;
 use Throwable;
 
@@ -82,4 +81,3 @@ class SignalActionExecutor
         return $handler;
     }
 }
-

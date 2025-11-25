@@ -16,4 +16,3 @@ class ListSignalActionLogs extends ListRecords
         ];
     }
 }
-

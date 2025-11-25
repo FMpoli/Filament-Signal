@@ -71,4 +71,3 @@ class EmailActionHandler implements SignalActionHandler
         ];
     }
 }
-

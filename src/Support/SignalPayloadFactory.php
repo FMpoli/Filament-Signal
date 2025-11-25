@@ -59,4 +59,3 @@ class SignalPayloadFactory
         return $value;
     }
 }
-

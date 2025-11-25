@@ -16,4 +16,3 @@ class ListSignalTemplates extends ListRecords
         ];
     }
 }
-

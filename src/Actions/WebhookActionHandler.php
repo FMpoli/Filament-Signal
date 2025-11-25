@@ -59,4 +59,3 @@ class WebhookActionHandler implements SignalActionHandler
         ];
     }
 }
-

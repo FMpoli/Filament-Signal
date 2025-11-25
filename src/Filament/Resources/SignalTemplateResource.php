@@ -105,4 +105,3 @@ class SignalTemplateResource extends Resource
         ];
     }
 }
-

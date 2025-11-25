@@ -44,4 +44,3 @@ class RunSignalTrigger implements ShouldQueue
         }
     }
 }
-
