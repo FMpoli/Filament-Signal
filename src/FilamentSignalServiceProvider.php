@@ -99,11 +99,19 @@ class FilamentSignalServiceProvider extends PackageServiceProvider
      */
     protected function getAssets(): array
     {
-        return [
-            // AlpineComponent::make('filament-signal', __DIR__ . '/../resources/dist/components/filament-signal.js'),
-            Css::make('filament-signal-styles', __DIR__ . '/../resources/dist/filament-signal.css'),
-            Js::make('filament-signal-scripts', __DIR__ . '/../resources/dist/filament-signal.js'),
-        ];
+        $assets = [];
+
+        $cssPath = __DIR__ . '/../resources/dist/filament-signal.css';
+        if (file_exists($cssPath)) {
+            $assets[] = Css::make('filament-signal-styles', $cssPath);
+        }
+
+        $jsPath = __DIR__ . '/../resources/dist/filament-signal.js';
+        if (file_exists($jsPath)) {
+            $assets[] = Js::make('filament-signal-scripts', $jsPath);
+        }
+
+        return $assets;
     }
 
     /**
@@ -146,7 +154,10 @@ class FilamentSignalServiceProvider extends PackageServiceProvider
     protected function getMigrations(): array
     {
         return [
-            'create_filament-signal_table',
+            'create_signal_templates_table',
+            'create_signal_triggers_table',
+            'create_signal_actions_table',
+            'create_signal_action_logs_table',
         ];
     }
 }
