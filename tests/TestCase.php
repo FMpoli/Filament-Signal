@@ -2,6 +2,7 @@
 
 namespace Base33\FilamentSignal\Tests;
 
+use Base33\FilamentSignal\FilamentSignalServiceProvider;
 use BladeUI\Heroicons\BladeHeroiconsServiceProvider;
 use BladeUI\Icons\BladeIconsServiceProvider;
 use Filament\Actions\ActionsServiceProvider;
@@ -16,7 +17,6 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 use Livewire\LivewireServiceProvider;
 use Orchestra\Testbench\TestCase as Orchestra;
 use RyanChandler\BladeCaptureDirective\BladeCaptureDirectiveServiceProvider;
-use Base33\FilamentSignal\FilamentSignalServiceProvider;
 
 class TestCase extends Orchestra
 {

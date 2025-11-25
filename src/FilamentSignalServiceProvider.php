@@ -2,6 +2,8 @@
 
 namespace Base33\FilamentSignal;
 
+use Base33\FilamentSignal\Commands\FilamentSignalCommand;
+use Base33\FilamentSignal\Testing\TestsFilamentSignal;
 use Filament\Support\Assets\AlpineComponent;
 use Filament\Support\Assets\Asset;
 use Filament\Support\Assets\Css;
@@ -13,8 +15,6 @@ use Livewire\Features\SupportTesting\Testable;
 use Spatie\LaravelPackageTools\Commands\InstallCommand;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
-use Base33\FilamentSignal\Commands\FilamentSignalCommand;
-use Base33\FilamentSignal\Testing\TestsFilamentSignal;
 
 class FilamentSignalServiceProvider extends PackageServiceProvider
 {
