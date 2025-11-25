@@ -1,5 +1,7 @@
 <?php
 
+use Base33\FilamentSignal\Actions\EmailActionHandler;
+use Base33\FilamentSignal\Actions\WebhookActionHandler;
 use Base33\FilamentSignal\Models\SignalAction;
 use Base33\FilamentSignal\Models\SignalActionLog;
 use Base33\FilamentSignal\Models\SignalTemplate;
@@ -44,5 +46,10 @@ return [
                 'codeBlock',
             ],
         ],
+    ],
+
+    'action_handlers' => [
+        'email' => EmailActionHandler::class,
+        'webhook' => WebhookActionHandler::class,
     ],
 ];

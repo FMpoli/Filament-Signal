@@ -1,0 +1,47 @@
+<?php
+
+namespace Base33\FilamentSignal\Jobs;
+
+use Base33\FilamentSignal\Models\SignalTrigger;
+use Base33\FilamentSignal\Services\SignalActionExecutor;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\SerializesModels;
+
+class RunSignalTrigger implements ShouldQueue
+{
+    use Dispatchable;
+    use InteractsWithQueue;
+    use Queueable;
+    use SerializesModels;
+
+    /**
+     * @param  array<string, mixed>  $payload
+     */
+    public function __construct(
+        protected int $triggerId,
+        protected string $eventClass,
+        protected array $payload,
+    ) {
+        if ($connection = config('signal.queue_connection')) {
+            $this->onConnection($connection);
+        }
+    }
+
+    public function handle(SignalActionExecutor $executor): void
+    {
+        $trigger = SignalTrigger::with(['actions' => fn ($query) => $query->active()->orderBy('execution_order')->with('template')])
+            ->find($this->triggerId);
+
+        if (! $trigger) {
+            return;
+        }
+
+        foreach ($trigger->actions as $action) {
+            $executor->execute($action, $this->payload, $this->eventClass);
+        }
+    }
+}
+

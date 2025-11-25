@@ -2,6 +2,9 @@
 
 namespace Base33\FilamentSignal;
 
+use Base33\FilamentSignal\Filament\Resources\SignalActionLogResource;
+use Base33\FilamentSignal\Filament\Resources\SignalTemplateResource;
+use Base33\FilamentSignal\Filament\Resources\SignalTriggerResource;
 use Filament\Contracts\Plugin;
 use Filament\Panel;
 
@@ -14,7 +17,11 @@ class FilamentSignalPlugin implements Plugin
 
     public function register(Panel $panel): void
     {
-        //
+        $panel->resources([
+            SignalTemplateResource::class,
+            SignalTriggerResource::class,
+            SignalActionLogResource::class,
+        ]);
     }
 
     public function boot(Panel $panel): void

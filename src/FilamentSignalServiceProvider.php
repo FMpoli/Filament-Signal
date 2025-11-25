@@ -3,6 +3,7 @@
 namespace Base33\FilamentSignal;
 
 use Base33\FilamentSignal\Commands\FilamentSignalCommand;
+use Base33\FilamentSignal\Services\SignalEventRegistrar;
 use Base33\FilamentSignal\Testing\TestsFilamentSignal;
 use Filament\Support\Assets\Asset;
 use Filament\Support\Assets\Css;
@@ -86,6 +87,10 @@ class FilamentSignalServiceProvider extends PackageServiceProvider
 
         // Testing
         Testable::mixin(new TestsFilamentSignal);
+
+        app()->booted(function (): void {
+            app(SignalEventRegistrar::class)->register();
+        });
     }
 
     protected function getAssetPackageName(): ?string
