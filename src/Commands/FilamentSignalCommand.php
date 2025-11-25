@@ -1,12 +1,12 @@
 <?php
 
-namespace VendorName\Skeleton\Commands;
+namespace Base33\FilamentSignal\Commands;
 
 use Illuminate\Console\Command;
 
-class SkeletonCommand extends Command
+class FilamentSignalCommand extends Command
 {
-    public $signature = 'skeleton';
+    public $signature = 'filament-signal';
 
     public $description = 'My command';
 
