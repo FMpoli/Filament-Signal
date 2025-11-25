@@ -140,4 +140,3 @@ class SignalActionLogResource extends Resource
         ];
     }
 }
-
