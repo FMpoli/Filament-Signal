@@ -11,10 +11,13 @@ class SignalTrigger extends Model
     use HasFactory;
 
     public const STATUS_DRAFT = 'draft';
+
     public const STATUS_ACTIVE = 'active';
+
     public const STATUS_DISABLED = 'disabled';
 
     public const MATCH_ALL = 'all';
+
     public const MATCH_ANY = 'any';
 
     protected $fillable = [
@@ -54,4 +57,3 @@ class SignalTrigger extends Model
         return $query->where('status', self::STATUS_ACTIVE);
     }
 }
-

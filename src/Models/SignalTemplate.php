@@ -26,9 +26,9 @@ class SignalTemplate extends Model
         'meta' => 'array',
         'is_active' => 'boolean',
     ];
+
     public function getTable()
     {
         return config('signal.table_names.templates', parent::getTable());
     }
 }
-

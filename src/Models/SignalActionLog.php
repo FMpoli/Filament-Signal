@@ -43,4 +43,3 @@ class SignalActionLog extends Model
         return $this->belongsTo(config('signal.models.action', SignalAction::class));
     }
 }
-

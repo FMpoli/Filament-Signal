@@ -4,7 +4,6 @@ namespace Base33\FilamentSignal;
 
 use Base33\FilamentSignal\Commands\FilamentSignalCommand;
 use Base33\FilamentSignal\Testing\TestsFilamentSignal;
-use Filament\Support\Assets\AlpineComponent;
 use Filament\Support\Assets\Asset;
 use Filament\Support\Assets\Css;
 use Filament\Support\Assets\Js;
