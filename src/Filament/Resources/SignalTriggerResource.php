@@ -2,6 +2,7 @@
 
 namespace Base33\FilamentSignal\Filament\Resources;
 
+use BackedEnum;
 use Base33\FilamentSignal\Filament\Resources\SignalTriggerResource\Pages;
 use Base33\FilamentSignal\Models\SignalTrigger;
 use Filament\Actions\BulkActionGroup;
@@ -24,7 +25,7 @@ class SignalTriggerResource extends Resource
 {
     protected static ?string $model = SignalTrigger::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-sparkles';
+    protected static BackedEnum | string | null $navigationIcon = 'heroicon-o-sparkles';
 
     public static function getNavigationGroup(): ?string
     {

@@ -2,12 +2,17 @@
 
 namespace Base33\FilamentSignal\Filament\Resources;
 
+use BackedEnum;
 use Base33\FilamentSignal\Filament\Resources\SignalActionLogResource\Pages;
 use Base33\FilamentSignal\Models\SignalActionLog;
+<<<<<<< HEAD
 use Filament\Infolists\Components\Section as InfoSection;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Components\ViewEntry;
 use Filament\Infolists\Infolist;
+=======
+use Filament\Forms;
+>>>>>>> 85d3876 (fix: align resources with filament 4 schema)
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Actions\Action;
@@ -17,7 +22,7 @@ class SignalActionLogResource extends Resource
 {
     protected static ?string $model = SignalActionLog::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-list';
+    protected static BackedEnum | string | null $navigationIcon = 'heroicon-o-clipboard-document-list';
 
     public static function getNavigationGroup(): ?string
     {
@@ -69,40 +74,64 @@ class SignalActionLogResource extends Resource
                 Action::make('viewLog')
                     ->label(__('filament-signal::signal.actions.view_log'))
                     ->icon('heroicon-o-eye')
+                    ->modalHeading(__('filament-signal::signal.actions.view_log'))
                     ->modalWidth('3xl')
-                    ->infolist(fn (SignalActionLog $record, Infolist $infolist): Infolist => static::infolist($infolist->record($record))),
+                    ->form(static::logFormSchema()),
             ])
             ->defaultSort('executed_at', 'desc');
     }
 
-    public static function infolist(Infolist $infolist): Infolist
+    protected static function logFormSchema(): array
     {
-        return $infolist
-            ->schema([
-                InfoSection::make(__('filament-signal::signal.sections.log_details'))
-                    ->schema([
-                        TextEntry::make('trigger.name')->label(__('filament-signal::signal.fields.name')),
-                        TextEntry::make('action.name')->label(__('filament-signal::signal.fields.actions')),
-                        TextEntry::make('event_class')->label(__('filament-signal::signal.fields.event_class')),
-                        TextEntry::make('status')->label(__('filament-signal::signal.fields.status')),
-                        TextEntry::make('message')->label(__('filament-signal::signal.fields.status_message')),
-                        TextEntry::make('executed_at')->dateTime()->label(__('filament-signal::signal.fields.executed_at')),
-                    ])->columns(2),
-                InfoSection::make(__('filament-signal::signal.sections.payload'))
-                    ->schema([
-                        ViewEntry::make('payload')
-                            ->view('filament-signal::infolists.json-preview', [
-                                'title' => __('filament-signal::signal.fields.payload_preview'),
-                            ]),
-                    ]),
-                InfoSection::make(__('filament-signal::signal.sections.response'))
-                    ->schema([
-                        ViewEntry::make('response')
-                            ->view('filament-signal::infolists.json-preview', [
-                                'title' => __('filament-signal::signal.fields.response_preview'),
-                            ]),
-                    ]),
-            ]);
+        return [
+            Forms\Components\Section::make(__('filament-signal::signal.sections.log_details'))
+                ->schema([
+                    Forms\Components\Placeholder::make('trigger_name')
+                        ->label(__('filament-signal::signal.fields.name'))
+                        ->content(fn (SignalActionLog $record): ?string => $record->trigger?->name),
+                    Forms\Components\Placeholder::make('action_name')
+                        ->label(__('filament-signal::signal.fields.actions'))
+                        ->content(fn (SignalActionLog $record): ?string => $record->action?->name),
+                    Forms\Components\Placeholder::make('event_class')
+                        ->label(__('filament-signal::signal.fields.event_class'))
+                        ->content(fn (SignalActionLog $record): string => $record->event_class),
+                    Forms\Components\Placeholder::make('status')
+                        ->label(__('filament-signal::signal.fields.status'))
+                        ->content(fn (SignalActionLog $record): string => ucfirst($record->status)),
+                    Forms\Components\Placeholder::make('message')
+                        ->label(__('filament-signal::signal.fields.status_message'))
+                        ->content(fn (SignalActionLog $record): ?string => $record->message),
+                    Forms\Components\Placeholder::make('executed_at')
+                        ->label(__('filament-signal::signal.fields.executed_at'))
+                        ->content(fn (SignalActionLog $record): ?string => optional($record->executed_at)->toDateTimeString()),
+                ])
+                ->columns(2),
+            Forms\Components\Section::make(__('filament-signal::signal.sections.payload'))
+                ->schema([
+                    Forms\Components\Textarea::make('payload')
+                        ->label(__('filament-signal::signal.fields.payload_preview'))
+                        ->formatStateUsing(fn ($state): string => static::formatJson($state))
+                        ->rows(8)
+                        ->disabled(),
+                ]),
+            Forms\Components\Section::make(__('filament-signal::signal.sections.response'))
+                ->schema([
+                    Forms\Components\Textarea::make('response')
+                        ->label(__('filament-signal::signal.fields.response_preview'))
+                        ->formatStateUsing(fn ($state): string => static::formatJson($state))
+                        ->rows(8)
+                        ->disabled(),
+                ]),
+        ];
+    }
+
+    protected static function formatJson(mixed $state): string
+    {
+        if (blank($state)) {
+            return '';
+        }
+
+        return json_encode($state, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
     }
 
     public static function shouldRegisterNavigation(): bool
