@@ -106,6 +106,7 @@ class SignalTriggerResource extends Resource
                         ->label(__('filament-signal::signal.fields.actions'))
                         ->orderColumn('execution_order')
                         ->schema(static::actionRepeaterSchema())
+                        ->columns(4)
                         ->collapsible()
                         ->addActionLabel(__('filament-signal::signal.actions.add_action')),
                 ])
@@ -116,25 +117,25 @@ class SignalTriggerResource extends Resource
     protected static function actionRepeaterSchema(): array
     {
         return [
-            Forms\Components\Grid::make()
-                ->schema([
-                    Forms\Components\TextInput::make('name')
-                        ->label(__('filament-signal::signal.fields.name'))
-                        ->required(),
-                    Forms\Components\TextInput::make('execution_order')
-                        ->label(__('filament-signal::signal.fields.execution_order'))
-                        ->numeric()
-                        ->default(1),
-                    Forms\Components\Select::make('action_type')
-                        ->label(__('filament-signal::signal.fields.action_type'))
-                        ->options(self::getActionTypeOptions())
-                        ->required()
-                        ->live(),
-                    Forms\Components\Toggle::make('is_active')
-                        ->label(__('filament-signal::signal.fields.status'))
-                        ->default(true),
-                ])
-                ->columns(4),
+            Forms\Components\TextInput::make('name')
+                ->label(__('filament-signal::signal.fields.name'))
+                ->required()
+                ->columnSpan(1),
+            Forms\Components\TextInput::make('execution_order')
+                ->label(__('filament-signal::signal.fields.execution_order'))
+                ->numeric()
+                ->default(1)
+                ->columnSpan(1),
+            Forms\Components\Select::make('action_type')
+                ->label(__('filament-signal::signal.fields.action_type'))
+                ->options(self::getActionTypeOptions())
+                ->required()
+                ->live()
+                ->columnSpan(1),
+            Forms\Components\Toggle::make('is_active')
+                ->label(__('filament-signal::signal.fields.status'))
+                ->default(true)
+                ->columnSpan(1),
             Forms\Components\Select::make('template_id')
                 ->label(__('filament-signal::signal.fields.template'))
                 ->relationship('template', 'name')

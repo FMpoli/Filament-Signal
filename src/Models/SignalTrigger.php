@@ -44,7 +44,7 @@ class SignalTrigger extends Model
 
     public function actions(): HasMany
     {
-        return $this->hasMany(config('signal.models.action', SignalAction::class));
+        return $this->hasMany(config('signal.models.action', SignalAction::class), 'trigger_id');
     }
 
     public function logs(): HasMany

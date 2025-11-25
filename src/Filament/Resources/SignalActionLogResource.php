@@ -5,17 +5,11 @@ namespace Base33\FilamentSignal\Filament\Resources;
 use BackedEnum;
 use Base33\FilamentSignal\Filament\Resources\SignalActionLogResource\Pages;
 use Base33\FilamentSignal\Models\SignalActionLog;
-<<<<<<< HEAD
-use Filament\Infolists\Components\Section as InfoSection;
-use Filament\Infolists\Components\TextEntry;
-use Filament\Infolists\Components\ViewEntry;
-use Filament\Infolists\Infolist;
-=======
+use Filament\Actions\Action;
 use Filament\Forms;
->>>>>>> 85d3876 (fix: align resources with filament 4 schema)
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Section as SchemaSection;
 use Filament\Tables;
-use Filament\Tables\Actions\Action;
 use Filament\Tables\Table;
 
 class SignalActionLogResource extends Resource
@@ -84,7 +78,7 @@ class SignalActionLogResource extends Resource
     protected static function logFormSchema(): array
     {
         return [
-            Forms\Components\Section::make(__('filament-signal::signal.sections.log_details'))
+            SchemaSection::make(__('filament-signal::signal.sections.log_details'))
                 ->schema([
                     Forms\Components\Placeholder::make('trigger_name')
                         ->label(__('filament-signal::signal.fields.name'))
@@ -106,7 +100,7 @@ class SignalActionLogResource extends Resource
                         ->content(fn (SignalActionLog $record): ?string => optional($record->executed_at)->toDateTimeString()),
                 ])
                 ->columns(2),
-            Forms\Components\Section::make(__('filament-signal::signal.sections.payload'))
+            SchemaSection::make(__('filament-signal::signal.sections.payload'))
                 ->schema([
                     Forms\Components\Textarea::make('payload')
                         ->label(__('filament-signal::signal.fields.payload_preview'))
@@ -114,7 +108,7 @@ class SignalActionLogResource extends Resource
                         ->rows(8)
                         ->disabled(),
                 ]),
-            Forms\Components\Section::make(__('filament-signal::signal.sections.response'))
+            SchemaSection::make(__('filament-signal::signal.sections.response'))
                 ->schema([
                     Forms\Components\Textarea::make('response')
                         ->label(__('filament-signal::signal.fields.response_preview'))
@@ -146,3 +140,4 @@ class SignalActionLogResource extends Resource
         ];
     }
 }
+
