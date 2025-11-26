@@ -3,6 +3,7 @@
 namespace Base33\FilamentSignal\Filament\Resources\SignalTriggerResource\Pages;
 
 use Base33\FilamentSignal\Filament\Resources\SignalTriggerResource;
+use Filament\Actions\Action;
 use Filament\Resources\Pages\ListRecords;
 
 class ListSignalTriggers extends ListRecords
@@ -12,7 +13,11 @@ class ListSignalTriggers extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            \Filament\Actions\CreateAction::make()->slideOver(),
+            Action::make('create')
+                ->label(__('filament::resources/pages/list-records.actions.create.label'))
+                ->url(static::getResource()::getUrl('create'))
+                ->icon('heroicon-o-plus')
+                ->button(),
         ];
     }
 }

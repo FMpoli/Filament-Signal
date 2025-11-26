@@ -12,7 +12,9 @@ use Filament\Actions\ViewAction;
 use Filament\Forms;
 use Filament\Forms\Components\Builder;
 use Filament\Forms\Components\Builder\Block;
+use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\ViewField;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Fieldset;
 use Filament\Schemas\Components\Section;
@@ -30,6 +32,48 @@ class SignalTriggerResource extends Resource
     public static function getNavigationGroup(): ?string
     {
         return __('filament-signal::signal.plugin.navigation.group');
+    }
+
+    public static function infolist(Schema $schema): Schema
+    {
+        return $schema
+            ->schema([
+                Section::make(__('filament-signal::signal.sections.trigger_details'))
+                    ->schema([
+                        Placeholder::make('name')
+                            ->label(__('filament-signal::signal.fields.name'))
+                            ->content(fn(SignalTrigger $record): string => $record->name),
+                        Placeholder::make('status')
+                            ->label(__('filament-signal::signal.fields.status'))
+                            ->content(fn(SignalTrigger $record): string => ucfirst($record->status)),
+                        Placeholder::make('event_class')
+                            ->label(__('filament-signal::signal.fields.event_class'))
+                            ->content(fn(SignalTrigger $record): string => $record->event_class),
+                        Placeholder::make('match_type')
+                            ->label(__('filament-signal::signal.fields.match_type'))
+                            ->content(fn(SignalTrigger $record): ?string => $record->match_type
+                                ? __('filament-signal::signal.options.match_type.' . $record->match_type)
+                                : null),
+                        Placeholder::make('description')
+                            ->label(__('filament-signal::signal.fields.description'))
+                            ->content(fn(SignalTrigger $record): ?string => $record->description)
+                            ->columnSpanFull(),
+                    ])
+                    ->columns(2),
+                Section::make(__('filament-signal::signal.sections.trigger_conditions'))
+                    ->schema([
+                        ViewField::make('filters')
+                            ->label(__('filament-signal::signal.fields.filters'))
+                            ->view('filament-signal::infolists.json-preview'),
+                    ]),
+                Section::make(__('filament-signal::signal.sections.trigger_actions'))
+                    ->schema([
+                        ViewField::make('actions')
+                            ->label(__('filament-signal::signal.fields.actions'))
+                            ->view('filament-signal::infolists.actions-list'),
+                    ])
+                    ->columnSpanFull(),
+            ]);
     }
 
     public static function getNavigationLabel(): string
@@ -140,10 +184,10 @@ class SignalTriggerResource extends Resource
                 ->label(__('filament-signal::signal.fields.template'))
                 ->relationship('template', 'name')
                 ->searchable()
-                ->visible(fn (Get $get): bool => $get('action_type') === 'email')
-                ->required(fn (Get $get): bool => $get('action_type') === 'email'),
+                ->visible(fn(Get $get): bool => $get('action_type') === 'email')
+                ->required(fn(Get $get): bool => $get('action_type') === 'email'),
             Fieldset::make(__('filament-signal::signal.sections.email_configuration'))
-                ->visible(fn (Get $get): bool => $get('action_type') === 'email')
+                ->visible(fn(Get $get): bool => $get('action_type') === 'email')
                 ->schema([
                     Forms\Components\TextInput::make('configuration.subject_override')
                         ->label(__('filament-signal::signal.fields.subject'))
@@ -165,12 +209,12 @@ class SignalTriggerResource extends Resource
                         ->addButtonLabel('Add recipient'),
                 ]),
             Fieldset::make(__('filament-signal::signal.sections.webhook_configuration'))
-                ->visible(fn (Get $get): bool => $get('action_type') === 'webhook')
+                ->visible(fn(Get $get): bool => $get('action_type') === 'webhook')
                 ->schema([
                     Forms\Components\TextInput::make('configuration.url')
                         ->label('Endpoint URL')
                         ->url()
-                        ->required(fn (Get $get): bool => $get('action_type') === 'webhook'),
+                        ->required(fn(Get $get): bool => $get('action_type') === 'webhook'),
                     Forms\Components\Select::make('configuration.method')
                         ->label('HTTP Method')
                         ->options([
@@ -200,7 +244,7 @@ class SignalTriggerResource extends Resource
     {
         return collect(config('signal.action_handlers', []))
             ->keys()
-            ->mapWithKeys(fn (string $type) => [$type => ucfirst($type)])
+            ->mapWithKeys(fn(string $type) => [$type => ucfirst($type)])
             ->all();
     }
 
@@ -240,8 +284,12 @@ class SignalTriggerResource extends Resource
                     ]),
             ])
             ->actions([
-                ViewAction::make()->slideOver(),
-                EditAction::make()->slideOver(),
+                ViewAction::make()
+                    ->url(fn(SignalTrigger $record): string => static::getUrl('view', ['record' => $record]))
+                    ->openUrlInNewTab(false),
+                EditAction::make()
+                    ->url(fn(SignalTrigger $record): string => static::getUrl('edit', ['record' => $record]))
+                    ->openUrlInNewTab(false),
             ])
             ->bulkActions([
                 BulkActionGroup::make([
@@ -254,6 +302,9 @@ class SignalTriggerResource extends Resource
     {
         return [
             'index' => Pages\ListSignalTriggers::route('/'),
+            'create' => Pages\CreateSignalTrigger::route('/create'),
+            'view' => Pages\ViewSignalTrigger::route('/{record}'),
+            'edit' => Pages\EditSignalTrigger::route('/{record}/edit'),
         ];
     }
 }

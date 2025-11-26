@@ -102,30 +102,19 @@ class SignalActionLogResource extends Resource
                 ->columns(2),
             SchemaSection::make(__('filament-signal::signal.sections.payload'))
                 ->schema([
-                    Forms\Components\Textarea::make('payload')
+                    Forms\Components\ViewField::make('payload')
                         ->label(__('filament-signal::signal.fields.payload_preview'))
-                        ->formatStateUsing(fn ($state): string => static::formatJson($state))
-                        ->rows(8)
-                        ->disabled(),
+                        ->view('filament-signal::infolists.json-preview')
+                        ->columnSpanFull(),
                 ]),
             SchemaSection::make(__('filament-signal::signal.sections.response'))
                 ->schema([
-                    Forms\Components\Textarea::make('response')
+                    Forms\Components\ViewField::make('response')
                         ->label(__('filament-signal::signal.fields.response_preview'))
-                        ->formatStateUsing(fn ($state): string => static::formatJson($state))
-                        ->rows(8)
-                        ->disabled(),
+                        ->view('filament-signal::infolists.json-preview')
+                        ->columnSpanFull(),
                 ]),
         ];
-    }
-
-    protected static function formatJson(mixed $state): string
-    {
-        if (blank($state)) {
-            return '';
-        }
-
-        return json_encode($state, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
     }
 
     public static function shouldRegisterNavigation(): bool

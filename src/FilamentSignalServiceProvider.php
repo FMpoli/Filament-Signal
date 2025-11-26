@@ -39,10 +39,10 @@ class FilamentSignalServiceProvider extends PackageServiceProvider
                     ->askToStarRepoOnGitHub('base33/filament-signal');
             });
 
-        $configFileName = $package->shortName();
+        $configFileName = 'signal';
 
         if (file_exists($package->basePath("/../config/{$configFileName}.php"))) {
-            $package->hasConfigFile();
+            $package->hasConfigFile($configFileName);
         }
 
         if (file_exists($package->basePath('/../database/migrations'))) {
@@ -158,10 +158,7 @@ class FilamentSignalServiceProvider extends PackageServiceProvider
     protected function getMigrations(): array
     {
         return [
-            'create_signal_templates_table',
-            'create_signal_triggers_table',
-            'create_signal_actions_table',
-            'create_signal_action_logs_table',
+            'create_signal_table',
         ];
     }
 }

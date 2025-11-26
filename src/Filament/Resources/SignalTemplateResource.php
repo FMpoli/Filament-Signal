@@ -42,7 +42,7 @@ class SignalTemplateResource extends Resource
                         ->label(__('filament-signal::signal.fields.name'))
                         ->required()
                         ->live(onBlur: true)
-                        ->afterStateUpdated(fn ($state, callable $set) => $set('slug', Str::slug($state))),
+                        ->afterStateUpdated(fn($state, callable $set) => $set('slug', Str::slug($state))),
                     Forms\Components\TextInput::make('slug')
                         ->label(__('filament-signal::signal.fields.slug'))
                         ->required()
@@ -54,19 +54,20 @@ class SignalTemplateResource extends Resource
                         ->label(__('filament-signal::signal.fields.status'))
                         ->default(true),
                 ])
-                ->columns(2),
+                ->columns(1),
             Section::make(__('filament-signal::signal.sections.template_content'))
                 ->schema([
                     Forms\Components\RichEditor::make('content_html')
                         ->label(__('filament-signal::signal.fields.content_html'))
                         ->required()
+
                         ->toolbarButtons(config('signal.editor.tiptap.toolbar_buttons')),
                     Forms\Components\Textarea::make('content_text')
                         ->label(__('filament-signal::signal.fields.content_text'))
                         ->rows(4),
                 ])
                 ->columns(1),
-        ]);
+        ])->columns(1);
     }
 
     public static function table(Table $table): Table
