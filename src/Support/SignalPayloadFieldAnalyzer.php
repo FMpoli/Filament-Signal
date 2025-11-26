@@ -124,12 +124,12 @@ class SignalPayloadFieldAnalyzer
             $idField = "{$propertyName}.{$relationName}_id";
             $relationField = "{$propertyName}.{$relationName}";
 
-            // Indovina la classe del modello dalla relazione
-            $relatedModelClass = $this->guessModelClass($relationName, $modelClass);
+            // Ottieni la classe del modello correlato usando reflection sul metodo di relazione
+            $relatedModelClass = $this->getRelatedModelClassFromRelation($modelClass, $relationName);
 
             if ($relatedModelClass) {
                 $expand = Arr::get($relationConfig, 'expand', []);
-
+                
                 $relations[$idField] = [
                     'id_field' => $idField,
                     'relation_field' => $relationField,
@@ -247,16 +247,73 @@ class SignalPayloadFieldAnalyzer
     }
 
     /**
-     * Indovina la classe del modello da un campo ID o nome relazione
+     * Ottiene la classe del modello correlato usando reflection sul metodo di relazione
+     * Questo è completamente agnostico e funziona con qualsiasi modello Laravel
      */
-    protected function guessModelClass(string $idFieldOrRelationName, string $parentModelClass): ?string
+    protected function getRelatedModelClassFromRelation(string $modelClass, string $relationName): ?string
+    {
+        if (! class_exists($modelClass) || ! is_subclass_of($modelClass, Model::class)) {
+            return null;
+        }
+
+        try {
+            $model = new $modelClass;
+            
+            // Verifica se il metodo di relazione esiste
+            if (! method_exists($model, $relationName)) {
+                return null;
+            }
+
+            // Chiama il metodo di relazione per ottenere l'oggetto relazione
+            $relation = $model->{$relationName}();
+            
+            // Se è una relazione Eloquent, ottieni il modello correlato
+            if (method_exists($relation, 'getRelated')) {
+                $relatedModel = $relation->getRelated();
+                return get_class($relatedModel);
+            }
+
+            // Fallback: usa reflection per ottenere il tipo di ritorno del metodo
+            $reflection = new ReflectionClass($modelClass);
+            if ($reflection->hasMethod($relationName)) {
+                $method = $reflection->getMethod($relationName);
+                $returnType = $method->getReturnType();
+                
+                if ($returnType instanceof \ReflectionNamedType) {
+                    $returnTypeClass = $returnType->getName();
+                    // Se è una classe di relazione Eloquent, prova a ottenere il modello correlato
+                    if (class_exists($returnTypeClass)) {
+                        // Prova a istanziare la relazione e ottenere il modello correlato
+                        try {
+                            $relationInstance = $model->{$relationName}();
+                            if (method_exists($relationInstance, 'getRelated')) {
+                                return get_class($relationInstance->getRelated());
+                            }
+                        } catch (\Throwable $e) {
+                            // Ignora errori durante l'istanziazione
+                        }
+                    }
+                }
+            }
+        } catch (\Throwable $e) {
+            // Se fallisce, usa il metodo di fallback
+            return $this->guessModelClassFallback($relationName, $modelClass);
+        }
+
+        return null;
+    }
+
+    /**
+     * Fallback: indovina la classe del modello da un campo ID o nome relazione
+     * Usato solo quando non è possibile ottenere il tipo dalla relazione
+     */
+    protected function guessModelClassFallback(string $idFieldOrRelationName, string $parentModelClass): ?string
     {
         $relationName = str_replace('_id', '', $idFieldOrRelationName);
         $parentNamespace = substr($parentModelClass, 0, strrpos($parentModelClass, '\\'));
 
         // Prova a trovare il modello nello stesso namespace
         $possibleNames = [
-            'Equipment' . ucfirst($relationName), // Es: EquipmentUnit
             ucfirst($relationName), // Es: Unit
             ucfirst(str_replace('_', '', ucwords($relationName, '_'))), // Es: EquipmentUnit da equipment_unit
         ];
@@ -268,41 +325,34 @@ class SignalPayloadFieldAnalyzer
             }
         }
 
-        // Mappa comune per relazioni note
-        $commonModels = [
-            'unit' => \Detit\FilamentLabOps\Models\EquipmentUnit::class,
-            'borrower' => \App\Models\User::class,
-            'loaner' => \App\Models\User::class,
-            'user' => \App\Models\User::class,
-            'model' => \Detit\FilamentLabOps\Models\EquipmentModel::class,
-            'brand' => \Detit\FilamentLabOps\Models\EquipmentBrand::class,
-            'type' => \Detit\FilamentLabOps\Models\EquipmentType::class,
-            'location' => \Detit\FilamentLabOps\Models\EquipmentLocation::class,
-            // Fallback per nomi completi
-            'EquipmentUnit' => \Detit\FilamentLabOps\Models\EquipmentUnit::class,
-            'EquipmentModel' => \Detit\FilamentLabOps\Models\EquipmentModel::class,
-            'EquipmentBrand' => \Detit\FilamentLabOps\Models\EquipmentBrand::class,
-            'EquipmentType' => \Detit\FilamentLabOps\Models\EquipmentType::class,
-            'User' => \App\Models\User::class,
-        ];
-
-        // Cerca per nome esatto (case-insensitive)
-        $relationNameLower = strtolower($relationName);
-        if (isset($commonModels[$relationNameLower])) {
-            $class = $commonModels[$relationNameLower];
-            if (class_exists($class)) {
-                return $class;
+        // Prova anche nel namespace Models
+        $modelsNamespace = $parentNamespace . '\\Models';
+        foreach ($possibleNames as $name) {
+            $possibleClass = $modelsNamespace . '\\' . $name;
+            if (class_exists($possibleClass) && is_subclass_of($possibleClass, Model::class)) {
+                return $possibleClass;
             }
         }
 
-        // Cerca per match parziale
-        foreach ($commonModels as $key => $class) {
-            if (stripos($relationName, strtolower($key)) !== false && class_exists($class)) {
-                return $class;
+        // Ultimo fallback: solo User (modello standard Laravel)
+        if (in_array(strtolower($relationName), ['user', 'borrower', 'loaner', 'author', 'creator', 'owner'])) {
+            if (class_exists(\App\Models\User::class)) {
+                return \App\Models\User::class;
             }
         }
 
         return null;
+    }
+
+    /**
+     * @deprecated Usa getRelatedModelClassFromRelation invece
+     * Mantenuto per compatibilità con il codice esistente
+     */
+    protected function guessModelClass(string $idFieldOrRelationName, string $parentModelClass): ?string
+    {
+        $relationName = str_replace('_id', '', $idFieldOrRelationName);
+        return $this->getRelatedModelClassFromRelation($parentModelClass, $relationName)
+            ?? $this->guessModelClassFallback($idFieldOrRelationName, $parentModelClass);
     }
 
     /**
@@ -359,18 +409,8 @@ class SignalPayloadFieldAnalyzer
      */
     public function getTranslatedFieldLabel(string $fieldKey, string $modelClass, ?string $fallback = null): string
     {
-        // Mappa i nomi dei campi alle chiavi di traduzione
-        $translationMap = [
-            'loaned_at' => 'loan_start_at',
-            'due_at' => 'loan_due_at',
-            'returned_at' => 'loan_returned_at',
-            'included_accessories' => 'loan_accessories',
-            'notes' => 'loan_notes',
-            'status' => 'status',
-            'id' => 'id',
-        ];
-
-        $translationKey = $translationMap[$fieldKey] ?? $fieldKey;
+        // Usa il fieldKey direttamente come chiave di traduzione (generico)
+        $translationKey = $fieldKey;
 
         // Prova a trovare la traduzione nel namespace del modello
         $modelNamespace = substr($modelClass, 0, strrpos($modelClass, '\\'));
@@ -380,9 +420,7 @@ class SignalPayloadFieldAnalyzer
             // Prova vari formati di chiave di traduzione
             // Il formato corretto per Filament è: filament-{package}::{namespace}.{key}
             $keys = [
-                "filament-{$packageName}::labops.fields.{$translationKey}",
                 "filament-{$packageName}::{$packageName}.fields.{$translationKey}",
-                "{$packageName}::labops.fields.{$translationKey}",
                 "{$packageName}::{$packageName}.fields.{$translationKey}",
                 "filament-{$packageName}::fields.{$translationKey}",
                 "{$packageName}::fields.{$translationKey}",
@@ -419,7 +457,7 @@ class SignalPayloadFieldAnalyzer
 
         if ($packageName) {
             $keys = [
-                "filament-{$packageName}::labops.fields.{$fieldKey}",
+                "filament-{$packageName}::{$packageName}.fields.{$fieldKey}",
                 "filament-{$packageName}::{$packageName}.fields.{$fieldKey}",
             ];
 
@@ -440,7 +478,7 @@ class SignalPayloadFieldAnalyzer
      */
     protected function getPackageNameFromNamespace(string $namespace): ?string
     {
-        // Es: Detit\FilamentLabOps -> labops
+        // Es: Vendor\FilamentPlugin -> plugin
         // Es: App\Models -> null (non è un package)
 
         if (str_contains($namespace, 'Filament')) {
@@ -455,10 +493,11 @@ class SignalPayloadFieldAnalyzer
             }
 
             // Se non trovato, prova a cercare il nome del package direttamente
-            // Es: Detit\FilamentLabOps -> cerca "labops"
+            // Estrai il nome del package dal namespace
             foreach ($parts as $part) {
-                if (stripos($part, 'labops') !== false) {
-                    return 'labops';
+                if (str_starts_with($part, 'Filament') && $part !== 'Filament') {
+                    $name = str_replace('Filament', '', $part);
+                    return strtolower($name);
                 }
             }
         }
@@ -478,12 +517,11 @@ class SignalPayloadFieldAnalyzer
         if ($packageName) {
             // Prova a trovare la traduzione nelle risorse
             $keys = [
-                "filament-{$packageName}::labops.resources.{$propertyName}.label",
                 "filament-{$packageName}::{$packageName}.resources.{$propertyName}.label",
-                "{$packageName}::labops.resources.{$propertyName}.label",
                 "{$packageName}::{$packageName}.resources.{$propertyName}.label",
-                "filament-{$packageName}::labops.fields.{$propertyName}",
                 "filament-{$packageName}::{$packageName}.fields.{$propertyName}",
+                "filament-{$packageName}::fields.{$propertyName}",
+                "{$packageName}::fields.{$propertyName}",
             ];
 
             foreach ($keys as $key) {

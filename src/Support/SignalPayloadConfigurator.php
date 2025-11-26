@@ -350,13 +350,30 @@ class SignalPayloadConfigurator
             }
         }
 
-        $commonModels = [
-            'User' => \App\Models\User::class,
-            'EquipmentUnit' => \Detit\FilamentLabOps\Models\EquipmentUnit::class,
-            'EquipmentModel' => \Detit\FilamentLabOps\Models\EquipmentModel::class,
-            'EquipmentBrand' => \Detit\FilamentLabOps\Models\EquipmentBrand::class,
-            'EquipmentType' => \Detit\FilamentLabOps\Models\EquipmentType::class,
-        ];
+        // Prova a ottenere il modello correlato usando reflection sulla relazione
+        // Questo è completamente agnostico
+        try {
+            if (class_exists($parentModelClass) && is_subclass_of($parentModelClass, Model::class)) {
+                $model = new $parentModelClass;
+                if (method_exists($model, $relationName)) {
+                    $relation = $model->{$relationName}();
+                    if (method_exists($relation, 'getRelated')) {
+                        $relatedModel = $relation->getRelated();
+                        return get_class($relatedModel);
+                    }
+                }
+            }
+        } catch (\Throwable $e) {
+            // Ignora errori
+        }
+
+        // Fallback: solo User (modello standard Laravel) per nomi comuni
+        $commonUserRelations = ['user', 'borrower', 'loaner', 'author', 'creator', 'owner'];
+        if (in_array(strtolower($relationName), $commonUserRelations)) {
+            if (class_exists(\App\Models\User::class)) {
+                return \App\Models\User::class;
+            }
+        }
 
         foreach ($commonModels as $key => $class) {
             if (stripos($relationName, strtolower($key)) !== false && class_exists($class)) {
@@ -485,13 +502,8 @@ class SignalPayloadConfigurator
         // Campi essenziali comuni
         $common = ['id', 'name', 'title', 'label', 'description', 'short_description', 'status', 'created_at', 'updated_at'];
 
-        // Campi specifici per tipo di modello
+        // Campi specifici per tipo di modello (solo generici)
         $specific = match (true) {
-            str_contains($modelClass, 'EquipmentUnit') => ['inventory_code', 'serial_number', 'internal_code', 'status', 'condition'],
-            str_contains($modelClass, 'EquipmentModel') => ['name', 'model_number', 'short_description'],
-            str_contains($modelClass, 'EquipmentBrand') => ['name'],
-            str_contains($modelClass, 'EquipmentType') => ['name'],
-            str_contains($modelClass, 'EquipmentLoan') => ['status', 'loaned_at', 'due_at', 'returned_at', 'notes'],
             str_contains($modelClass, 'User') => ['name', 'email'],
             default => [],
         };

@@ -31,7 +31,7 @@ class SignalTriggerResource extends Resource
 {
     protected static ?string $model = SignalTrigger::class;
 
-    protected static BackedEnum | string | null $navigationIcon = 'heroicon-o-sparkles';
+    protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-sparkles';
 
     public static function getNavigationGroup(): ?string
     {
@@ -431,15 +431,19 @@ class SignalTriggerResource extends Resource
                                     // Mostra solo i campi essenziali del modello principale (non delle relazioni)
                                     $options = [];
                                     foreach ($analysis['fields'] as $field => $data) {
-                                        // Mostra solo i campi del modello principale (es: loan.id, loan.status)
-                                        // Escludi i campi delle relazioni (es: loan.unit.inventory_code)
+                                        // Mostra solo i campi del modello principale (es: model.id, model.status)
+                                        // Escludi i campi delle relazioni (es: model.relation.field)
                                         if (substr_count($field, '.') > 1) {
                                             continue;
                                         }
 
-                                        // Salta i campi tecnici meno usati
-                                        if (in_array($field, ['loan.created_at', 'loan.updated_at', 'loan.attachments', 'loan.return_notes'])) {
-                                            continue;
+                                        // Salta i campi tecnici meno usati (created_at, updated_at, attachments, etc.)
+                                        $parts = explode('.', $field);
+                                        if (count($parts) === 2) {
+                                            $fieldName = $parts[1];
+                                            if (in_array($fieldName, ['created_at', 'updated_at', 'attachments'])) {
+                                                continue;
+                                            }
                                         }
 
                                         $options[$field] = $data['label'];
@@ -466,8 +470,17 @@ class SignalTriggerResource extends Resource
 
                                     $validFields = [];
                                     foreach ($analysis['fields'] as $field => $data) {
-                                        if (substr_count($field, '.') <= 1 && ! in_array($field, ['loan.created_at', 'loan.updated_at', 'loan.attachments', 'loan.return_notes'])) {
-                                            $validFields[] = $field;
+                                        if (substr_count($field, '.') <= 1) {
+                                            // Salta i campi tecnici meno usati
+                                            $parts = explode('.', $field);
+                                            if (count($parts) === 2) {
+                                                $fieldName = $parts[1];
+                                                if (! in_array($fieldName, ['created_at', 'updated_at', 'attachments'])) {
+                                                    $validFields[] = $field;
+                                                }
+                                            } else {
+                                                $validFields[] = $field;
+                                            }
                                         }
                                     }
 
@@ -488,8 +501,17 @@ class SignalTriggerResource extends Resource
 
                                     $validFields = [];
                                     foreach ($analysis['fields'] as $field => $data) {
-                                        if (substr_count($field, '.') <= 1 && ! in_array($field, ['loan.created_at', 'loan.updated_at', 'loan.attachments', 'loan.return_notes'])) {
-                                            $validFields[] = $field;
+                                        if (substr_count($field, '.') <= 1) {
+                                            // Salta i campi tecnici meno usati
+                                            $parts = explode('.', $field);
+                                            if (count($parts) === 2) {
+                                                $fieldName = $parts[1];
+                                                if (! in_array($fieldName, ['created_at', 'updated_at', 'attachments'])) {
+                                                    $validFields[] = $field;
+                                                }
+                                            } else {
+                                                $validFields[] = $field;
+                                            }
                                         }
                                     }
 

@@ -39,10 +39,10 @@ class FilamentSignal
      *
      * Esempio:
      * FilamentSignal::registerEvent(
-     *     eventClass: \Detit\FilamentLabOps\Events\EquipmentLoanCreated::class,
-     *     name: 'Equipment Loan Created',
-     *     description: 'Triggered when a new equipment loan is created',
-     *     group: 'LabOps'
+     *     eventClass: \Vendor\Plugin\Events\ModelCreated::class,
+     *     name: 'Model Created',
+     *     description: 'Triggered when a new model is created',
+     *     group: 'Plugin'
      * );
      *
      * @param  string  $eventClass  Classe completa dell'evento
