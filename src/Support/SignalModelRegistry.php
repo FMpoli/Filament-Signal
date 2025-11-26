@@ -14,7 +14,7 @@ class SignalModelRegistry
 
     /**
      * Registra i campi disponibili per un modello
-     * 
+     *
      * @param  string  $modelClass  Classe del modello
      * @param  array  $fields  Array con struttura getSignalFields()
      */
@@ -25,9 +25,6 @@ class SignalModelRegistry
 
     /**
      * Ottiene i campi disponibili per un modello
-     * 
-     * @param  string  $modelClass
-     * @return array|null
      */
     public function getFields(string $modelClass): ?array
     {
@@ -56,4 +53,3 @@ class SignalModelRegistry
         return $this->models;
     }
 }
-

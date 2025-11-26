@@ -7,8 +7,8 @@ use Base33\FilamentSignal\Filament\Resources\SignalActionLogResource\Pages;
 use Base33\FilamentSignal\Models\SignalActionLog;
 use Filament\Actions\Action;
 use Filament\Forms;
-use Filament\Schemas\Components\Section as SchemaSection;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Section as SchemaSection;
 use Filament\Tables;
 use Filament\Tables\Table;
 
@@ -120,10 +120,10 @@ class SignalActionLogResource extends Resource
                             if ($record->action && is_array($payload)) {
                                 $configuration = $record->action->configuration ?? [];
                                 $payloadConfig = \Illuminate\Support\Arr::get($configuration, 'payload_config', []);
-                                
+
                                 if (! empty($payloadConfig)) {
                                     $configurator = app(\Base33\FilamentSignal\Support\SignalPayloadConfigurator::class);
-                                    
+
                                     // Se ci sono relationFields, espandi automaticamente quelle relazioni
                                     $relationFields = \Illuminate\Support\Arr::get($payloadConfig, 'relation_fields', []);
                                     if (! empty($relationFields) && is_array($relationFields)) {
@@ -132,15 +132,15 @@ class SignalActionLogResource extends Resource
 
                                         $relationsMap = [];
                                         $expandNested = [];
-                                        
+
                                         foreach ($relationFields as $idField => $fields) {
                                             $originalIdField = str_contains($idField, '.') ? $idField : str_replace('_', '.', $idField);
-                                            
+
                                             if (isset($analysis['relations'][$originalIdField])) {
                                                 $relation = $analysis['relations'][$originalIdField];
                                                 if ($relation['model_class']) {
                                                     $relationsMap[$originalIdField] = $relation['model_class'];
-                                                    
+
                                                     if (! empty($relation['expand'])) {
                                                         $expandNested[$originalIdField] = $relation['expand'];
                                                     }
@@ -151,9 +151,9 @@ class SignalActionLogResource extends Resource
                                         $payloadConfig['expand_relations'] = $relationsMap;
                                         $payloadConfig['expand_nested'] = $expandNested;
                                     }
-                                    
+
                                     $payload = $configurator->configure($payload, $payloadConfig);
-                                    
+
                                     // Se il body mode è 'event', applica anche la formattazione finale
                                     $bodyMode = \Illuminate\Support\Arr::get($configuration, 'body', 'payload');
                                     if ($bodyMode === 'event') {

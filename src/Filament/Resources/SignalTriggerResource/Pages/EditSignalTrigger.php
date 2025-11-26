@@ -9,4 +9,3 @@ class EditSignalTrigger extends EditRecord
 {
     protected static string $resource = SignalTriggerResource::class;
 }
-

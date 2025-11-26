@@ -18,7 +18,6 @@ class SignalPayloadFieldAnalyzer
     /**
      * Analizza un evento e restituisce i campi disponibili basati su HasSignal
      *
-     * @param  string  $eventClass
      * @return array{
      *     fields: array<string, array{label: string, type: string, group: string}>,
      *     relations: array<string, array{id_field: string, relation_field: string, model_class: string|null, label: string, expand: array<string>}>
@@ -316,6 +315,7 @@ class SignalPayloadFieldAnalyzer
             $className = end($parts);
             $cleanRelationName = str_replace('_', ' ', $relationName);
             $cleanRelationName = str_replace('.', ' → ', $cleanRelationName);
+
             return ucwords($cleanRelationName) . " ({$className})";
         }
 
@@ -449,6 +449,7 @@ class SignalPayloadFieldAnalyzer
                 if (str_starts_with($part, 'Filament') && $part !== 'Filament') {
                     // Es: FilamentLabOps -> labops
                     $name = str_replace('Filament', '', $part);
+
                     return strtolower($name);
                 }
             }

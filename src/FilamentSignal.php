@@ -56,7 +56,7 @@ class FilamentSignal
     }
 
     /**
-     * @return array<string, string>  Array con chiave = event class, valore = nome visualizzato
+     * @return array<string, string> Array con chiave = event class, valore = nome visualizzato
      */
     public static function eventOptions(): array
     {
@@ -64,7 +64,7 @@ class FilamentSignal
     }
 
     /**
-     * @return array<string, array<string, string>>  Array raggruppato per gruppo
+     * @return array<string, array<string, string>> Array raggruppato per gruppo
      */
     public static function groupedEventOptions(): array
     {
@@ -95,9 +95,6 @@ class FilamentSignal
 
     /**
      * Ottiene i campi disponibili per un modello
-     *
-     * @param  string  $modelClass
-     * @return array|null
      */
     public static function getModelFields(string $modelClass): ?array
     {

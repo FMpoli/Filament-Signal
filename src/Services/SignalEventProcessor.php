@@ -4,7 +4,6 @@ namespace Base33\FilamentSignal\Services;
 
 use Base33\FilamentSignal\Jobs\RunSignalTrigger;
 use Base33\FilamentSignal\Models\SignalTrigger;
-use Base33\FilamentSignal\Services\SignalActionExecutor;
 use Base33\FilamentSignal\Support\SignalPayloadFactory;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
@@ -19,16 +18,17 @@ class SignalEventProcessor
     {
         $eventClass = $event::class;
 
-        Log::debug("Signal: Event received", [
+        Log::debug('Signal: Event received', [
             'event_class' => $eventClass,
         ]);
 
         $triggers = $this->findMatchingTriggers($eventClass);
 
         if ($triggers->isEmpty()) {
-            Log::debug("Signal: No active triggers found for event", [
+            Log::debug('Signal: No active triggers found for event', [
                 'event_class' => $eventClass,
             ]);
+
             return;
         }
 
@@ -46,7 +46,7 @@ class SignalEventProcessor
                 // Esegui immediatamente senza coda
                 $trigger->load(['actions' => fn ($query) => $query->active()->orderBy('execution_order')->with('template')]);
                 $executor = app(SignalActionExecutor::class);
-                
+
                 foreach ($trigger->actions as $action) {
                     $executor->execute($action, $payload, $eventClass);
                 }

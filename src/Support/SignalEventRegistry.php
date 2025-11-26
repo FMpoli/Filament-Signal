@@ -38,7 +38,7 @@ class SignalEventRegistry
     /**
      * Restituisce le opzioni per una select, organizzate per gruppo
      *
-     * @return array<string, string>  Array con chiave = event class, valore = nome visualizzato
+     * @return array<string, string> Array con chiave = event class, valore = nome visualizzato
      */
     public function options(): array
     {
@@ -58,7 +58,7 @@ class SignalEventRegistry
     /**
      * Restituisce le opzioni raggruppate per gruppo
      *
-     * @return array<string, array<string, string>>  Array con chiave = gruppo, valore = array di eventi
+     * @return array<string, array<string, string>> Array con chiave = gruppo, valore = array di eventi
      */
     public function groupedOptions(): array
     {
@@ -87,4 +87,3 @@ class SignalEventRegistry
         return $this->events[$eventClass] ?? null;
     }
 }
-

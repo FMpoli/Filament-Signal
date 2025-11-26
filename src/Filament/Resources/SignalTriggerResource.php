@@ -6,7 +6,6 @@ use BackedEnum;
 use Base33\FilamentSignal\Filament\Resources\SignalTriggerResource\Pages;
 use Base33\FilamentSignal\FilamentSignal;
 use Base33\FilamentSignal\Models\SignalTrigger;
-use Base33\FilamentSignal\Support\SignalEventRegistry;
 use Base33\FilamentSignal\Support\SignalPayloadFieldAnalyzer;
 use Base33\FilamentSignal\Support\SignalWebhookTemplateRegistry;
 use Filament\Actions\BulkActionGroup;
@@ -18,8 +17,6 @@ use Filament\Forms\Components\Builder;
 use Filament\Forms\Components\Builder\Block;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Repeater;
-use Filament\Forms\Components\ViewField;
-use Illuminate\Support\Str;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Fieldset as SchemaFieldset;
 use Filament\Schemas\Components\Grid as SchemaGrid;
@@ -28,6 +25,7 @@ use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Support\Str;
 
 class SignalTriggerResource extends Resource
 {
@@ -48,21 +46,21 @@ class SignalTriggerResource extends Resource
                     ->schema([
                         Placeholder::make('name')
                             ->label(__('filament-signal::signal.fields.name'))
-                            ->content(fn(SignalTrigger $record): string => $record->name),
+                            ->content(fn (SignalTrigger $record): string => $record->name),
                         Placeholder::make('status')
                             ->label(__('filament-signal::signal.fields.status'))
-                            ->content(fn(SignalTrigger $record): string => ucfirst($record->status)),
+                            ->content(fn (SignalTrigger $record): string => ucfirst($record->status)),
                         Placeholder::make('event_class')
                             ->label(__('filament-signal::signal.fields.event_class'))
-                            ->content(fn(SignalTrigger $record): string => $record->event_class),
+                            ->content(fn (SignalTrigger $record): string => $record->event_class),
                         Placeholder::make('match_type')
                             ->label(__('filament-signal::signal.fields.match_type'))
-                            ->content(fn(SignalTrigger $record): ?string => $record->match_type
+                            ->content(fn (SignalTrigger $record): ?string => $record->match_type
                                 ? __('filament-signal::signal.options.match_type.' . $record->match_type)
                                 : null),
                         Placeholder::make('description')
                             ->label(__('filament-signal::signal.fields.description'))
-                            ->content(fn(SignalTrigger $record): ?string => $record->description)
+                            ->content(fn (SignalTrigger $record): ?string => $record->description)
                             ->columnSpanFull(),
                     ])
                     ->columns(2),
@@ -78,6 +76,7 @@ class SignalTriggerResource extends Resource
                                 $formatted = is_string($filters)
                                     ? $filters
                                     : json_encode($filters, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+
                                 return '<pre class="p-3 overflow-auto font-mono text-xs text-gray-900 rounded-lg max-h-64 bg-gray-950/5 dark:bg-white/5 dark:text-gray-100">' . e($formatted) . '</pre>';
                             }),
                     ]),
@@ -239,7 +238,7 @@ class SignalTriggerResource extends Resource
      * - Eventi configurati in config('signal.registered_events')
      * - Eventi già usati nei trigger esistenti (dal database)
      *
-     * @return array<string, string>  Array con chiave = event class, valore = nome visualizzato
+     * @return array<string, string> Array con chiave = event class, valore = nome visualizzato
      */
     protected static function getEventClassOptions(): array
     {
@@ -331,11 +330,11 @@ class SignalTriggerResource extends Resource
                 ->label(__('filament-signal::signal.fields.template'))
                 ->relationship('template', 'name')
                 ->searchable()
-                ->visible(fn(Get $get): bool => $get('action_type') === 'email')
-                ->required(fn(Get $get): bool => $get('action_type') === 'email'),
+                ->visible(fn (Get $get): bool => $get('action_type') === 'email')
+                ->required(fn (Get $get): bool => $get('action_type') === 'email'),
             SchemaFieldset::make(__('filament-signal::signal.sections.email_configuration'))
                 ->columnSpanFull()
-                ->visible(fn(Get $get): bool => $get('action_type') === 'email')
+                ->visible(fn (Get $get): bool => $get('action_type') === 'email')
                 ->schema([
                     SchemaGrid::make()
                         ->columns([
@@ -373,7 +372,7 @@ class SignalTriggerResource extends Resource
                 ]),
             SchemaFieldset::make(__('filament-signal::signal.sections.webhook_configuration'))
                 ->columnSpanFull()
-                ->visible(fn(Get $get): bool => $get('action_type') === 'webhook')
+                ->visible(fn (Get $get): bool => $get('action_type') === 'webhook')
                 ->schema([
                     SchemaGrid::make()
                         ->columns([
@@ -385,7 +384,7 @@ class SignalTriggerResource extends Resource
                             Forms\Components\TextInput::make('configuration.url')
                                 ->label('Endpoint URL')
                                 ->url()
-                                ->required(fn(Get $get): bool => $get('action_type') === 'webhook')
+                                ->required(fn (Get $get): bool => $get('action_type') === 'webhook')
                                 ->columnSpanFull(),
                             Forms\Components\Select::make('configuration.method')
                                 ->label('HTTP Method')
@@ -406,7 +405,7 @@ class SignalTriggerResource extends Resource
                             Forms\Components\TextInput::make('configuration.secret')
                                 ->label('Signing secret')
                                 ->password()
-                                ->default(fn() => config('signal.webhook.secret') ?: Str::random(40))
+                                ->default(fn () => config('signal.webhook.secret') ?: Str::random(40))
                                 ->helperText('Generato automaticamente se vuoto. Utilizzato per generare la firma con spatie/laravel-webhook-server.'),
                             Forms\Components\Toggle::make('configuration.verify_ssl')
                                 ->label('Verify SSL')
@@ -523,6 +522,7 @@ class SignalTriggerResource extends Resource
                                             $typeClass = $propType->getName();
                                             if (is_subclass_of($typeClass, \Illuminate\Database\Eloquent\Model::class)) {
                                                 $mainModelClass = $typeClass;
+
                                                 break;
                                             }
                                         }
@@ -595,10 +595,10 @@ class SignalTriggerResource extends Resource
                                 })
                                 ->collapsible()
                                 ->collapsed(false)
-                                ->visible(fn(Get $get): bool => filled($get('../../event_class')))
+                                ->visible(fn (Get $get): bool => filled($get('../../event_class')))
                                 ->columnSpanFull(),
                         ])
-                        ->visible(fn(Get $get): bool => filled($get('../../event_class'))),
+                        ->visible(fn (Get $get): bool => filled($get('../../event_class'))),
                     SchemaSection::make(__('filament-signal::signal.sections.webhook_configuration_advanced'))
                         ->collapsible()
                         ->collapsed()
@@ -683,7 +683,7 @@ class SignalTriggerResource extends Resource
     {
         return collect(config('signal.action_handlers', []))
             ->keys()
-            ->mapWithKeys(fn(string $type) => [$type => ucfirst($type)])
+            ->mapWithKeys(fn (string $type) => [$type => ucfirst($type)])
             ->all();
     }
 
@@ -724,10 +724,10 @@ class SignalTriggerResource extends Resource
             ])
             ->actions([
                 ViewAction::make()
-                    ->url(fn(SignalTrigger $record): string => static::getUrl('view', ['record' => $record]))
+                    ->url(fn (SignalTrigger $record): string => static::getUrl('view', ['record' => $record]))
                     ->openUrlInNewTab(false),
                 EditAction::make()
-                    ->url(fn(SignalTrigger $record): string => static::getUrl('edit', ['record' => $record]))
+                    ->url(fn (SignalTrigger $record): string => static::getUrl('edit', ['record' => $record]))
                     ->openUrlInNewTab(false),
             ])
             ->bulkActions([

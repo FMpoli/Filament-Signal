@@ -42,7 +42,7 @@ class SignalTemplateResource extends Resource
                         ->label(__('filament-signal::signal.fields.name'))
                         ->required()
                         ->live(onBlur: true)
-                        ->afterStateUpdated(fn($state, callable $set) => $set('slug', Str::slug($state))),
+                        ->afterStateUpdated(fn ($state, callable $set) => $set('slug', Str::slug($state))),
                     Forms\Components\TextInput::make('slug')
                         ->label(__('filament-signal::signal.fields.slug'))
                         ->required()

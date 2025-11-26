@@ -45,5 +45,3 @@ class SignalWebhookTemplateRegistry
         return $options;
     }
 }
-
-

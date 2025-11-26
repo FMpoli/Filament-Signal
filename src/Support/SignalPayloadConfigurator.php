@@ -4,7 +4,6 @@ namespace Base33\FilamentSignal\Support;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
-use Base33\FilamentSignal\Support\SignalPayloadFieldAnalyzer;
 
 class SignalPayloadConfigurator
 {
@@ -61,7 +60,7 @@ class SignalPayloadConfigurator
         // Raccogli tutti i campi root (non annidati) e quelli annidati
         $rootFields = [];
         $nestedFields = [];
-        
+
         foreach ($fields as $field) {
             if (str_contains($field, '.')) {
                 $nestedFields[] = $field;
@@ -119,17 +118,17 @@ class SignalPayloadConfigurator
                         if (empty($selectedFields) || ! is_array($selectedFields)) {
                             continue;
                         }
-                        
+
                         // Converti il formato safe (loan_unit_id) al formato originale (loan.unit_id)
                         $originalIdField = str_contains($idField, '.') ? $idField : str_replace('_', '.', $idField);
                         $parts = explode('.', $originalIdField);
-                        
+
                         if (count($parts) >= 2 && $parts[0] === $parentKey) {
                             $relationIdField = str_replace('_id', '', $parts[1]);
                             $relationsWithFields[$relationIdField] = true;
                         }
                     }
-                    
+
                     // Includi tutte le relazioni che hanno campi selezionati
                     foreach ($relationsWithFields as $relationName => $_) {
                         if (isset($parentData[$relationName]) && is_array($parentData[$relationName])) {
@@ -178,7 +177,7 @@ class SignalPayloadConfigurator
             // Il formato può essere "loan.unit_id" o "loan_unit_id" (safe format)
             // Converti il formato safe al formato originale se necessario
             $originalIdField = str_contains($idField, '.') ? $idField : str_replace('_', '.', $idField);
-            
+
             // Estrai il nome della relazione (es: loan.borrower_id -> borrower)
             $parts = explode('.', $originalIdField);
             if (count($parts) < 2) {
@@ -368,11 +367,9 @@ class SignalPayloadConfigurator
         return null;
     }
 
-
     /**
      * Espande ricorsivamente i campi ID nel payload
      *
-     * @param  mixed  $data
      * @param  array<string, string>  $relations
      * @param  array<string, array<string>>  $expandNested
      */
@@ -422,7 +419,6 @@ class SignalPayloadConfigurator
      * Espande le relazioni annidate in un modello già caricato
      *
      * @param  array<string, mixed>  $data
-     * @param  string  $modelClass
      * @param  array<string, string>  $relations
      * @return array<string, mixed>
      */

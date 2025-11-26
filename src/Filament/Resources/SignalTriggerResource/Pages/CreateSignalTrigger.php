@@ -9,4 +9,3 @@ class CreateSignalTrigger extends CreateRecord
 {
     protected static string $resource = SignalTriggerResource::class;
 }
-

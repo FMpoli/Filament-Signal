@@ -9,4 +9,3 @@ class ViewSignalTrigger extends ViewRecord
 {
     protected static string $resource = SignalTriggerResource::class;
 }
-

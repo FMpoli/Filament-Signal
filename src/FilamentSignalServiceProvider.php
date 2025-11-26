@@ -64,9 +64,9 @@ class FilamentSignalServiceProvider extends PackageServiceProvider
 
     public function packageRegistered(): void
     {
-        $this->app->singleton(SignalWebhookTemplateRegistry::class, fn(): SignalWebhookTemplateRegistry => new SignalWebhookTemplateRegistry());
-        $this->app->singleton(SignalEventRegistry::class, fn(): SignalEventRegistry => new SignalEventRegistry());
-        $this->app->singleton(SignalModelRegistry::class, fn(): SignalModelRegistry => new SignalModelRegistry());
+        $this->app->singleton(SignalWebhookTemplateRegistry::class, fn (): SignalWebhookTemplateRegistry => new SignalWebhookTemplateRegistry);
+        $this->app->singleton(SignalEventRegistry::class, fn (): SignalEventRegistry => new SignalEventRegistry);
+        $this->app->singleton(SignalModelRegistry::class, fn (): SignalModelRegistry => new SignalModelRegistry);
     }
 
     public function packageBooted(): void

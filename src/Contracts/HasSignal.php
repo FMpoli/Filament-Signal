@@ -9,7 +9,7 @@ interface HasSignal
 {
     /**
      * Restituisce i campi disponibili per i segnali (webhook/email)
-     * 
+     *
      * @return array{
      *     essential: array<string|int, string>,  // ['field' => 'Label'] o ['field']
      *     relations?: array<string, array{
@@ -20,4 +20,3 @@ interface HasSignal
      */
     public static function getSignalFields(): array;
 }
-

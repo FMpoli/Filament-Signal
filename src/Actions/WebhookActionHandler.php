@@ -133,7 +133,7 @@ class WebhookActionHandler implements SignalActionHandler
         // Configura il payload se ci sono configurazioni
         if (! empty($payloadConfig)) {
             $relationFields = Arr::get($payloadConfig, 'relation_fields', []);
-            
+
             // Se ci sono relation_fields configurati, espandi automaticamente quelle relazioni
             // (non serve più expand_relations perché tutte le relazioni sono sempre disponibili)
             if (! empty($relationFields) && is_array($relationFields)) {
@@ -142,17 +142,17 @@ class WebhookActionHandler implements SignalActionHandler
 
                 $relationsMap = [];
                 $expandNested = []; // Relazioni annidate da espandere automaticamente
-                
+
                 // Per ogni relazione che ha campi selezionati, aggiungila a expand_relations
                 foreach ($relationFields as $idField => $fields) {
                     // Converti il formato safe (loan_unit_id) al formato originale (loan.unit_id)
                     $originalIdField = str_replace('_', '.', $idField);
-                    
+
                     if (isset($analysis['relations'][$originalIdField])) {
                         $relation = $analysis['relations'][$originalIdField];
                         if ($relation['model_class']) {
                             $relationsMap[$originalIdField] = $relation['model_class'];
-                            
+
                             // Se la relazione ha 'expand' definito, aggiungilo
                             if (! empty($relation['expand'])) {
                                 $expandNested[$originalIdField] = $relation['expand'];
@@ -173,13 +173,13 @@ class WebhookActionHandler implements SignalActionHandler
 
                     $relationsMap = [];
                     $expandNested = [];
-                    
+
                     foreach ($expandRelations as $idField) {
                         if (isset($analysis['relations'][$idField])) {
                             $relation = $analysis['relations'][$idField];
                             if ($relation['model_class']) {
                                 $relationsMap[$idField] = $relation['model_class'];
-                                
+
                                 if (! empty($relation['expand'])) {
                                     $expandNested[$idField] = $relation['expand'];
                                 }
