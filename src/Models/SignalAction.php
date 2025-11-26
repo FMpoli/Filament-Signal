@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Str;
 
 class SignalAction extends Model
 {
@@ -25,6 +27,23 @@ class SignalAction extends Model
         'is_active' => 'boolean',
         'configuration' => 'array',
     ];
+
+    protected static function booted(): void
+    {
+        static::saving(function (self $action): void {
+            // Genera automaticamente un secret per webhook se non è presente
+            if ($action->action_type === 'webhook') {
+                $configuration = $action->configuration ?? [];
+                $secret = Arr::get($configuration, 'secret');
+
+                // Se il secret è vuoto o non presente, genera uno random
+                if (blank($secret)) {
+                    $configuration['secret'] = Str::random(40);
+                    $action->configuration = $configuration;
+                }
+            }
+        });
+    }
 
     public function getTable()
     {

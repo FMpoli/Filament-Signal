@@ -3,6 +3,7 @@
 namespace Base33\FilamentSignal\Services;
 
 use Base33\FilamentSignal\Models\SignalTrigger;
+use Base33\FilamentSignal\Support\SignalEventRegistry;
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
@@ -12,7 +13,8 @@ class SignalEventRegistrar
 {
     public function __construct(
         protected Dispatcher $dispatcher,
-        protected SignalEventProcessor $processor
+        protected SignalEventProcessor $processor,
+        protected SignalEventRegistry $eventRegistry
     ) {}
 
     public function register(): void
@@ -28,8 +30,13 @@ class SignalEventRegistrar
 
     protected function discoverEvents(): Collection
     {
+        // Eventi dal config
         $configured = collect(config('signal.registered_events', []));
 
+        // Eventi registrati dai plugin tramite FilamentSignal::registerEvent()
+        $registeredEvents = collect(array_keys($this->eventRegistry->all()));
+
+        // Eventi già usati nei trigger esistenti (dal database)
         $databaseEvents = collect();
 
         try {
@@ -43,6 +50,11 @@ class SignalEventRegistrar
             ]);
         }
 
-        return $configured->merge($databaseEvents)->filter()->unique()->values();
+        return $configured
+            ->merge($registeredEvents)
+            ->merge($databaseEvents)
+            ->filter()
+            ->unique()
+            ->values();
     }
 }

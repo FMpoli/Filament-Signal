@@ -7,6 +7,7 @@ use Base33\FilamentSignal\Models\SignalAction;
 use Base33\FilamentSignal\Models\SignalActionLog;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Log;
 use InvalidArgumentException;
 use Throwable;
 
@@ -29,9 +30,20 @@ class SignalActionExecutor
         $log = $this->createLog($action, $eventClass, $payload);
 
         try {
+            Log::info("Signal: Executing action [{$action->id}] of type [{$action->action_type}]", [
+                'action_id' => $action->id,
+                'action_type' => $action->action_type,
+                'event_class' => $eventClass,
+            ]);
+
             $handler = $this->resolveHandler($action->action_type);
 
             $response = $handler->handle($action, $payload, $eventClass);
+
+            Log::info("Signal: Action [{$action->id}] executed successfully", [
+                'action_id' => $action->id,
+                'response' => $response,
+            ]);
 
             $log->update([
                 'status' => 'success',
@@ -39,6 +51,13 @@ class SignalActionExecutor
                 'executed_at' => now(),
             ]);
         } catch (Throwable $exception) {
+            Log::error("Signal: Action [{$action->id}] failed", [
+                'action_id' => $action->id,
+                'action_type' => $action->action_type,
+                'error' => $exception->getMessage(),
+                'trace' => $exception->getTraceAsString(),
+            ]);
+
             $log->update([
                 'status' => 'failed',
                 'message' => $exception->getMessage(),

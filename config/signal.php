@@ -12,6 +12,13 @@ return [
 
     'queue_connection' => env('FILAMENT_SIGNAL_QUEUE', null),
 
+    /*
+     * Se true, esegue i trigger immediatamente senza usare le code.
+     * Utile per sviluppo o quando non hai un worker configurato.
+     * Se false, usa le code (richiede un worker in esecuzione).
+     */
+    'execute_sync' => env('FILAMENT_SIGNAL_EXECUTE_SYNC', false),
+
     'registered_events' => [
         // \App\Events\LoanCreated::class,
     ],
@@ -51,5 +58,28 @@ return [
     'action_handlers' => [
         'email' => EmailActionHandler::class,
         'webhook' => WebhookActionHandler::class,
+    ],
+
+    'webhook' => [
+        'secret' => env('FILAMENT_SIGNAL_WEBHOOK_SECRET'),
+        'queue' => env('FILAMENT_SIGNAL_WEBHOOK_QUEUE'),
+        'connection' => env('FILAMENT_SIGNAL_WEBHOOK_CONNECTION'),
+        'timeout' => env('FILAMENT_SIGNAL_WEBHOOK_TIMEOUT'),
+        'tries' => env('FILAMENT_SIGNAL_WEBHOOK_TRIES'),
+        'backoff_strategy' => env('FILAMENT_SIGNAL_WEBHOOK_BACKOFF', 'Spatie\\WebhookServer\\BackoffStrategy\\ExponentialBackoffStrategy'),
+        'verify_ssl' => env('FILAMENT_SIGNAL_WEBHOOK_VERIFY_SSL', true),
+        'throw_exception_on_failure' => env('FILAMENT_SIGNAL_WEBHOOK_THROW_ON_FAILURE', false),
+    ],
+
+    'webhook_templates' => [
+        // [
+        //     'id' => 'user-created',
+        //     'name' => 'User created',
+        //     'event_class' => \App\Events\UserCreated::class,
+        //     'description' => 'Triggered when a user is created.',
+        //     'defaults' => [
+        //         'metadata.some_key' => 'value',
+        //     ],
+        // ],
     ],
 ];

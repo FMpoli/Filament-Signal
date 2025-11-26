@@ -39,6 +39,7 @@ return [
         'status_message' => 'Status message',
         'response_preview' => 'Response preview',
         'payload_preview' => 'Payload preview',
+        'webhook_template' => 'Model preset',
     ],
     'sections' => [
         'template_content' => 'Template content',
@@ -47,9 +48,16 @@ return [
         'trigger_actions' => 'Actions',
         'email_configuration' => 'Email configuration',
         'webhook_configuration' => 'Webhook configuration',
+        'webhook_configuration_advanced' => 'Advanced settings',
         'log_details' => 'Log details',
         'payload' => 'Payload',
         'response' => 'Response',
+    ],
+    'helpers' => [
+        'webhook_template' => 'Select a predefined model/event to auto-fill the event class and defaults.',
+    ],
+    'placeholders' => [
+        'webhook_template' => 'Select a preset',
     ],
     'options' => [
         'status' => [

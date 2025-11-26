@@ -39,6 +39,7 @@ return [
         'status_message' => 'Messaggio di stato',
         'response_preview' => 'Anteprima risposta',
         'payload_preview' => 'Anteprima payload',
+        'webhook_template' => 'Modello predefinito',
     ],
     'sections' => [
         'template_content' => 'Contenuto del template',
@@ -47,9 +48,16 @@ return [
         'trigger_actions' => 'Azioni',
         'email_configuration' => 'Configurazione email',
         'webhook_configuration' => 'Configurazione webhook',
+        'webhook_configuration_advanced' => 'Impostazioni avanzate',
         'log_details' => 'Dettagli log',
         'payload' => 'Payload',
         'response' => 'Risposta',
+    ],
+    'helpers' => [
+        'webhook_template' => 'Seleziona un modello preconfigurato per compilare automaticamente la classe evento.',
+    ],
+    'placeholders' => [
+        'webhook_template' => 'Scegli un modello',
     ],
     'options' => [
         'status' => [

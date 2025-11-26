@@ -4,6 +4,10 @@ namespace Base33\FilamentSignal;
 
 use Base33\FilamentSignal\Commands\FilamentSignalCommand;
 use Base33\FilamentSignal\Services\SignalEventRegistrar;
+use Base33\FilamentSignal\Support\SignalEventRegistry;
+use Base33\FilamentSignal\Support\SignalModelRegistry;
+use Base33\FilamentSignal\Support\SignalWebhookTemplate;
+use Base33\FilamentSignal\Support\SignalWebhookTemplateRegistry;
 use Base33\FilamentSignal\Testing\TestsFilamentSignal;
 use Filament\Support\Assets\Asset;
 use Filament\Support\Assets\Css;
@@ -58,10 +62,17 @@ class FilamentSignalServiceProvider extends PackageServiceProvider
         }
     }
 
-    public function packageRegistered(): void {}
+    public function packageRegistered(): void
+    {
+        $this->app->singleton(SignalWebhookTemplateRegistry::class, fn(): SignalWebhookTemplateRegistry => new SignalWebhookTemplateRegistry());
+        $this->app->singleton(SignalEventRegistry::class, fn(): SignalEventRegistry => new SignalEventRegistry());
+        $this->app->singleton(SignalModelRegistry::class, fn(): SignalModelRegistry => new SignalModelRegistry());
+    }
 
     public function packageBooted(): void
     {
+        $this->registerConfiguredWebhookTemplates();
+
         // Asset Registration
         FilamentAsset::register(
             $this->getAssets(),
@@ -91,6 +102,27 @@ class FilamentSignalServiceProvider extends PackageServiceProvider
         app()->booted(function (): void {
             app(SignalEventRegistrar::class)->register();
         });
+    }
+
+    protected function registerConfiguredWebhookTemplates(): void
+    {
+        $templates = config('signal.webhook_templates', []);
+
+        if (empty($templates)) {
+            return;
+        }
+
+        $registry = app(SignalWebhookTemplateRegistry::class);
+
+        foreach ($templates as $template) {
+            if (is_array($template)) {
+                $template = SignalWebhookTemplate::fromArray($template);
+            }
+
+            if ($template instanceof SignalWebhookTemplate) {
+                $registry->register($template);
+            }
+        }
     }
 
     protected function getAssetPackageName(): ?string

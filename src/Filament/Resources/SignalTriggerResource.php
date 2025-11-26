@@ -4,7 +4,11 @@ namespace Base33\FilamentSignal\Filament\Resources;
 
 use BackedEnum;
 use Base33\FilamentSignal\Filament\Resources\SignalTriggerResource\Pages;
+use Base33\FilamentSignal\FilamentSignal;
 use Base33\FilamentSignal\Models\SignalTrigger;
+use Base33\FilamentSignal\Support\SignalEventRegistry;
+use Base33\FilamentSignal\Support\SignalPayloadFieldAnalyzer;
+use Base33\FilamentSignal\Support\SignalWebhookTemplateRegistry;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -15,9 +19,11 @@ use Filament\Forms\Components\Builder\Block;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\ViewField;
+use Illuminate\Support\Str;
 use Filament\Resources\Resource;
-use Filament\Schemas\Components\Fieldset;
-use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Fieldset as SchemaFieldset;
+use Filament\Schemas\Components\Grid as SchemaGrid;
+use Filament\Schemas\Components\Section as SchemaSection;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Filament\Tables;
@@ -38,7 +44,7 @@ class SignalTriggerResource extends Resource
     {
         return $schema
             ->schema([
-                Section::make(__('filament-signal::signal.sections.trigger_details'))
+                SchemaSection::make(__('filament-signal::signal.sections.trigger_details'))
                     ->schema([
                         Placeholder::make('name')
                             ->label(__('filament-signal::signal.fields.name'))
@@ -60,17 +66,30 @@ class SignalTriggerResource extends Resource
                             ->columnSpanFull(),
                     ])
                     ->columns(2),
-                Section::make(__('filament-signal::signal.sections.trigger_conditions'))
+                SchemaSection::make(__('filament-signal::signal.sections.trigger_conditions'))
                     ->schema([
-                        ViewField::make('filters')
+                        Placeholder::make('filters')
                             ->label(__('filament-signal::signal.fields.filters'))
-                            ->view('filament-signal::infolists.json-preview'),
+                            ->content(function (SignalTrigger $record): string {
+                                $filters = $record->filters;
+                                if (blank($filters)) {
+                                    return '—';
+                                }
+                                $formatted = is_string($filters)
+                                    ? $filters
+                                    : json_encode($filters, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+                                return '<pre class="p-3 overflow-auto font-mono text-xs text-gray-900 rounded-lg max-h-64 bg-gray-950/5 dark:bg-white/5 dark:text-gray-100">' . e($formatted) . '</pre>';
+                            }),
                     ]),
-                Section::make(__('filament-signal::signal.sections.trigger_actions'))
+                SchemaSection::make(__('filament-signal::signal.sections.trigger_actions'))
                     ->schema([
-                        ViewField::make('actions')
+                        Placeholder::make('actions')
                             ->label(__('filament-signal::signal.fields.actions'))
-                            ->view('filament-signal::infolists.actions-list'),
+                            ->content(function (SignalTrigger $record): string {
+                                return view('filament-signal::infolists.actions-list', [
+                                    'actions' => $record->actions->toArray(),
+                                ])->render();
+                            }),
                     ])
                     ->columnSpanFull(),
             ]);
@@ -84,31 +103,79 @@ class SignalTriggerResource extends Resource
     public static function form(Schema $schema): Schema
     {
         return $schema->schema([
-            Section::make(__('filament-signal::signal.sections.trigger_details'))
+            SchemaSection::make(__('filament-signal::signal.sections.trigger_details'))
                 ->schema([
-                    Forms\Components\TextInput::make('name')
-                        ->label(__('filament-signal::signal.fields.name'))
-                        ->required(),
-                    Forms\Components\Select::make('status')
-                        ->label(__('filament-signal::signal.fields.status'))
-                        ->options([
-                            SignalTrigger::STATUS_DRAFT => __('filament-signal::signal.options.status.draft'),
-                            SignalTrigger::STATUS_ACTIVE => __('filament-signal::signal.options.status.active'),
-                            SignalTrigger::STATUS_DISABLED => __('filament-signal::signal.options.status.disabled'),
+                    SchemaGrid::make()
+                        ->columns([
+                            'default' => 1,
+                            '@md' => 2,
                         ])
-                        ->default(SignalTrigger::STATUS_DRAFT)
-                        ->required(),
-                    Forms\Components\TextInput::make('event_class')
-                        ->label(__('filament-signal::signal.fields.event_class'))
-                        ->required()
-                        ->helperText('Provide the fully qualified event class name.'),
-                    Forms\Components\Textarea::make('description')
-                        ->label(__('filament-signal::signal.fields.description'))
-                        ->rows(3)
-                        ->columnSpanFull(),
-                ])
-                ->columns(2),
-            Fieldset::make(__('filament-signal::signal.sections.trigger_conditions'))
+                        ->schema([
+                            Forms\Components\TextInput::make('name')
+                                ->label(__('filament-signal::signal.fields.name'))
+                                ->required(),
+                            Forms\Components\Select::make('status')
+                                ->label(__('filament-signal::signal.fields.status'))
+                                ->options([
+                                    SignalTrigger::STATUS_DRAFT => __('filament-signal::signal.options.status.draft'),
+                                    SignalTrigger::STATUS_ACTIVE => __('filament-signal::signal.options.status.active'),
+                                    SignalTrigger::STATUS_DISABLED => __('filament-signal::signal.options.status.disabled'),
+                                ])
+                                ->default(SignalTrigger::STATUS_DRAFT)
+                                ->required(),
+                            Forms\Components\Select::make('event_class')
+                                ->label(__('filament-signal::signal.fields.event_class'))
+                                ->options(self::getEventClassOptions())
+                                ->searchable()
+                                ->preload()
+                                ->required()
+                                ->live()
+                                ->helperText('Seleziona un evento dalla lista o cerca per nome. Gli eventi registrati dai plugin sono mostrati con il loro nome completo.')
+                                ->getSearchResultsUsing(function (string $search): array {
+                                    $options = self::getEventClassOptions();
+                                    $results = [];
+
+                                    foreach ($options as $class => $name) {
+                                        // Cerca nel nome o nella classe
+                                        if (
+                                            stripos($name, $search) !== false ||
+                                            stripos($class, $search) !== false
+                                        ) {
+                                            $results[$class] = $name;
+                                        }
+                                    }
+
+                                    return $results;
+                                })
+                                ->getOptionLabelUsing(function (?string $value): ?string {
+                                    if (! $value) {
+                                        return null;
+                                    }
+
+                                    $options = self::getEventClassOptions();
+
+                                    return $options[$value] ?? class_basename($value);
+                                })
+                                ->columnSpanFull(),
+                            Forms\Components\Select::make('metadata.webhook_template')
+                                ->label(__('filament-signal::signal.fields.webhook_template'))
+                                ->placeholder(__('filament-signal::signal.placeholders.webhook_template'))
+                                ->options(self::getWebhookTemplateOptions())
+                                ->searchable()
+                                ->preload()
+                                ->live()
+                                ->helperText(__('filament-signal::signal.helpers.webhook_template'))
+                                ->afterStateUpdated(function ($state, callable $set): void {
+                                    static::applyWebhookTemplate($state, $set);
+                                })
+                                ->columnSpanFull(),
+                            Forms\Components\Textarea::make('description')
+                                ->label(__('filament-signal::signal.fields.description'))
+                                ->rows(3)
+                                ->columnSpanFull(),
+                        ]),
+                ]),
+            SchemaFieldset::make(__('filament-signal::signal.sections.trigger_conditions'))
                 ->schema([
                     Forms\Components\Select::make('match_type')
                         ->label(__('filament-signal::signal.fields.match_type'))
@@ -143,7 +210,7 @@ class SignalTriggerResource extends Resource
                         ])
                         ->collapsible(),
                 ]),
-            Section::make(__('filament-signal::signal.sections.trigger_actions'))
+            SchemaSection::make(__('filament-signal::signal.sections.trigger_actions'))
                 ->schema([
                     Repeater::make('actions')
                         ->relationship('actions')
@@ -156,6 +223,86 @@ class SignalTriggerResource extends Resource
                 ])
                 ->columnSpanFull(),
         ]);
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    protected static function getWebhookTemplateOptions(): array
+    {
+        return app(SignalWebhookTemplateRegistry::class)->options();
+    }
+
+    /**
+     * Raccoglie tutte le opzioni degli eventi disponibili:
+     * - Eventi registrati dai plugin tramite FilamentSignal::registerEvent()
+     * - Eventi configurati in config('signal.registered_events')
+     * - Eventi già usati nei trigger esistenti (dal database)
+     *
+     * @return array<string, string>  Array con chiave = event class, valore = nome visualizzato
+     */
+    protected static function getEventClassOptions(): array
+    {
+        $options = [];
+
+        // Eventi registrati dai plugin (con nome e gruppo)
+        $registeredOptions = FilamentSignal::eventOptions();
+        $options = array_merge($options, $registeredOptions);
+
+        // Eventi dal config
+        $configuredEvents = config('signal.registered_events', []);
+        foreach ($configuredEvents as $eventClass) {
+            if (is_string($eventClass) && ! isset($options[$eventClass])) {
+                // Se non è già registrato con un nome, usa il nome della classe
+                $shortName = class_basename($eventClass);
+                $options[$eventClass] = $shortName;
+            }
+        }
+
+        // Eventi dal database (già usati in trigger esistenti)
+        try {
+            $databaseEvents = SignalTrigger::query()
+                ->select('event_class')
+                ->distinct()
+                ->whereNotNull('event_class')
+                ->pluck('event_class')
+                ->filter()
+                ->toArray();
+
+            foreach ($databaseEvents as $eventClass) {
+                if (! isset($options[$eventClass])) {
+                    // Se non è già presente, usa il nome della classe
+                    $shortName = class_basename($eventClass);
+                    $options[$eventClass] = $shortName;
+                }
+            }
+        } catch (\Throwable $e) {
+            // Ignora errori se il database non è ancora pronto
+        }
+
+        // Ordina per nome
+        asort($options);
+
+        return $options;
+    }
+
+    protected static function applyWebhookTemplate(?string $templateId, callable $set): void
+    {
+        $template = app(SignalWebhookTemplateRegistry::class)->find($templateId);
+
+        if (! $template) {
+            return;
+        }
+
+        $set('event_class', $template->eventClass);
+
+        if ($template->description) {
+            $set('description', $template->description);
+        }
+
+        foreach ($template->defaults as $path => $value) {
+            $set($path, $value);
+        }
     }
 
     protected static function actionRepeaterSchema(): array
@@ -186,56 +333,348 @@ class SignalTriggerResource extends Resource
                 ->searchable()
                 ->visible(fn(Get $get): bool => $get('action_type') === 'email')
                 ->required(fn(Get $get): bool => $get('action_type') === 'email'),
-            Fieldset::make(__('filament-signal::signal.sections.email_configuration'))
+            SchemaFieldset::make(__('filament-signal::signal.sections.email_configuration'))
+                ->columnSpanFull()
                 ->visible(fn(Get $get): bool => $get('action_type') === 'email')
                 ->schema([
-                    Forms\Components\TextInput::make('configuration.subject_override')
-                        ->label(__('filament-signal::signal.fields.subject'))
-                        ->placeholder('Leave empty to use template subject'),
-                    Forms\Components\KeyValue::make('configuration.recipients.to')
-                        ->label('To recipients')
-                        ->keyLabel('Email')
-                        ->valueLabel('Name')
-                        ->addButtonLabel('Add recipient'),
-                    Forms\Components\KeyValue::make('configuration.recipients.cc')
-                        ->label('CC recipients')
-                        ->keyLabel('Email')
-                        ->valueLabel('Name')
-                        ->addButtonLabel('Add recipient'),
-                    Forms\Components\KeyValue::make('configuration.recipients.bcc')
-                        ->label('BCC recipients')
-                        ->keyLabel('Email')
-                        ->valueLabel('Name')
-                        ->addButtonLabel('Add recipient'),
+                    SchemaGrid::make()
+                        ->columns([
+                            'default' => 1,
+                            '@md' => 2,
+                        ])
+                        ->schema([
+                            Forms\Components\TextInput::make('configuration.subject_override')
+                                ->label(__('filament-signal::signal.fields.subject'))
+                                ->placeholder('Leave empty to use template subject')
+                                ->columnSpanFull(),
+                            SchemaGrid::make()
+                                ->columns([
+                                    'default' => 1,
+                                    '@md' => 3,
+                                ])
+                                ->schema([
+                                    Forms\Components\KeyValue::make('configuration.recipients.to')
+                                        ->label('To recipients')
+                                        ->keyLabel('Email')
+                                        ->valueLabel('Name')
+                                        ->addActionLabel('Add recipient'),
+                                    Forms\Components\KeyValue::make('configuration.recipients.cc')
+                                        ->label('CC recipients')
+                                        ->keyLabel('Email')
+                                        ->valueLabel('Name')
+                                        ->addActionLabel('Add recipient'),
+                                    Forms\Components\KeyValue::make('configuration.recipients.bcc')
+                                        ->label('BCC recipients')
+                                        ->keyLabel('Email')
+                                        ->valueLabel('Name')
+                                        ->addActionLabel('Add recipient'),
+                                ]),
+                        ]),
                 ]),
-            Fieldset::make(__('filament-signal::signal.sections.webhook_configuration'))
+            SchemaFieldset::make(__('filament-signal::signal.sections.webhook_configuration'))
+                ->columnSpanFull()
                 ->visible(fn(Get $get): bool => $get('action_type') === 'webhook')
                 ->schema([
-                    Forms\Components\TextInput::make('configuration.url')
-                        ->label('Endpoint URL')
-                        ->url()
-                        ->required(fn(Get $get): bool => $get('action_type') === 'webhook'),
-                    Forms\Components\Select::make('configuration.method')
-                        ->label('HTTP Method')
-                        ->options([
-                            'POST' => 'POST',
-                            'PUT' => 'PUT',
-                            'PATCH' => 'PATCH',
-                            'DELETE' => 'DELETE',
+                    SchemaGrid::make()
+                        ->columns([
+                            'default' => 1,
+                            '@md' => 2,
+                            '@xl' => 2,
                         ])
-                        ->default('POST'),
-                    Forms\Components\KeyValue::make('configuration.headers')
-                        ->label('Headers')
-                        ->keyLabel('Header')
-                        ->valueLabel('Value')
-                        ->addButtonLabel('Add header'),
-                    Forms\Components\Select::make('configuration.body')
-                        ->label('Payload mode')
-                        ->options([
-                            'payload' => 'Event payload',
-                            'event' => 'Envelope (class + payload)',
+                        ->schema([
+                            Forms\Components\TextInput::make('configuration.url')
+                                ->label('Endpoint URL')
+                                ->url()
+                                ->required(fn(Get $get): bool => $get('action_type') === 'webhook')
+                                ->columnSpanFull(),
+                            Forms\Components\Select::make('configuration.method')
+                                ->label('HTTP Method')
+                                ->options([
+                                    'POST' => 'POST',
+                                    'PUT' => 'PUT',
+                                    'PATCH' => 'PATCH',
+                                    'DELETE' => 'DELETE',
+                                ])
+                                ->default('POST'),
+                            Forms\Components\Select::make('configuration.body')
+                                ->label('Payload mode')
+                                ->options([
+                                    'payload' => 'Event payload',
+                                    'event' => 'Envelope (class + payload)',
+                                ])
+                                ->default('event'),
+                            Forms\Components\TextInput::make('configuration.secret')
+                                ->label('Signing secret')
+                                ->password()
+                                ->default(fn() => config('signal.webhook.secret') ?: Str::random(40))
+                                ->helperText('Generato automaticamente se vuoto. Utilizzato per generare la firma con spatie/laravel-webhook-server.'),
+                            Forms\Components\Toggle::make('configuration.verify_ssl')
+                                ->label('Verify SSL')
+                                ->default(true),
+                        ]),
+                    SchemaSection::make(__('filament-signal::signal.sections.payload_configuration'))
+                        ->label('Payload Configuration')
+                        ->description('Seleziona i campi da includere nel payload e le relazioni da espandere')
+                        ->collapsible()
+                        ->collapsed()
+                        ->schema([
+                            Forms\Components\CheckboxList::make('configuration.payload_config.include_fields')
+                                ->label('Campi essenziali')
+                                ->options(function (Get $get): array {
+                                    $eventClass = $get('../../event_class');
+                                    if (! $eventClass) {
+                                        return [];
+                                    }
+
+                                    $analyzer = app(SignalPayloadFieldAnalyzer::class);
+                                    $analysis = $analyzer->analyzeEvent($eventClass);
+
+                                    // Mostra solo i campi essenziali del modello principale (non delle relazioni)
+                                    $options = [];
+                                    foreach ($analysis['fields'] as $field => $data) {
+                                        // Mostra solo i campi del modello principale (es: loan.id, loan.status)
+                                        // Escludi i campi delle relazioni (es: loan.unit.inventory_code)
+                                        if (substr_count($field, '.') > 1) {
+                                            continue;
+                                        }
+
+                                        // Salta i campi tecnici meno usati
+                                        if (in_array($field, ['loan.created_at', 'loan.updated_at', 'loan.attachments', 'loan.return_notes'])) {
+                                            continue;
+                                        }
+
+                                        $options[$field] = $data['label'];
+                                    }
+
+                                    return $options;
+                                })
+                                ->columns(2)
+                                ->gridDirection('row')
+                                ->helperText('Seleziona i campi essenziali del prestito da includere.')
+                                ->columnSpanFull()
+                                ->live(onBlur: false)
+                                ->dehydrated()
+                                ->rules([])
+                                ->afterStateHydrated(function ($state, callable $set, Get $get) {
+                                    // Pulisci i valori non validi quando viene caricato lo stato
+                                    $eventClass = $get('../../event_class');
+                                    if (! $eventClass || ! is_array($state)) {
+                                        return;
+                                    }
+
+                                    $analyzer = app(SignalPayloadFieldAnalyzer::class);
+                                    $analysis = $analyzer->analyzeEvent($eventClass);
+
+                                    $validFields = [];
+                                    foreach ($analysis['fields'] as $field => $data) {
+                                        if (substr_count($field, '.') <= 1 && ! in_array($field, ['loan.created_at', 'loan.updated_at', 'loan.attachments', 'loan.return_notes'])) {
+                                            $validFields[] = $field;
+                                        }
+                                    }
+
+                                    $filtered = array_intersect($state, $validFields);
+                                    if (count($filtered) !== count($state)) {
+                                        $set('configuration.payload_config.include_fields', array_values($filtered));
+                                    }
+                                })
+                                ->afterStateUpdated(function ($state, callable $set, Get $get) {
+                                    // Pulisci i valori che non sono più nelle opzioni disponibili quando cambia l'evento
+                                    $eventClass = $get('../../event_class');
+                                    if (! $eventClass || ! is_array($state)) {
+                                        return;
+                                    }
+
+                                    $analyzer = app(SignalPayloadFieldAnalyzer::class);
+                                    $analysis = $analyzer->analyzeEvent($eventClass);
+
+                                    $validFields = [];
+                                    foreach ($analysis['fields'] as $field => $data) {
+                                        if (substr_count($field, '.') <= 1 && ! in_array($field, ['loan.created_at', 'loan.updated_at', 'loan.attachments', 'loan.return_notes'])) {
+                                            $validFields[] = $field;
+                                        }
+                                    }
+
+                                    $filtered = array_intersect($state, $validFields);
+                                    if (count($filtered) !== count($state)) {
+                                        $set('configuration.payload_config.include_fields', array_values($filtered));
+                                    }
+                                }),
+                            // Sezione per le relazioni - tutte le relazioni sono sempre mostrate come sezioni con titoli
+                            SchemaSection::make('Relazioni')
+                                ->description('Seleziona i campi da includere per ogni relazione')
+                                ->schema(function (Get $get): array {
+                                    $eventClass = $get('../../event_class');
+
+                                    if (! $eventClass) {
+                                        return [];
+                                    }
+
+                                    $analyzer = app(SignalPayloadFieldAnalyzer::class);
+                                    $analysis = $analyzer->analyzeEvent($eventClass);
+
+                                    // Ottieni il modello principale dall'evento
+                                    $reflection = new \ReflectionClass($eventClass);
+                                    $properties = $reflection->getProperties(\ReflectionProperty::IS_PUBLIC);
+
+                                    $mainModelClass = null;
+                                    foreach ($properties as $property) {
+                                        $propType = $property->getType();
+                                        if ($propType instanceof \ReflectionNamedType) {
+                                            $typeClass = $propType->getName();
+                                            if (is_subclass_of($typeClass, \Illuminate\Database\Eloquent\Model::class)) {
+                                                $mainModelClass = $typeClass;
+                                                break;
+                                            }
+                                        }
+                                    }
+
+                                    if (! $mainModelClass) {
+                                        return [];
+                                    }
+
+                                    // Ottieni i campi definiti nel modello principale
+                                    $mainModelFields = app(\Base33\FilamentSignal\Support\SignalModelRegistry::class)->getFields($mainModelClass);
+
+                                    if (! $mainModelFields || ! isset($mainModelFields['relations'])) {
+                                        return [];
+                                    }
+
+                                    $analyzerInstance = app(SignalPayloadFieldAnalyzer::class);
+                                    $sections = [];
+
+                                    // Genera una sezione per OGNI relazione disponibile con il nome come titolo
+                                    foreach ($analysis['relations'] as $idField => $relation) {
+                                        $relationLabel = $relation['label'];
+
+                                        // Estrai il nome della relazione (es: loan.borrower_id -> borrower)
+                                        $relationName = str_replace('_id', '', explode('.', $idField)[1] ?? '');
+
+                                        // Ottieni i campi definiti per questa relazione nel modello principale
+                                        if (! isset($mainModelFields['relations'][$relationName]['fields'])) {
+                                            continue;
+                                        }
+
+                                        $relationFields = $mainModelFields['relations'][$relationName]['fields'];
+                                        $modelClass = $relation['model_class'];
+
+                                        $fieldOptions = [];
+                                        foreach ($relationFields as $field => $label) {
+                                            $fieldKey = is_int($field) ? $label : $field;
+                                            $fieldLabel = is_int($field)
+                                                ? $analyzerInstance->getTranslatedFieldLabel($fieldKey, $modelClass ?? $mainModelClass)
+                                                : $analyzerInstance->getTranslatedFieldLabel($label, $modelClass ?? $mainModelClass, $label);
+
+                                            $fullFieldKey = $relationName . '.' . $fieldKey;
+                                            $fieldOptions[$fullFieldKey] = $fieldLabel;
+                                        }
+
+                                        if (! empty($fieldOptions)) {
+                                            // Crea un path stabile e univoco per ogni relazione
+                                            $safeIdField = str_replace(['.', ' '], ['_', '_'], $idField);
+                                            $uniquePath = "configuration.payload_config.relation_fields.{$safeIdField}";
+
+                                            // Crea una sezione per ogni relazione con il nome come titolo
+                                            $sections[] = SchemaSection::make($relationLabel)
+                                                ->schema([
+                                                    Forms\Components\CheckboxList::make($uniquePath)
+                                                        ->label('Campi disponibili')
+                                                        ->options($fieldOptions)
+                                                        ->columns(2)
+                                                        ->gridDirection('row')
+                                                        ->helperText("Seleziona i campi da includere per {$relationLabel}")
+                                                        ->columnSpanFull()
+                                                        ->dehydrated()
+                                                        ->rules([]),
+                                                ])
+                                                ->collapsible()
+                                                ->collapsed(false);
+                                        }
+                                    }
+
+                                    return $sections;
+                                })
+                                ->collapsible()
+                                ->collapsed(false)
+                                ->visible(fn(Get $get): bool => filled($get('../../event_class')))
+                                ->columnSpanFull(),
                         ])
-                        ->default('payload'),
+                        ->visible(fn(Get $get): bool => filled($get('../../event_class'))),
+                    SchemaSection::make(__('filament-signal::signal.sections.webhook_configuration_advanced'))
+                        ->collapsible()
+                        ->collapsed()
+                        ->visible(false) // Temporaneamente nascosto - riattivare quando necessario
+                        ->schema([
+                            SchemaGrid::make()
+                                ->columns([
+                                    'default' => 1,
+                                    '@md' => 2,
+                                    '@xl' => 3,
+                                ])
+                                ->schema([
+                                    Forms\Components\TextInput::make('configuration.queue')
+                                        ->label('Queue')
+                                        ->placeholder('default'),
+                                    Forms\Components\TextInput::make('configuration.connection')
+                                        ->label('Queue connection'),
+                                    Forms\Components\TextInput::make('configuration.timeout')
+                                        ->label('Timeout (seconds)')
+                                        ->numeric()
+                                        ->minValue(1),
+                                    Forms\Components\TextInput::make('configuration.tries')
+                                        ->label('Max attempts')
+                                        ->numeric()
+                                        ->minValue(1)
+                                        ->placeholder('Esempio: 3'),
+                                    Forms\Components\TextInput::make('configuration.backoff_strategy')
+                                        ->label('Backoff strategy class'),
+                                    Forms\Components\Toggle::make('configuration.throw_exception_on_failure')
+                                        ->label('Throw on failure')
+                                        ->default(false),
+                                    Forms\Components\Toggle::make('configuration.dispatch_sync')
+                                        ->label('Dispatch synchronously')
+                                        ->helperText('Esegue la chiamata nella stessa richiesta invece che in coda.'),
+                                    Forms\Components\TagsInput::make('configuration.tags')
+                                        ->label('Horizon tags')
+                                        ->placeholder('tag')
+                                        ->columnSpan([
+                                            'default' => 1,
+                                            '@md' => 2,
+                                            '@xl' => 1,
+                                        ]),
+                                    Forms\Components\KeyValue::make('configuration.headers')
+                                        ->label('Headers')
+                                        ->keyLabel('Header')
+                                        ->valueLabel('Value')
+                                        ->addActionLabel('Add header')
+                                        ->columnSpan([
+                                            'default' => 1,
+                                            '@md' => 2,
+                                            '@xl' => 2,
+                                        ]),
+                                    Forms\Components\KeyValue::make('configuration.meta')
+                                        ->label('Meta')
+                                        ->keyLabel('Key')
+                                        ->valueLabel('Value')
+                                        ->addActionLabel('Add meta')
+                                        ->columnSpan([
+                                            'default' => 1,
+                                            '@md' => 2,
+                                            '@xl' => 3,
+                                        ]),
+                                    Forms\Components\TextInput::make('configuration.proxy')
+                                        ->label('Proxy')
+                                        ->placeholder('http://proxy.server:3128')
+                                        ->columnSpan([
+                                            'default' => 1,
+                                            '@md' => 2,
+                                            '@xl' => 3,
+                                        ]),
+                                    Forms\Components\TextInput::make('configuration.job')
+                                        ->label('Custom job class'),
+                                    Forms\Components\TextInput::make('configuration.signer')
+                                        ->label('Custom signer class'),
+                                ]),
+                        ]),
                 ]),
         ];
     }
