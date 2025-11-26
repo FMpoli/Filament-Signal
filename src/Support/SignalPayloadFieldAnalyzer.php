@@ -129,7 +129,7 @@ class SignalPayloadFieldAnalyzer
 
             if ($relatedModelClass) {
                 $expand = Arr::get($relationConfig, 'expand', []);
-                
+
                 $relations[$idField] = [
                     'id_field' => $idField,
                     'relation_field' => $relationField,
@@ -258,7 +258,7 @@ class SignalPayloadFieldAnalyzer
 
         try {
             $model = new $modelClass;
-            
+
             // Verifica se il metodo di relazione esiste
             if (! method_exists($model, $relationName)) {
                 return null;
@@ -266,10 +266,11 @@ class SignalPayloadFieldAnalyzer
 
             // Chiama il metodo di relazione per ottenere l'oggetto relazione
             $relation = $model->{$relationName}();
-            
+
             // Se è una relazione Eloquent, ottieni il modello correlato
             if (method_exists($relation, 'getRelated')) {
                 $relatedModel = $relation->getRelated();
+
                 return get_class($relatedModel);
             }
 
@@ -278,7 +279,7 @@ class SignalPayloadFieldAnalyzer
             if ($reflection->hasMethod($relationName)) {
                 $method = $reflection->getMethod($relationName);
                 $returnType = $method->getReturnType();
-                
+
                 if ($returnType instanceof \ReflectionNamedType) {
                     $returnTypeClass = $returnType->getName();
                     // Se è una classe di relazione Eloquent, prova a ottenere il modello correlato
@@ -351,6 +352,7 @@ class SignalPayloadFieldAnalyzer
     protected function guessModelClass(string $idFieldOrRelationName, string $parentModelClass): ?string
     {
         $relationName = str_replace('_id', '', $idFieldOrRelationName);
+
         return $this->getRelatedModelClassFromRelation($parentModelClass, $relationName)
             ?? $this->guessModelClassFallback($idFieldOrRelationName, $parentModelClass);
     }
@@ -497,6 +499,7 @@ class SignalPayloadFieldAnalyzer
             foreach ($parts as $part) {
                 if (str_starts_with($part, 'Filament') && $part !== 'Filament') {
                     $name = str_replace('Filament', '', $part);
+
                     return strtolower($name);
                 }
             }

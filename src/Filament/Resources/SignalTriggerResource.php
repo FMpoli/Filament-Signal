@@ -31,7 +31,7 @@ class SignalTriggerResource extends Resource
 {
     protected static ?string $model = SignalTrigger::class;
 
-    protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-sparkles';
+    protected static BackedEnum | string | null $navigationIcon = 'heroicon-o-sparkles';
 
     public static function getNavigationGroup(): ?string
     {

@@ -359,6 +359,7 @@ class SignalPayloadConfigurator
                     $relation = $model->{$relationName}();
                     if (method_exists($relation, 'getRelated')) {
                         $relatedModel = $relation->getRelated();
+
                         return get_class($relatedModel);
                     }
                 }

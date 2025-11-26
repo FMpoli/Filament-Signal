@@ -224,5 +224,4 @@ class WebhookActionHandler implements SignalActionHandler
         // Converte da PascalCase a snake_case per consistenza
         return strtolower(preg_replace('/(?<!^)[A-Z]/', '_$0', $className));
     }
-
 }
