@@ -16,5 +16,3 @@ class EditSignalModelIntegration extends EditRecord
         ];
     }
 }
-
-

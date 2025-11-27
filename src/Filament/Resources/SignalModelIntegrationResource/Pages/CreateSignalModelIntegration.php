@@ -9,5 +9,3 @@ class CreateSignalModelIntegration extends CreateRecord
 {
     protected static string $resource = SignalModelIntegrationResource::class;
 }
-
-

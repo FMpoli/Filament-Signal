@@ -230,5 +230,3 @@ class SignalModelIntegration extends Model
         };
     }
 }
-
-

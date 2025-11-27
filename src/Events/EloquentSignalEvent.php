@@ -59,5 +59,3 @@ class EloquentSignalEvent implements SignalIdentifiableEvent, SignalPayloadProvi
         return $payload;
     }
 }
-
-

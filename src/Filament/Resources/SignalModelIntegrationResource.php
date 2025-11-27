@@ -191,5 +191,3 @@ class SignalModelIntegrationResource extends Resource
         ];
     }
 }
-
-

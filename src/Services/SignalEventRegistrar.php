@@ -4,10 +4,10 @@ namespace Base33\FilamentSignal\Services;
 
 use Base33\FilamentSignal\Events\EloquentSignalEvent;
 use Base33\FilamentSignal\Models\SignalTrigger;
-use Base33\FilamentSignal\Support\SignalEventRegistry;
 use Base33\FilamentSignal\Support\SignalEloquentEventMap;
-use Illuminate\Database\Eloquent\Model;
+use Base33\FilamentSignal\Support\SignalEventRegistry;
 use Illuminate\Contracts\Events\Dispatcher;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;

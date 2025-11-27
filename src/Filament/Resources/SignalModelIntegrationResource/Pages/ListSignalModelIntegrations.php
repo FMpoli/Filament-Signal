@@ -17,5 +17,3 @@ class ListSignalModelIntegrations extends ListRecords
         ];
     }
 }
-
-

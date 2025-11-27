@@ -13,5 +13,3 @@ interface SignalIdentifiableEvent
      */
     public function signalEventIdentifier(): string;
 }
-
-

@@ -13,5 +13,3 @@ interface SignalPayloadProvider
      */
     public function toSignalPayload(): array;
 }
-
-

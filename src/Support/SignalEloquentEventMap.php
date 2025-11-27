@@ -34,5 +34,3 @@ class SignalEloquentEventMap
         return $this->map[$eventName] ?? null;
     }
 }
-
-
