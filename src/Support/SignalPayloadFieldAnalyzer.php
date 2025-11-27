@@ -119,89 +119,75 @@ class SignalPayloadFieldAnalyzer
 
             $alias = $reverseConfig['alias'] ?? $this->defaultReverseAlias($descriptor);
             $sourceModel = $descriptor['source_model'] ?? null;
+            
+            // Verifica se il modello target (quello che ha la relazione inversa) proviene da Model Integration
+            $isTargetFromIntegration = $this->isModelFromIntegration($modelClass);
+            
+            // Se il modello target proviene da Model Integration, usa SOLO i campi configurati
+            if ($isTargetFromIntegration) {
+                // Usa solo i campi esplicitamente configurati dall'utente
+                $fieldOptions = $this->formatFieldOptions(
+                    $reverseConfig['fields'] ?? [],
+                    $sourceModel
+                );
+                
+                // Non aggiungere campi extra, usa solo quelli configurati
+            } else {
+                // Per modelli con HasSignal, usa la logica completa con fallback
+                // Prima prova con i campi selezionati nella Model Integration (se esistono)
+                $fieldOptions = $this->formatFieldOptions(
+                    $reverseConfig['fields'] ?? [],
+                    $sourceModel
+                );
 
-            // Prima prova con i campi selezionati nella Model Integration
-            $fieldOptions = $this->formatFieldOptions(
-                $reverseConfig['fields'] ?? [],
-                $sourceModel
-            );
-
-            // Se non ci sono campi selezionati, usa i campi essenziali del modello sorgente
-            if (empty($fieldOptions) && $sourceModel) {
-                $sourceModelFields = $this->modelRegistry->getFields($sourceModel);
-                if ($sourceModelFields && isset($sourceModelFields['essential'])) {
-                    $essentialFields = $sourceModelFields['essential'];
-                    // Estrai i nomi dei campi (gestisci sia array associativi che numerici)
-                    $fieldNames = [];
-                    foreach ($essentialFields as $key => $value) {
-                        if (is_int($key)) {
-                            // Array numerico: il valore è il nome del campo
-                            $fieldNames[] = $value;
-                        } else {
-                            // Array associativo: la chiave è il nome del campo
-                            $fieldNames[] = $key;
-                        }
-                    }
-                    $fieldOptions = $this->formatFieldOptions($fieldNames, $sourceModel);
-                }
-            }
-
-            // Se ancora vuoto, usa un fallback con campi comuni
-            if (empty($fieldOptions)) {
-                $fieldOptions = [
-                    'id' => 'ID',
-                    'name' => 'Name',
-                    'created_at' => 'Created At',
-                    'updated_at' => 'Updated At',
-                ];
-            }
-
-            // Aggiungi i campi delle relazioni annidate (es: unit.inventory_code, unit.model.name)
-            if ($sourceModel) {
-                $sourceModelFields = $this->modelRegistry->getFields($sourceModel);
-                if ($sourceModelFields && isset($sourceModelFields['relations'])) {
-                    foreach ($sourceModelFields['relations'] as $relationName => $relationConfig) {
-                        $relationExpand = $relationConfig['expand'] ?? [];
-                        $relationFields = $relationConfig['fields'] ?? [];
-
-                        // Aggiungi i campi della relazione principale (es: unit.inventory_code)
-                        if (! empty($relationFields)) {
-                            $relatedModelClass = $this->getRelatedModelClassFromRelation($sourceModel, $relationName);
-                            if ($relatedModelClass) {
-                                $nestedFieldOptions = $this->formatFieldOptions($relationFields, $relatedModelClass);
-                                foreach ($nestedFieldOptions as $fieldKey => $fieldLabel) {
-                                    $fullKey = "{$alias}.{$relationName}.{$fieldKey}";
-                                    $fieldOptions[$fullKey] = "{$relationName} → {$fieldLabel}";
-                                }
+                // Se non ci sono campi selezionati, usa i campi essenziali del modello sorgente
+                if (empty($fieldOptions) && $sourceModel) {
+                    $sourceModelFields = $this->modelRegistry->getFields($sourceModel);
+                    if ($sourceModelFields && isset($sourceModelFields['essential'])) {
+                        $essentialFields = $sourceModelFields['essential'];
+                        // Estrai i nomi dei campi (gestisci sia array associativi che numerici)
+                        $fieldNames = [];
+                        foreach ($essentialFields as $key => $value) {
+                            if (is_int($key)) {
+                                // Array numerico: il valore è il nome del campo
+                                $fieldNames[] = $value;
+                            } else {
+                                // Array associativo: la chiave è il nome del campo
+                                $fieldNames[] = $key;
                             }
                         }
-
-                        // Aggiungi i campi delle relazioni annidate (es: unit.model.name, unit.brand.name)
-                        if (! empty($relationExpand)) {
-                            $relatedModelClass = $this->getRelatedModelClassFromRelation($sourceModel, $relationName);
-                            if ($relatedModelClass) {
-                                $relatedModelFields = $this->modelRegistry->getFields($relatedModelClass);
-                                foreach ($relationExpand as $nestedRelationName) {
-                                    if ($relatedModelFields && isset($relatedModelFields['relations'][$nestedRelationName])) {
-                                        $nestedRelationConfig = $relatedModelFields['relations'][$nestedRelationName];
-                                        $nestedRelationFields = $nestedRelationConfig['fields'] ?? [];
-
-                                        if (! empty($nestedRelationFields)) {
-                                            $nestedRelatedModelClass = $this->getRelatedModelClassFromRelation($relatedModelClass, $nestedRelationName);
-                                            if ($nestedRelatedModelClass) {
-                                                $nestedFieldOptions = $this->formatFieldOptions($nestedRelationFields, $nestedRelatedModelClass);
-                                                foreach ($nestedFieldOptions as $fieldKey => $fieldLabel) {
-                                                    $fullKey = "{$alias}.{$relationName}.{$nestedRelationName}.{$fieldKey}";
-                                                    $fieldOptions[$fullKey] = "{$relationName} → {$nestedRelationName} → {$fieldLabel}";
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
+                        $fieldOptions = $this->formatFieldOptions($fieldNames, $sourceModel);
                     }
                 }
+
+                // Se ancora vuoto, usa un fallback con campi comuni
+                if (empty($fieldOptions)) {
+                    $fieldOptions = [
+                        'id' => 'ID',
+                        'name' => 'Name',
+                        'created_at' => 'Created At',
+                        'updated_at' => 'Updated At',
+                    ];
+                }
+
+                // Aggiungi i campi delle relazioni annidate (ricorsivamente) solo per modelli con HasSignal
+                if ($sourceModel) {
+                    $sourceModelFields = $this->modelRegistry->getFields($sourceModel);
+                    if ($sourceModelFields && isset($sourceModelFields['relations'])) {
+                        $this->collectNestedRelationFieldsForReverse(
+                            $sourceModelFields['relations'],
+                            $sourceModel,
+                            $alias,
+                            $fieldOptions,
+                            ''
+                        );
+                    }
+                }
+            }
+            
+            // Se il modello target proviene da Model Integration e non ci sono campi configurati, salta questa relazione
+            if ($isTargetFromIntegration && empty($fieldOptions)) {
+                continue;
             }
 
             $idField = "{$propertyName}.{$alias}";
@@ -302,10 +288,34 @@ class SignalPayloadFieldAnalyzer
             if ($relatedModelClass) {
                 $expand = Arr::get($relationConfig, 'expand', []);
                 $alias = Arr::get($relationConfig, 'alias', $relationName);
+                
+                // Inizia con i campi diretti della relazione
                 $fieldOptions = $this->formatFieldOptions(
                     Arr::get($relationConfig, 'fields', []),
                     $relatedModelClass
                 );
+
+                // Aggiungi i campi delle relazioni annidate (ricorsivamente)
+                // Solo se il modello implementa HasSignal (non da Model Integration)
+                // Per Model Integration, usiamo solo i campi esplicitamente configurati
+                if ($relatedModelClass) {
+                    $isFromModelIntegration = $this->isModelFromIntegration($modelClass);
+                    
+                    // Se non è da Model Integration, aggiungi ricorsivamente tutti i campi disponibili
+                    // Se è da Model Integration, usa solo i campi configurati (già in fieldOptions)
+                    if (! $isFromModelIntegration) {
+                        $relatedModelFields = $this->modelRegistry->getFields($relatedModelClass);
+                        if ($relatedModelFields && isset($relatedModelFields['relations'])) {
+                            $this->collectNestedRelationFieldsForDirect(
+                                $relatedModelFields['relations'],
+                                $relatedModelClass,
+                                $relationName,
+                                $fieldOptions,
+                                ''
+                            );
+                        }
+                    }
+                }
 
                 if (empty($fieldOptions)) {
                     continue;
@@ -774,5 +784,213 @@ class SignalPayloadFieldAnalyzer
 
         // Fallback: usa il nome della proprietà capitalizzato
         return ucfirst($propertyName);
+    }
+
+    /**
+     * Raccoglie ricorsivamente tutti i campi delle relazioni annidate per le relazioni inverse.
+     * 
+     * @param  array<string, mixed>  $relations  Configurazione delle relazioni
+     * @param  string  $modelClass  Classe del modello corrente
+     * @param  string  $baseAlias  Alias base (es: 'equipment_loan')
+     * @param  array<string, string>  &$fieldOptions  Array di output per le opzioni dei campi
+     * @param  string  $basePath  Path base corrente (es: 'unit' o 'unit.model')
+     */
+    protected function collectNestedRelationFieldsForReverse(
+        array $relations,
+        string $modelClass,
+        string $baseAlias,
+        array &$fieldOptions,
+        string $basePath = ''
+    ): void {
+        foreach ($relations as $relationName => $relationConfig) {
+            $relationExpand = $relationConfig['expand'] ?? [];
+            $relationFields = $relationConfig['fields'] ?? [];
+            $relatedModelClass = $this->getRelatedModelClassFromRelation($modelClass, $relationName);
+            
+            if (! $relatedModelClass) {
+                continue;
+            }
+            
+            $currentPath = $basePath === '' ? $relationName : "{$basePath}.{$relationName}";
+            
+            // Aggiungi i campi della relazione principale (es: unit.inventory_code o unit.model.name)
+            if (! empty($relationFields)) {
+                $nestedFieldOptions = $this->formatFieldOptions($relationFields, $relatedModelClass);
+                foreach ($nestedFieldOptions as $fieldKey => $fieldLabel) {
+                    $fullKey = "{$baseAlias}.{$currentPath}.{$fieldKey}";
+                    // Formatta il path con frecce e nomi in minuscolo per leggibilità
+                    $labelPath = str_replace('.', ' → ', strtolower($currentPath));
+                    $fieldOptions[$fullKey] = "{$labelPath} → {$fieldLabel}";
+                }
+            }
+            
+            // Se ci sono relazioni annidate da espandere, processale ricorsivamente
+            if (! empty($relationExpand)) {
+                $relatedModelFields = $this->modelRegistry->getFields($relatedModelClass);
+                
+                // Se il modello correlato ha relazioni configurate, processale
+                if ($relatedModelFields && isset($relatedModelFields['relations'])) {
+                    // Filtra solo le relazioni che sono in expand
+                    $nestedRelations = [];
+                    foreach ($relationExpand as $nestedRelationName) {
+                        if (isset($relatedModelFields['relations'][$nestedRelationName])) {
+                            $nestedRelations[$nestedRelationName] = $relatedModelFields['relations'][$nestedRelationName];
+                        } else {
+                            // Se la relazione non è configurata, crea una entry di base per permettere la selezione
+                            $nestedRelatedModelClass = $this->getRelatedModelClassFromRelation($relatedModelClass, $nestedRelationName);
+                            if ($nestedRelatedModelClass) {
+                                // Crea una configurazione di base con campi essenziali comuni
+                                $nestedRelations[$nestedRelationName] = [
+                                    'fields' => ['id', 'name'], // Campi essenziali comuni
+                                    'expand' => [],
+                                ];
+                            }
+                        }
+                    }
+                    
+                    // Processa ricorsivamente
+                    if (! empty($nestedRelations)) {
+                        $this->collectNestedRelationFieldsForReverse(
+                            $nestedRelations,
+                            $relatedModelClass,
+                            $baseAlias,
+                            $fieldOptions,
+                            $currentPath
+                        );
+                    }
+                } else {
+                    // Se il modello correlato non ha getSignalFields configurato,
+                    // aggiungi comunque i campi essenziali comuni per le relazioni in expand
+                    foreach ($relationExpand as $nestedRelationName) {
+                        $nestedRelatedModelClass = $this->getRelatedModelClassFromRelation($relatedModelClass, $nestedRelationName);
+                        if ($nestedRelatedModelClass) {
+                            // Aggiungi campi essenziali comuni
+                            $commonFields = ['id', 'name'];
+                            $nestedFieldOptions = $this->formatFieldOptions($commonFields, $nestedRelatedModelClass);
+                            foreach ($nestedFieldOptions as $fieldKey => $fieldLabel) {
+                                $fullKey = "{$baseAlias}.{$currentPath}.{$nestedRelationName}.{$fieldKey}";
+                                // Formatta il path con frecce e nomi in minuscolo per leggibilità
+                                $labelPath = str_replace('.', ' → ', strtolower($currentPath));
+                                $nestedRelationLabel = ucfirst(strtolower($nestedRelationName));
+                                $fieldOptions[$fullKey] = "{$labelPath} → {$nestedRelationLabel} → {$fieldLabel}";
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Raccoglie ricorsivamente tutti i campi delle relazioni annidate per le relazioni dirette.
+     * 
+     * @param  array<string, mixed>  $relations  Configurazione delle relazioni
+     * @param  string  $modelClass  Classe del modello corrente
+     * @param  string  $baseRelationName  Nome della relazione base (es: 'unit')
+     * @param  array<string, string>  &$fieldOptions  Array di output per le opzioni dei campi
+     * @param  string  $basePath  Path base corrente (es: 'unit' o 'unit.model')
+     */
+    protected function collectNestedRelationFieldsForDirect(
+        array $relations,
+        string $modelClass,
+        string $baseRelationName,
+        array &$fieldOptions,
+        string $basePath = ''
+    ): void {
+        foreach ($relations as $relationName => $relationConfig) {
+            $relationExpand = $relationConfig['expand'] ?? [];
+            $relationFields = $relationConfig['fields'] ?? [];
+            $relatedModelClass = $this->getRelatedModelClassFromRelation($modelClass, $relationName);
+            
+            if (! $relatedModelClass) {
+                continue;
+            }
+            
+            $currentPath = $basePath === '' ? $relationName : "{$basePath}.{$relationName}";
+            
+            // Aggiungi i campi della relazione principale (es: unit.inventory_code o unit.model.name)
+            if (! empty($relationFields)) {
+                $nestedFieldOptions = $this->formatFieldOptions($relationFields, $relatedModelClass);
+                foreach ($nestedFieldOptions as $fieldKey => $fieldLabel) {
+                    $fullKey = "{$baseRelationName}.{$currentPath}.{$fieldKey}";
+                    // Formatta il path con frecce e nomi in minuscolo per leggibilità
+                    $labelPath = str_replace('.', ' → ', strtolower($currentPath));
+                    $fieldOptions[$fullKey] = "{$labelPath} → {$fieldLabel}";
+                }
+            }
+            
+            // Se ci sono relazioni annidate da espandere, processale ricorsivamente
+            if (! empty($relationExpand)) {
+                $relatedModelFields = $this->modelRegistry->getFields($relatedModelClass);
+                
+                // Se il modello correlato ha relazioni configurate, processale
+                if ($relatedModelFields && isset($relatedModelFields['relations'])) {
+                    // Filtra solo le relazioni che sono in expand
+                    $nestedRelations = [];
+                    foreach ($relationExpand as $nestedRelationName) {
+                        if (isset($relatedModelFields['relations'][$nestedRelationName])) {
+                            $nestedRelations[$nestedRelationName] = $relatedModelFields['relations'][$nestedRelationName];
+                        } else {
+                            // Se la relazione non è configurata, crea una entry di base per permettere la selezione
+                            $nestedRelatedModelClass = $this->getRelatedModelClassFromRelation($relatedModelClass, $nestedRelationName);
+                            if ($nestedRelatedModelClass) {
+                                // Crea una configurazione di base con campi essenziali comuni
+                                $nestedRelations[$nestedRelationName] = [
+                                    'fields' => ['id', 'name'], // Campi essenziali comuni
+                                    'expand' => [],
+                                ];
+                            }
+                        }
+                    }
+                    
+                    // Processa ricorsivamente
+                    if (! empty($nestedRelations)) {
+                        $this->collectNestedRelationFieldsForDirect(
+                            $nestedRelations,
+                            $relatedModelClass,
+                            $baseRelationName,
+                            $fieldOptions,
+                            $currentPath
+                        );
+                    }
+                } else {
+                    // Se il modello correlato non ha getSignalFields configurato,
+                    // aggiungi comunque i campi essenziali comuni per le relazioni in expand
+                    foreach ($relationExpand as $nestedRelationName) {
+                        $nestedRelatedModelClass = $this->getRelatedModelClassFromRelation($relatedModelClass, $nestedRelationName);
+                        if ($nestedRelatedModelClass) {
+                            // Aggiungi campi essenziali comuni
+                            $commonFields = ['id', 'name'];
+                            $nestedFieldOptions = $this->formatFieldOptions($commonFields, $nestedRelatedModelClass);
+                            foreach ($nestedFieldOptions as $fieldKey => $fieldLabel) {
+                                $fullKey = "{$baseRelationName}.{$currentPath}.{$nestedRelationName}.{$fieldKey}";
+                                // Formatta il path con frecce e nomi in minuscolo per leggibilità
+                                $labelPath = str_replace('.', ' → ', strtolower($currentPath));
+                                $nestedRelationLabel = ucfirst(strtolower($nestedRelationName));
+                                $fieldOptions[$fullKey] = "{$labelPath} → {$nestedRelationLabel} → {$fieldLabel}";
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Verifica se un modello è registrato tramite Model Integration (non implementa HasSignal).
+     */
+    protected function isModelFromIntegration(string $modelClass): bool
+    {
+        // Verifica se il modello implementa HasSignal
+        if (is_subclass_of($modelClass, \Base33\FilamentSignal\Contracts\HasSignal::class)) {
+            return false;
+        }
+
+        // Verifica se esiste un record SignalModelIntegration per questo modello
+        $integration = \Base33\FilamentSignal\Models\SignalModelIntegration::where('model_class', $modelClass)
+            ->whereNull('deleted_at')
+            ->first();
+
+        return $integration !== null;
     }
 }
