@@ -15,6 +15,8 @@ use Filament\Schemas\Components\Grid as SchemaGrid;
 use Filament\Schemas\Components\Section as SchemaSection;
 use Filament\Schemas\Components\Utilities\Get as SchemaGet;
 use Filament\Schemas\Schema;
+use Base33\FilamentSignal\Support\ReverseRelationRegistry;
+use Base33\FilamentSignal\Support\SignalModelRegistry;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
@@ -106,7 +108,7 @@ class SignalModelIntegrationResource extends Resource
                                 ->schema([
                                     Forms\Components\Select::make('name')
                                         ->label(__('filament-signal::signal.model_integrations.fields.relation_name'))
-                                        ->options(fn (SchemaGet $get): array => static::getModelRelationOptions(static::resolveModelClass($get)))
+                                        ->options(fn (SchemaGet $get): array => static::getRelationOptions(static::resolveModelClass($get)))
                                         ->searchable()
                                         ->preload()
                                         ->reactive()
@@ -116,27 +118,36 @@ class SignalModelIntegrationResource extends Resource
                                                 return;
                                             }
 
-                                            $relatedClass = static::getRelatedModelClass(static::resolveModelClass($get), $state);
-                                            $set('related_class', $relatedClass);
+                                            static::syncRelationMetadata($state, $set, $get);
                                         })
                                         ->afterStateUpdated(function ($state, callable $set, SchemaGet $get): void {
-                                            $relatedClass = static::getRelatedModelClass(static::resolveModelClass($get), $state);
-                                            $set('related_class', $relatedClass);
+                                            static::syncRelationMetadata($state, $set, $get);
                                             $set('fields', []);
                                             $set('expand', []);
                                         })
                                         ->required(),
                                     Forms\Components\Hidden::make('related_class'),
+                                    Forms\Components\Hidden::make('relation_mode')->default('direct'),
+                                    Forms\Components\Hidden::make('relation_descriptor'),
+                                    Forms\Components\TextInput::make('alias')
+                                        ->label(__('filament-signal::signal.model_integrations.fields.relation_alias'))
+                                        ->placeholder('loans_sent')
+                                        ->helperText(__('filament-signal::signal.model_integrations.helpers.relation_alias')) ,
                                     Forms\Components\Repeater::make('fields')
                                         ->label(__('filament-signal::signal.model_integrations.fields.relation_fields'))
                                         ->schema([
                                             Forms\Components\Select::make('field')
                                                 ->label(__('filament-signal::signal.model_integrations.fields.field_name'))
-                                                ->options(fn (SchemaGet $get): array => static::getModelFieldOptions($get('../related_class')))
+                                                ->options(fn (SchemaGet $get): array => static::getRelationFieldOptions($get))
                                                 ->required()
+                                                ->live()
                                                 ->reactive()
                                                 ->searchable()
-                                                ->preload(),
+                                                ->preload()
+                                                ->afterStateHydrated(function (SchemaGet $get, callable $set): void {
+                                                    // Force refresh when relation changes
+                                                    $get('../../name');
+                                                }),
                                             Forms\Components\TextInput::make('label')
                                                 ->label(__('filament-signal::signal.model_integrations.fields.field_label')),
                                         ])
@@ -147,7 +158,7 @@ class SignalModelIntegrationResource extends Resource
                                     Forms\Components\Select::make('expand')
                                         ->label(__('filament-signal::signal.model_integrations.fields.expand_relations'))
                                         ->multiple()
-                                        ->options(fn (SchemaGet $get): array => static::getModelRelationOptions($get('related_class')))
+                                        ->options(fn (SchemaGet $get): array => static::getRelationExpandOptions($get))
                                         ->reactive()
                                         ->searchable()
                                         ->preload(),
@@ -252,19 +263,22 @@ class SignalModelIntegrationResource extends Resource
         return self::analyzeModel($modelClass)['fields'];
     }
 
-    protected static function getModelRelationOptions(?string $modelClass): array
+    protected static function getRelationOptions(?string $modelClass): array
     {
-        $relations = self::analyzeModel($modelClass)['relations'];
-
         $options = [];
 
-        foreach ($relations as $name => $relatedClass) {
+        foreach (self::analyzeModel($modelClass)['relations'] as $name => $relatedClass) {
             $label = Str::headline($name);
             if ($relatedClass) {
                 $label .= ' (' . class_basename($relatedClass) . ')';
             }
 
             $options[$name] = $label;
+        }
+
+        foreach (app(ReverseRelationRegistry::class)->for($modelClass) as $descriptor) {
+            $key = 'reverse::' . $descriptor['key'];
+            $options[$key] = $descriptor['label'] . ' · ' . __('filament-signal::signal.model_integrations.labels.reverse');
         }
 
         return $options;
@@ -356,6 +370,439 @@ class SignalModelIntegrationResource extends Resource
             'fields' => $fieldOptions,
             'relations' => $relations,
         ];
+    }
+
+    protected static function syncRelationMetadata(string $state, callable $set, SchemaGet $get): void
+    {
+        if (str_starts_with($state, 'reverse::')) {
+            $descriptorKey = substr($state, 9);
+            $descriptor = app(ReverseRelationRegistry::class)->find($descriptorKey);
+
+            $set('relation_mode', 'reverse');
+            $set('relation_descriptor', $descriptorKey);
+            $set('related_class', $descriptor['source_model'] ?? null);
+
+            if (blank($get('alias'))) {
+                $set('alias', static::defaultReverseAlias($descriptor));
+            }
+
+            return;
+        }
+
+        $relatedClass = static::getRelatedModelClass(static::resolveModelClass($get), $state);
+        $set('relation_mode', 'direct');
+        $set('relation_descriptor', null);
+        $set('related_class', $relatedClass);
+
+        if (blank($get('alias'))) {
+            $set('alias', static::defaultDirectAlias($state));
+        }
+    }
+
+    protected static function getRelationFieldOptions(SchemaGet $get): array
+    {
+        $mode = static::resolveRelationMode($get);
+
+        if ($mode === 'reverse') {
+            $descriptorKey = static::resolveRelationDescriptorKey($get);
+            if (! $descriptorKey) {
+                return [];
+            }
+
+            $descriptor = app(ReverseRelationRegistry::class)->find($descriptorKey);
+            if (! $descriptor) {
+                return [];
+            }
+
+            // Per le relazioni inverse, usa i campi essenziali del modello sorgente (es: EquipmentLoan)
+            // e include anche i campi delle relazioni annidate (es: unit.inventory_code, unit.model.name)
+            $sourceModel = $descriptor['source_model'] ?? null;
+            if ($sourceModel && class_exists($sourceModel)) {
+                $registry = app(SignalModelRegistry::class);
+                $modelFields = $registry->getFields($sourceModel);
+                
+                $allFieldOptions = [];
+                
+                // Aggiungi i campi essenziali
+                if ($modelFields && isset($modelFields['essential'])) {
+                    $essentialFields = $modelFields['essential'];
+                    $fieldNames = [];
+                    foreach ($essentialFields as $key => $value) {
+                        if (is_int($key)) {
+                            $fieldNames[] = $value;
+                        } else {
+                            $fieldNames[] = $key;
+                        }
+                    }
+                    $allFieldOptions = array_merge($allFieldOptions, static::formatFieldOptions($fieldNames, $sourceModel));
+                }
+                
+                // Aggiungi i campi delle relazioni annidate (ricorsivamente)
+                if ($modelFields && isset($modelFields['relations'])) {
+                    static::collectNestedRelationFields(
+                        $modelFields['relations'],
+                        $sourceModel,
+                        $registry,
+                        $allFieldOptions,
+                        ''
+                    );
+                }
+                
+                if (! empty($allFieldOptions)) {
+                    return $allFieldOptions;
+                }
+            }
+
+            // Fallback: usa i campi configurati nella relazione (se esistono)
+            $fields = $descriptor['model_fields']['fields'] ?? [];
+            return static::formatFieldOptions($fields, $sourceModel);
+        }
+
+        $relatedClass = static::resolveRelatedClass($get);
+        if (! $relatedClass) {
+            return [];
+        }
+
+        return static::getModelFieldOptions($relatedClass);
+    }
+
+    protected static function getRelationExpandOptions(SchemaGet $get): array
+    {
+        $mode = static::resolveRelationMode($get);
+
+        if ($mode === 'reverse') {
+            $descriptorKey = static::resolveRelationDescriptorKey($get);
+            if (! $descriptorKey) {
+                return [];
+            }
+
+            $descriptor = app(ReverseRelationRegistry::class)->find($descriptorKey);
+            if (! $descriptor) {
+                return [];
+            }
+
+            $expand = $descriptor['model_fields']['expand'] ?? [];
+
+            return array_combine($expand, $expand);
+        }
+
+        $relatedClass = static::resolveRelatedClass($get);
+        if (! $relatedClass) {
+            return [];
+        }
+
+        $relations = self::analyzeModel($relatedClass)['relations'];
+
+        $options = [];
+        foreach ($relations as $name => $class) {
+            $options[$name] = Str::headline($name);
+        }
+
+        return $options;
+    }
+
+    protected static function defaultDirectAlias(string $relationName): string
+    {
+        return Str::camel($relationName);
+    }
+
+    protected static function defaultReverseAlias(?array $descriptor): string
+    {
+        if (! $descriptor) {
+            return Str::camel('reverse_relation');
+        }
+
+        return Str::camel(class_basename($descriptor['source_model'] ?? 'relation') . '_' . ($descriptor['relation_name'] ?? 'related'));
+    }
+
+    protected static function resolveRelationMode(SchemaGet $get): string
+    {
+        $paths = [
+            'relation_mode',
+            '../relation_mode',
+            '../../relation_mode',
+            '../../../relation_mode',
+        ];
+
+        foreach ($paths as $path) {
+            $value = $get($path);
+            if ($value) {
+                return $value;
+            }
+        }
+
+        return 'direct';
+    }
+
+    protected static function resolveRelatedClass(SchemaGet $get): ?string
+    {
+        $paths = [
+            'related_class',
+            '../related_class',
+            '../../related_class',
+            '../../../related_class',
+        ];
+
+        foreach ($paths as $path) {
+            $value = $get($path);
+            if ($value) {
+                return $value;
+            }
+        }
+
+        return null;
+    }
+
+    protected static function resolveRelationDescriptorKey(SchemaGet $get): ?string
+    {
+        $paths = [
+            'relation_descriptor',
+            '../relation_descriptor',
+            '../../relation_descriptor',
+            '../../../relation_descriptor',
+        ];
+
+        foreach ($paths as $path) {
+            $value = $get($path);
+            if ($value) {
+                return $value;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Ottiene la classe del modello correlato da una relazione usando la reflection.
+     */
+    protected static function getRelatedModelClassFromRelation(string $modelClass, string $relationName): ?string
+    {
+        if (! class_exists($modelClass)) {
+            return null;
+        }
+
+        try {
+            $model = new $modelClass;
+
+            // Verifica se il metodo di relazione esiste
+            if (! method_exists($model, $relationName)) {
+                return null;
+            }
+
+            // Chiama il metodo di relazione per ottenere l'oggetto relazione
+            $relation = $model->{$relationName}();
+
+            // Se è una relazione Eloquent, ottieni il modello correlato
+            if (method_exists($relation, 'getRelated')) {
+                $relatedModel = $relation->getRelated();
+
+                return get_class($relatedModel);
+            }
+
+            // Fallback: usa reflection per ottenere il tipo di ritorno del metodo
+            $reflection = new ReflectionClass($modelClass);
+            if ($reflection->hasMethod($relationName)) {
+                $method = $reflection->getMethod($relationName);
+                $returnType = $method->getReturnType();
+
+                if ($returnType instanceof \ReflectionNamedType) {
+                    $returnTypeClass = $returnType->getName();
+                    // Se è una classe di relazione Eloquent, prova a ottenere il modello correlato
+                    if (class_exists($returnTypeClass)) {
+                        if (is_subclass_of($returnTypeClass, Model::class)) {
+                            return $returnTypeClass;
+                        }
+                    }
+                }
+            }
+
+            // Fallback: prova a indovinare dal nome della relazione
+            $guessedClass = static::guessModelClassFromRelationName($relationName, $modelClass);
+            if ($guessedClass && class_exists($guessedClass)) {
+                return $guessedClass;
+            }
+        } catch (\Throwable $e) {
+            // Ignora errori
+        }
+
+        return null;
+    }
+
+    /**
+     * Tenta di indovinare la classe del modello dal nome della relazione.
+     */
+    protected static function guessModelClassFromRelationName(string $relationName, string $currentModelClass): ?string
+    {
+        // Nomi comuni che puntano a User
+        $userRelations = ['borrower', 'loaner', 'author', 'creator', 'owner', 'created_by', 'updated_by', 'user'];
+        
+        if (in_array($relationName, $userRelations)) {
+            return \App\Models\User::class;
+        }
+
+        // Prova a derivare dal nome della relazione (es: unit -> Unit)
+        $className = Str::studly($relationName);
+        $namespace = substr($currentModelClass, 0, strrpos($currentModelClass, '\\'));
+        
+        // Prova vari namespace comuni
+        $possibleClasses = [
+            $namespace . '\\' . $className,
+            'App\\Models\\' . $className,
+            'Detit\\FilamentLabOps\\Models\\' . $className,
+        ];
+
+        foreach ($possibleClasses as $class) {
+            if (class_exists($class)) {
+                return $class;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Raccoglie ricorsivamente tutti i campi delle relazioni annidate.
+     * 
+     * @param  array<string, mixed>  $relations  Configurazione delle relazioni
+     * @param  string  $modelClass  Classe del modello corrente
+     * @param  SignalModelRegistry  $registry  Registry per ottenere i campi dei modelli
+     * @param  array<string, string>  &$allFieldOptions  Array di output per le opzioni dei campi
+     * @param  string  $basePath  Path base corrente (es: 'unit' o 'unit.model')
+     */
+    protected static function collectNestedRelationFields(
+        array $relations,
+        string $modelClass,
+        SignalModelRegistry $registry,
+        array &$allFieldOptions,
+        string $basePath = ''
+    ): void {
+        foreach ($relations as $relationName => $relationConfig) {
+            $relationExpand = $relationConfig['expand'] ?? [];
+            $relationFields = $relationConfig['fields'] ?? [];
+            $relatedModelClass = static::getRelatedModelClassFromRelation($modelClass, $relationName);
+            
+            if (! $relatedModelClass) {
+                continue;
+            }
+            
+            $currentPath = $basePath === '' ? $relationName : "{$basePath}.{$relationName}";
+            
+            // Aggiungi i campi della relazione principale (es: unit.inventory_code o unit.model.name)
+            if (! empty($relationFields)) {
+                $nestedFieldOptions = static::formatFieldOptions($relationFields, $relatedModelClass);
+                foreach ($nestedFieldOptions as $fieldKey => $fieldLabel) {
+                    $fullKey = "{$currentPath}.{$fieldKey}";
+                    $labelPath = str_replace('.', ' → ', $currentPath);
+                    $allFieldOptions[$fullKey] = "{$labelPath} → {$fieldLabel}";
+                }
+            }
+            
+            // Se ci sono relazioni annidate da espandere, processale ricorsivamente
+            if (! empty($relationExpand)) {
+                $relatedModelFields = $registry->getFields($relatedModelClass);
+                
+                // Se il modello correlato ha relazioni configurate, processale
+                if ($relatedModelFields && isset($relatedModelFields['relations'])) {
+                    // Filtra solo le relazioni che sono in expand
+                    $nestedRelations = [];
+                    foreach ($relationExpand as $nestedRelationName) {
+                        if (isset($relatedModelFields['relations'][$nestedRelationName])) {
+                            $nestedRelations[$nestedRelationName] = $relatedModelFields['relations'][$nestedRelationName];
+                        } else {
+                            // Se la relazione non è configurata, crea una entry di base per permettere la selezione
+                            // Verifica che la relazione esista nel modello
+                            $nestedRelatedModelClass = static::getRelatedModelClassFromRelation($relatedModelClass, $nestedRelationName);
+                            if ($nestedRelatedModelClass) {
+                                // Crea una configurazione di base con campi essenziali comuni
+                                $nestedRelations[$nestedRelationName] = [
+                                    'fields' => ['id', 'name'], // Campi essenziali comuni
+                                    'expand' => [],
+                                ];
+                            }
+                        }
+                    }
+                    
+                    // Processa ricorsivamente
+                    if (! empty($nestedRelations)) {
+                        static::collectNestedRelationFields(
+                            $nestedRelations,
+                            $relatedModelClass,
+                            $registry,
+                            $allFieldOptions,
+                            $currentPath
+                        );
+                    }
+                } else {
+                    // Se il modello correlato non ha getSignalFields configurato,
+                    // aggiungi comunque i campi essenziali comuni per le relazioni in expand
+                    foreach ($relationExpand as $nestedRelationName) {
+                        $nestedRelatedModelClass = static::getRelatedModelClassFromRelation($relatedModelClass, $nestedRelationName);
+                        if ($nestedRelatedModelClass) {
+                            // Aggiungi campi essenziali comuni
+                            $commonFields = ['id', 'name'];
+                            $nestedFieldOptions = static::formatFieldOptions($commonFields, $nestedRelatedModelClass);
+                            foreach ($nestedFieldOptions as $fieldKey => $fieldLabel) {
+                                $fullKey = "{$currentPath}.{$nestedRelationName}.{$fieldKey}";
+                                $labelPath = str_replace('.', ' → ', $currentPath);
+                                $allFieldOptions[$fullKey] = "{$labelPath} → {$nestedRelationName} → {$fieldLabel}";
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    protected static function formatFieldOptions(array $fields, ?string $modelClass = null): array
+    {
+        $options = [];
+
+        foreach ($fields as $key => $value) {
+            if (is_int($key)) {
+                $fieldKey = $value;
+                // Prova a ottenere la traduzione se disponibile
+                $label = static::getTranslatedFieldLabel($fieldKey, $modelClass);
+                if (! $label) {
+                    $label = Str::headline(str_replace('_', ' ', $fieldKey));
+                }
+            } else {
+                $fieldKey = $key;
+                $label = $value;
+            }
+
+            $options[$fieldKey] = $label;
+        }
+
+        return $options;
+    }
+
+    /**
+     * Ottiene l'etichetta tradotta per un campo.
+     */
+    protected static function getTranslatedFieldLabel(string $fieldKey, ?string $modelClass = null): ?string
+    {
+        if (! $modelClass) {
+            return null;
+        }
+
+        // Prova a ottenere la traduzione dal package filament-signal
+        $translationKey = "signal.fields.{$fieldKey}";
+        $translated = trans($translationKey);
+        
+        if ($translated !== $translationKey) {
+            return $translated;
+        }
+
+        // Prova con il nome del modello
+        $modelName = class_basename($modelClass);
+        $translationKey = "signal.models.{$modelName}.fields.{$fieldKey}";
+        $translated = trans($translationKey);
+        
+        if ($translated !== $translationKey) {
+            return $translated;
+        }
+
+        return null;
     }
 
     protected static function resolveModelClass(SchemaGet $get): ?string

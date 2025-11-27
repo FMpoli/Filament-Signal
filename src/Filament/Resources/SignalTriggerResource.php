@@ -533,98 +533,59 @@ class SignalTriggerResource extends Resource
                                     $analyzer = app(SignalPayloadFieldAnalyzer::class);
                                     $analysis = $analyzer->analyzeEvent($eventClass);
 
-                                    // Ottieni il modello principale dall'evento
-                                    $mainModelClass = null;
-
-                                    if (\Illuminate\Support\Str::startsWith($eventClass, 'eloquent.')) {
-                                        if (preg_match('/eloquent\.[a-z_]+:\s*(.+)$/i', $eventClass, $matches)) {
-                                            $candidate = trim($matches[1]);
-                                            if (
-                                                $candidate &&
-                                                class_exists($candidate) &&
-                                                is_subclass_of($candidate, \Illuminate\Database\Eloquent\Model::class)
-                                            ) {
-                                                $mainModelClass = $candidate;
-                                            }
-                                        }
-                                    } elseif (class_exists($eventClass)) {
-                                        $reflection = new \ReflectionClass($eventClass);
-                                        $properties = $reflection->getProperties(\ReflectionProperty::IS_PUBLIC);
-
-                                        foreach ($properties as $property) {
-                                            $propType = $property->getType();
-                                            if ($propType instanceof \ReflectionNamedType) {
-                                                $typeClass = $propType->getName();
-                                                if (is_subclass_of($typeClass, \Illuminate\Database\Eloquent\Model::class)) {
-                                                    $mainModelClass = $typeClass;
-
-                                                    break;
-                                                }
-                                            }
-                                        }
-                                    }
-
-                                    if (! $mainModelClass) {
+                                    if (empty($analysis['relations'])) {
                                         return [];
                                     }
 
-                                    // Ottieni i campi definiti nel modello principale
-                                    $mainModelFields = app(\Base33\FilamentSignal\Support\SignalModelRegistry::class)->getFields($mainModelClass);
-
-                                    if (! $mainModelFields || ! isset($mainModelFields['relations'])) {
-                                        return [];
-                                    }
-
-                                    $analyzerInstance = app(SignalPayloadFieldAnalyzer::class);
                                     $sections = [];
 
-                                    // Genera una sezione per OGNI relazione disponibile con il nome come titolo
-                                    foreach ($analysis['relations'] as $idField => $relation) {
-                                        $relationLabel = $relation['label'];
-
-                                        // Estrai il nome della relazione (es: loan.borrower_id -> borrower)
-                                        $relationName = str_replace('_id', '', explode('.', $idField)[1] ?? '');
-
-                                        // Ottieni i campi definiti per questa relazione nel modello principale
-                                        if (! isset($mainModelFields['relations'][$relationName]['fields'])) {
+                                    foreach ($analysis['relations'] as $relation) {
+                                        $fieldOptions = $relation['field_options'] ?? [];
+                                        if (empty($fieldOptions)) {
                                             continue;
                                         }
 
-                                        $relationFields = $mainModelFields['relations'][$relationName]['fields'];
-                                        $modelClass = $relation['model_class'];
+                                        $alias = $relation['alias'] ?? 'relation';
+                                        $formKey = $relation['form_key'] ?? str_replace(['.', ' '], '_', $relation['id_field']);
 
-                                        $fieldOptions = [];
-                                        foreach ($relationFields as $field => $label) {
-                                            $fieldKey = is_int($field) ? $label : $field;
-                                            $fieldLabel = is_int($field)
-                                                ? $analyzerInstance->getTranslatedFieldLabel($fieldKey, $modelClass ?? $mainModelClass)
-                                                : $analyzerInstance->getTranslatedFieldLabel($label, $modelClass ?? $mainModelClass, $label);
-
-                                            $fullFieldKey = $relationName . '.' . $fieldKey;
-                                            $fieldOptions[$fullFieldKey] = $fieldLabel;
+                                        $options = [];
+                                        foreach ($fieldOptions as $fieldKey => $label) {
+                                            $options["{$alias}.{$fieldKey}"] = $label;
                                         }
 
-                                        if (! empty($fieldOptions)) {
-                                            // Crea un path stabile e univoco per ogni relazione
-                                            $safeIdField = str_replace(['.', ' '], ['_', '_'], $idField);
-                                            $uniquePath = "configuration.payload_config.relation_fields.{$safeIdField}";
+                                        $sections[] = SchemaSection::make($relation['label'])
+                                            ->schema([
+                                                Forms\Components\CheckboxList::make($formKey)
+                                                    ->label(__('filament-signal::signal.model_integrations.fields.relation_fields'))
+                                                    ->options($options)
+                                                    ->columns(2)
+                                                    ->bulkToggleable()
+                                                    ->statePath("configuration.payload_config.relation_fields.{$formKey}")
+                                                    ->rules([])
+                                                    ->reactive()
+                                                    ->afterStateHydrated(function (?array $state, callable $set) use ($options, $formKey): void {
+                                                        if (blank($state)) {
+                                                            return;
+                                                        }
 
-                                            // Crea una sezione per ogni relazione con il nome come titolo
-                                            $sections[] = SchemaSection::make($relationLabel)
-                                                ->schema([
-                                                    Forms\Components\CheckboxList::make($uniquePath)
-                                                        ->label('Campi disponibili')
-                                                        ->options($fieldOptions)
-                                                        ->columns(2)
-                                                        ->gridDirection('row')
-                                                        ->helperText("Seleziona i campi da includere per {$relationLabel}")
-                                                        ->columnSpanFull()
-                                                        ->dehydrated()
-                                                        ->rules([]),
-                                                ])
-                                                ->collapsible()
-                                                ->collapsed(false);
-                                        }
+                                                        $valid = array_intersect($state, array_keys($options));
+                                                        if (count($valid) !== count($state)) {
+                                                            $set("configuration.payload_config.relation_fields.{$formKey}", array_values($valid));
+                                                        }
+                                                    })
+                                                    ->afterStateUpdated(function ($state, callable $set) use ($options, $formKey): void {
+                                                        if (! is_array($state)) {
+                                                            return;
+                                                        }
+
+                                                        $valid = array_intersect($state, array_keys($options));
+                                                        if (count($valid) !== count($state)) {
+                                                            $set("configuration.payload_config.relation_fields.{$formKey}", array_values($valid));
+                                                        }
+                                                    }),
+                                            ])
+                                            ->collapsible()
+                                            ->collapsed(false);
                                     }
 
                                     return $sections;

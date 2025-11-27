@@ -5,9 +5,13 @@ namespace Base33\FilamentSignal;
 use Base33\FilamentSignal\Commands\FilamentSignalCommand;
 use Base33\FilamentSignal\Models\SignalModelIntegration;
 use Base33\FilamentSignal\Services\SignalEventRegistrar;
+use Base33\FilamentSignal\Support\ReverseRelationRegistrar;
+use Base33\FilamentSignal\Support\ReverseRelationRegistry;
+use Base33\FilamentSignal\Support\ReverseRelationWarmup;
 use Base33\FilamentSignal\Support\SignalEloquentEventMap;
 use Base33\FilamentSignal\Support\SignalEventRegistry;
 use Base33\FilamentSignal\Support\SignalModelRegistry;
+use Base33\FilamentSignal\Support\SignalPayloadFieldAnalyzer;
 use Base33\FilamentSignal\Support\SignalWebhookTemplate;
 use Base33\FilamentSignal\Support\SignalWebhookTemplateRegistry;
 use Base33\FilamentSignal\Testing\TestsFilamentSignal;
@@ -70,6 +74,16 @@ class FilamentSignalServiceProvider extends PackageServiceProvider
         $this->app->singleton(SignalWebhookTemplateRegistry::class, fn (): SignalWebhookTemplateRegistry => new SignalWebhookTemplateRegistry);
         $this->app->singleton(SignalEventRegistry::class, fn (): SignalEventRegistry => new SignalEventRegistry);
         $this->app->singleton(SignalModelRegistry::class, fn (): SignalModelRegistry => new SignalModelRegistry);
+        $this->app->singleton(ReverseRelationRegistry::class, fn (): ReverseRelationRegistry => new ReverseRelationRegistry);
+        $this->app->singleton(ReverseRelationRegistrar::class, fn ($app): ReverseRelationRegistrar => new ReverseRelationRegistrar(
+            $app->make(ReverseRelationRegistry::class)
+        ));
+        $this->app->singleton(ReverseRelationWarmup::class, fn ($app): ReverseRelationWarmup => new ReverseRelationWarmup(
+            $app->make(SignalEventRegistry::class),
+            $app->make(SignalPayloadFieldAnalyzer::class),
+            $app->make(SignalModelRegistry::class),
+            $app->make(ReverseRelationRegistrar::class)
+        ));
         $this->app->singleton(SignalEloquentEventMap::class, fn (): SignalEloquentEventMap => new SignalEloquentEventMap);
     }
 

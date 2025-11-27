@@ -116,6 +116,7 @@ class SignalModelIntegration extends Model
         $definition = [
             'essential' => [],
             'relations' => [],
+            'reverse_relations' => [],
         ];
 
         $essential = Arr::get($this->fields, 'essential', []);
@@ -138,34 +139,63 @@ class SignalModelIntegration extends Model
         $relations = Arr::get($this->fields, 'relations', []);
 
         foreach ($relations as $relation) {
+            $mode = $relation['relation_mode'] ?? 'direct';
+
+            if ($mode === 'reverse') {
+                $descriptor = $relation['relation_descriptor'] ?? null;
+                if (! $descriptor) {
+                    continue;
+                }
+
+                $definition['reverse_relations'][] = [
+                    'descriptor' => $descriptor,
+                    'alias' => $relation['alias'] ?? null,
+                    'fields' => $this->normalizeRelationFields($relation['fields'] ?? []),
+                    'expand' => array_values(array_filter($relation['expand'] ?? [])),
+                ];
+
+                continue;
+            }
+
             $name = $relation['name'] ?? null;
             if (! $name) {
                 continue;
             }
 
-            $relationFields = [];
-            foreach ($relation['fields'] ?? [] as $relationField) {
-                $relationFieldName = $relationField['field'] ?? null;
-                if (! $relationFieldName) {
-                    continue;
-                }
-
-                $relationFieldLabel = $relationField['label'] ?? null;
-
-                if ($relationFieldLabel) {
-                    $relationFields[$relationFieldName] = $relationFieldLabel;
-                } else {
-                    $relationFields[] = $relationFieldName;
-                }
-            }
-
             $definition['relations'][$name] = [
-                'fields' => $relationFields,
+                'alias' => $relation['alias'] ?? null,
+                'fields' => $this->normalizeRelationFields($relation['fields'] ?? []),
                 'expand' => array_values(array_filter($relation['expand'] ?? [])),
             ];
         }
 
         return $definition;
+    }
+
+    /**
+     * @param  array<int, array{field?: string|null, label?: string|null}>  $fields
+     * @return array<int|string, string>
+     */
+    protected function normalizeRelationFields(array $fields): array
+    {
+        $relationFields = [];
+
+        foreach ($fields as $field) {
+            $fieldName = $field['field'] ?? null;
+            if (! $fieldName) {
+                continue;
+            }
+
+            $label = $field['label'] ?? null;
+
+            if ($label) {
+                $relationFields[$fieldName] = $label;
+            } else {
+                $relationFields[] = $fieldName;
+            }
+        }
+
+        return $relationFields;
     }
 
     /**

@@ -134,35 +134,53 @@ class WebhookActionHandler implements SignalActionHandler
         if (! empty($payloadConfig)) {
             $relationFields = Arr::get($payloadConfig, 'relation_fields', []);
 
-            // Se ci sono relation_fields configurati, espandi automaticamente quelle relazioni
-            // (non serve più expand_relations perché tutte le relazioni sono sempre disponibili)
             if (! empty($relationFields) && is_array($relationFields)) {
                 $analyzer = app(SignalPayloadFieldAnalyzer::class);
                 $analysis = $analyzer->analyzeEvent($eventClass);
 
+                $relationMetaMap = [];
+                foreach ($analysis['relations'] as $relation) {
+                    $formKey = $relation['form_key'] ?? str_replace(['.', ' '], '_', $relation['id_field']);
+                    $relationMetaMap[$formKey] = $relation;
+                }
+
                 $relationsMap = [];
-                $expandNested = []; // Relazioni annidate da espandere automaticamente
+                $expandNested = [];
+                $reverseSelections = [];
 
-                // Per ogni relazione che ha campi selezionati, aggiungila a expand_relations
-                foreach ($relationFields as $idField => $fields) {
-                    // Converti il formato safe (loan_unit_id) al formato originale (loan.unit_id)
-                    $originalIdField = str_replace('_', '.', $idField);
+                foreach ($relationFields as $formKey => $fields) {
+                    $relationMeta = $relationMetaMap[$formKey] ?? null;
+                    if (! $relationMeta) {
+                        continue;
+                    }
 
-                    if (isset($analysis['relations'][$originalIdField])) {
-                        $relation = $analysis['relations'][$originalIdField];
-                        if ($relation['model_class']) {
-                            $relationsMap[$originalIdField] = $relation['model_class'];
+                    if (($relationMeta['mode'] ?? 'direct') === 'reverse') {
+                        // Aggiungi sempre la relazione inversa, anche se fields è vuoto
+                        // (verrà gestito da filterReverseRelationFields con campi essenziali)
+                        $reverseSelections[] = [
+                            'meta' => $relationMeta,
+                            'fields' => is_array($fields) ? $fields : [],
+                        ];
 
-                            // Se la relazione ha 'expand' definito, aggiungilo
-                            if (! empty($relation['expand'])) {
-                                $expandNested[$originalIdField] = $relation['expand'];
-                            }
-                        }
+                        continue;
+                    }
+
+                    $idField = $relationMeta['id_field'] ?? null;
+                    if (! $idField || empty($relationMeta['model_class'])) {
+                        continue;
+                    }
+
+                    $relationsMap[$idField] = $relationMeta['model_class'];
+
+                    if (! empty($relationMeta['expand'])) {
+                        $expandNested[$idField] = $relationMeta['expand'];
                     }
                 }
 
                 $payloadConfig['expand_relations'] = $relationsMap;
                 $payloadConfig['expand_nested'] = $expandNested;
+                $payloadConfig['reverse_relations'] = $reverseSelections;
+                $payloadConfig['relation_meta_map'] = $relationMetaMap;
             } else {
                 // Se expand_relations è ancora presente (per retrocompatibilità), convertilo
                 $expandRelations = Arr::get($payloadConfig, 'expand_relations', []);

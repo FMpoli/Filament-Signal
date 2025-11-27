@@ -91,6 +91,7 @@ return [
             'field_label' => 'Etichetta personalizzata',
             'relations' => 'Relazioni',
             'relation_name' => 'Nome relazione',
+            'relation_alias' => 'Alias nel payload',
             'relation_fields' => 'Campi della relazione',
             'expand_relations' => 'Espandi relazioni annidate',
             'eloquent_events' => 'Eventi Eloquent',
@@ -101,6 +102,7 @@ return [
         ],
         'helpers' => [
             'model_alias' => 'Utilizzato come chiave principale nel payload (default: nome del modello).',
+            'relation_alias' => 'Lascia vuoto per generare automaticamente il nome (es. equipmentLoanAsLoaner).',
         ],
         'actions' => [
             'add_field' => 'Aggiungi campo',
@@ -118,6 +120,9 @@ return [
         ],
         'groups' => [
             'eloquent' => 'Eloquent',
+        ],
+        'labels' => [
+            'reverse' => 'relazione inversa',
         ],
     ],
 ];

@@ -2,6 +2,8 @@
 
 namespace Base33\FilamentSignal\Support;
 
+use Base33\FilamentSignal\Support\ReverseRelationRegistrar;
+
 /**
  * Registro per modelli che non implementano HasSignal ma vogliono esporre campi per segnali
  */
@@ -30,6 +32,8 @@ class SignalModelRegistry
         if ($alias) {
             $this->aliases[$modelClass] = $alias;
         }
+
+        app(ReverseRelationRegistrar::class)->register($modelClass, $fields);
     }
 
     /**
@@ -39,7 +43,10 @@ class SignalModelRegistry
     {
         // Prima controlla se il modello implementa HasSignal
         if (is_subclass_of($modelClass, \Base33\FilamentSignal\Contracts\HasSignal::class)) {
-            return $modelClass::getSignalFields();
+            $fields = $modelClass::getSignalFields();
+            app(ReverseRelationRegistrar::class)->register($modelClass, $fields);
+
+            return $fields;
         }
 
         // Poi controlla la registrazione esterna

@@ -6,14 +6,17 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use ReflectionClass;
+use Base33\FilamentSignal\Support\ReverseRelationRegistry;
 
 class SignalPayloadFieldAnalyzer
 {
     protected SignalModelRegistry $modelRegistry;
+    protected ReverseRelationRegistry $reverseRegistry;
 
-    public function __construct(SignalModelRegistry $modelRegistry)
+    public function __construct(SignalModelRegistry $modelRegistry, ReverseRelationRegistry $reverseRegistry)
     {
         $this->modelRegistry = $modelRegistry;
+        $this->reverseRegistry = $reverseRegistry;
     }
 
     /**
@@ -93,6 +96,136 @@ class SignalPayloadFieldAnalyzer
         }
     }
 
+    /**
+     * @param  array<int, array{descriptor: string, alias?: string|null, fields?: array, expand?: array}>  $reverseRelations
+     */
+    protected function processReverseRelations(
+        string $propertyName,
+        string $modelClass,
+        array $reverseRelations,
+        array &$relations
+    ): void {
+        foreach ($reverseRelations as $reverseConfig) {
+            $descriptorKey = $reverseConfig['descriptor'] ?? null;
+            if (! $descriptorKey) {
+                continue;
+            }
+
+            $descriptor = $this->reverseRegistry->find($descriptorKey);
+
+            if (! $descriptor) {
+                continue;
+            }
+
+            $alias = $reverseConfig['alias'] ?? $this->defaultReverseAlias($descriptor);
+            $sourceModel = $descriptor['source_model'] ?? null;
+
+            // Prima prova con i campi selezionati nella Model Integration
+            $fieldOptions = $this->formatFieldOptions(
+                $reverseConfig['fields'] ?? [],
+                $sourceModel
+            );
+
+            // Se non ci sono campi selezionati, usa i campi essenziali del modello sorgente
+            if (empty($fieldOptions) && $sourceModel) {
+                $sourceModelFields = $this->modelRegistry->getFields($sourceModel);
+                if ($sourceModelFields && isset($sourceModelFields['essential'])) {
+                    $essentialFields = $sourceModelFields['essential'];
+                    // Estrai i nomi dei campi (gestisci sia array associativi che numerici)
+                    $fieldNames = [];
+                    foreach ($essentialFields as $key => $value) {
+                        if (is_int($key)) {
+                            // Array numerico: il valore è il nome del campo
+                            $fieldNames[] = $value;
+                        } else {
+                            // Array associativo: la chiave è il nome del campo
+                            $fieldNames[] = $key;
+                        }
+                    }
+                    $fieldOptions = $this->formatFieldOptions($fieldNames, $sourceModel);
+                }
+            }
+
+            // Se ancora vuoto, usa un fallback con campi comuni
+            if (empty($fieldOptions)) {
+                $fieldOptions = [
+                    'id' => 'ID',
+                    'name' => 'Name',
+                    'created_at' => 'Created At',
+                    'updated_at' => 'Updated At',
+                ];
+            }
+
+            // Aggiungi i campi delle relazioni annidate (es: unit.inventory_code, unit.model.name)
+            if ($sourceModel) {
+                $sourceModelFields = $this->modelRegistry->getFields($sourceModel);
+                if ($sourceModelFields && isset($sourceModelFields['relations'])) {
+                    foreach ($sourceModelFields['relations'] as $relationName => $relationConfig) {
+                        $relationExpand = $relationConfig['expand'] ?? [];
+                        $relationFields = $relationConfig['fields'] ?? [];
+                        
+                        // Aggiungi i campi della relazione principale (es: unit.inventory_code)
+                        if (! empty($relationFields)) {
+                            $relatedModelClass = $this->getRelatedModelClassFromRelation($sourceModel, $relationName);
+                            if ($relatedModelClass) {
+                                $nestedFieldOptions = $this->formatFieldOptions($relationFields, $relatedModelClass);
+                                foreach ($nestedFieldOptions as $fieldKey => $fieldLabel) {
+                                    $fullKey = "{$alias}.{$relationName}.{$fieldKey}";
+                                    $fieldOptions[$fullKey] = "{$relationName} → {$fieldLabel}";
+                                }
+                            }
+                        }
+                        
+                        // Aggiungi i campi delle relazioni annidate (es: unit.model.name, unit.brand.name)
+                        if (! empty($relationExpand)) {
+                            $relatedModelClass = $this->getRelatedModelClassFromRelation($sourceModel, $relationName);
+                            if ($relatedModelClass) {
+                                $relatedModelFields = $this->modelRegistry->getFields($relatedModelClass);
+                                foreach ($relationExpand as $nestedRelationName) {
+                                    if ($relatedModelFields && isset($relatedModelFields['relations'][$nestedRelationName])) {
+                                        $nestedRelationConfig = $relatedModelFields['relations'][$nestedRelationName];
+                                        $nestedRelationFields = $nestedRelationConfig['fields'] ?? [];
+                                        
+                                        if (! empty($nestedRelationFields)) {
+                                            $nestedRelatedModelClass = $this->getRelatedModelClassFromRelation($relatedModelClass, $nestedRelationName);
+                                            if ($nestedRelatedModelClass) {
+                                                $nestedFieldOptions = $this->formatFieldOptions($nestedRelationFields, $nestedRelatedModelClass);
+                                                foreach ($nestedFieldOptions as $fieldKey => $fieldLabel) {
+                                                    $fullKey = "{$alias}.{$relationName}.{$nestedRelationName}.{$fieldKey}";
+                                                    $fieldOptions[$fullKey] = "{$relationName} → {$nestedRelationName} → {$fieldLabel}";
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            $idField = "{$propertyName}.{$alias}";
+            $formKey = $this->makeRelationFormKey('reverse::' . $descriptorKey, true);
+
+            $relations[$idField] = [
+                'id_field' => $idField,
+                'relation_field' => "{$propertyName}.{$alias}",
+                'model_class' => $descriptor['source_model'] ?? null,
+                'label' => $descriptor['label'] ?? $alias,
+                'expand' => $reverseConfig['expand'] ?? [],
+                'field_options' => $fieldOptions,
+                'mode' => 'reverse',
+                'alias' => $alias,
+                'form_key' => $formKey,
+                'relation_name' => $descriptor['relation_name'] ?? $alias,
+                'parent_property' => $propertyName,
+                'reverse_descriptor' => $descriptorKey,
+                'foreign_key' => $descriptor['foreign_key'] ?? null,
+                'relation_type' => $descriptor['relation_type'] ?? null,
+            ];
+        }
+    }
+
     protected function analyzeEloquentEvent(string $eventName): array
     {
         if (! preg_match('/eloquent\.[a-z_]+:\s*(.+)$/i', $eventName, $matches)) {
@@ -136,6 +269,9 @@ class SignalPayloadFieldAnalyzer
     ): void {
         $essential = Arr::get($modelFields, 'essential', []);
         $modelRelations = Arr::get($modelFields, 'relations', []);
+        $reverseRelations = Arr::get($modelFields, 'reverse_relations', []);
+
+        app(ReverseRelationRegistrar::class)->register($modelClass, $modelFields);
 
         $modelLabel = $this->getModelLabel($modelClass);
 
@@ -165,6 +301,17 @@ class SignalPayloadFieldAnalyzer
 
             if ($relatedModelClass) {
                 $expand = Arr::get($relationConfig, 'expand', []);
+                $alias = Arr::get($relationConfig, 'alias', $relationName);
+                $fieldOptions = $this->formatFieldOptions(
+                    Arr::get($relationConfig, 'fields', []),
+                    $relatedModelClass
+                );
+
+                if (empty($fieldOptions)) {
+                    continue;
+                }
+
+                $formKey = $this->makeRelationFormKey($idField);
 
                 $relations[$idField] = [
                     'id_field' => $idField,
@@ -172,8 +319,18 @@ class SignalPayloadFieldAnalyzer
                     'model_class' => $relatedModelClass,
                     'label' => $this->getRelationLabel("{$propertyName}.{$relationName}", $relatedModelClass),
                     'expand' => $expand, // Relazioni annidate da espandere
+                    'field_options' => $fieldOptions,
+                    'mode' => 'direct',
+                    'alias' => $alias,
+                    'form_key' => $formKey,
+                    'relation_name' => $relationName,
+                    'parent_property' => $propertyName,
                 ];
             }
+        }
+
+        if (! empty($reverseRelations)) {
+            $this->processReverseRelations($propertyName, $modelClass, $reverseRelations, $relations);
         }
     }
 
@@ -509,6 +666,50 @@ class SignalPayloadFieldAnalyzer
 
         // Fallback: genera label automatico
         return $this->getFieldLabel($fieldKey);
+    }
+
+    /**
+     * @param  array<int|string, string>  $fields
+     * @return array<string, string>
+     */
+    protected function formatFieldOptions(array $fields, ?string $modelClass): array
+    {
+        $options = [];
+
+        foreach ($fields as $key => $value) {
+            if (is_int($key)) {
+                $fieldKey = $value;
+                $label = $this->getTranslatedFieldLabel($fieldKey, $modelClass);
+            } else {
+                $fieldKey = $key;
+                $label = $value;
+            }
+
+            $options[$fieldKey] = $label;
+        }
+
+        return $options;
+    }
+
+    protected function makeRelationFormKey(string $identifier, bool $isReverse = false): string
+    {
+        if ($isReverse) {
+            return 'reverse_' . md5($identifier);
+        }
+
+        return str_replace(['.', ' '], '_', $identifier);
+    }
+
+    protected function defaultReverseAlias(?array $descriptor): string
+    {
+        if (! $descriptor) {
+            return 'relatedModels';
+        }
+
+        $source = class_basename($descriptor['source_model'] ?? 'Relation');
+        $relation = $descriptor['relation_name'] ?? 'related';
+
+        return Str::camel($source . '_' . $relation);
     }
 
     /**

@@ -91,6 +91,7 @@ return [
             'field_label' => 'Custom label',
             'relations' => 'Relations',
             'relation_name' => 'Relation name',
+            'relation_alias' => 'Payload alias',
             'relation_fields' => 'Relation fields',
             'expand_relations' => 'Expand nested relations',
             'eloquent_events' => 'Eloquent events',
@@ -101,6 +102,7 @@ return [
         ],
         'helpers' => [
             'model_alias' => 'Used as the root key inside the payload (defaults to the model name).',
+            'relation_alias' => 'Leave empty to auto-generate a name (e.g. equipmentLoanAsLoaner).',
         ],
         'actions' => [
             'add_field' => 'Add field',
@@ -118,6 +120,9 @@ return [
         ],
         'groups' => [
             'eloquent' => 'Eloquent',
+        ],
+        'labels' => [
+            'reverse' => 'reverse relation',
         ],
     ],
 ];
