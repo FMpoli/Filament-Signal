@@ -5,6 +5,8 @@ namespace Base33\FilamentSignal\Filament\Resources;
 use BackedEnum;
 use Base33\FilamentSignal\Filament\Resources\SignalModelIntegrationResource\Pages;
 use Base33\FilamentSignal\Models\SignalModelIntegration;
+use Base33\FilamentSignal\Support\ReverseRelationRegistry;
+use Base33\FilamentSignal\Support\SignalModelRegistry;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
@@ -15,8 +17,6 @@ use Filament\Schemas\Components\Grid as SchemaGrid;
 use Filament\Schemas\Components\Section as SchemaSection;
 use Filament\Schemas\Components\Utilities\Get as SchemaGet;
 use Filament\Schemas\Schema;
-use Base33\FilamentSignal\Support\ReverseRelationRegistry;
-use Base33\FilamentSignal\Support\SignalModelRegistry;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
@@ -132,7 +132,7 @@ class SignalModelIntegrationResource extends Resource
                                     Forms\Components\TextInput::make('alias')
                                         ->label(__('filament-signal::signal.model_integrations.fields.relation_alias'))
                                         ->placeholder('loans_sent')
-                                        ->helperText(__('filament-signal::signal.model_integrations.helpers.relation_alias')) ,
+                                        ->helperText(__('filament-signal::signal.model_integrations.helpers.relation_alias')),
                                     Forms\Components\Repeater::make('fields')
                                         ->label(__('filament-signal::signal.model_integrations.fields.relation_fields'))
                                         ->schema([
@@ -420,9 +420,9 @@ class SignalModelIntegrationResource extends Resource
             if ($sourceModel && class_exists($sourceModel)) {
                 $registry = app(SignalModelRegistry::class);
                 $modelFields = $registry->getFields($sourceModel);
-                
+
                 $allFieldOptions = [];
-                
+
                 // Aggiungi i campi essenziali
                 if ($modelFields && isset($modelFields['essential'])) {
                     $essentialFields = $modelFields['essential'];
@@ -436,7 +436,7 @@ class SignalModelIntegrationResource extends Resource
                     }
                     $allFieldOptions = array_merge($allFieldOptions, static::formatFieldOptions($fieldNames, $sourceModel));
                 }
-                
+
                 // Aggiungi i campi delle relazioni annidate (ricorsivamente)
                 if ($modelFields && isset($modelFields['relations'])) {
                     static::collectNestedRelationFields(
@@ -447,7 +447,7 @@ class SignalModelIntegrationResource extends Resource
                         ''
                     );
                 }
-                
+
                 if (! empty($allFieldOptions)) {
                     return $allFieldOptions;
                 }
@@ -455,6 +455,7 @@ class SignalModelIntegrationResource extends Resource
 
             // Fallback: usa i campi configurati nella relazione (se esistono)
             $fields = $descriptor['model_fields']['fields'] ?? [];
+
             return static::formatFieldOptions($fields, $sourceModel);
         }
 
@@ -635,7 +636,7 @@ class SignalModelIntegrationResource extends Resource
     {
         // Nomi comuni che puntano a User
         $userRelations = ['borrower', 'loaner', 'author', 'creator', 'owner', 'created_by', 'updated_by', 'user'];
-        
+
         if (in_array($relationName, $userRelations)) {
             return \App\Models\User::class;
         }
@@ -643,7 +644,7 @@ class SignalModelIntegrationResource extends Resource
         // Prova a derivare dal nome della relazione (es: unit -> Unit)
         $className = Str::studly($relationName);
         $namespace = substr($currentModelClass, 0, strrpos($currentModelClass, '\\'));
-        
+
         // Prova vari namespace comuni
         $possibleClasses = [
             $namespace . '\\' . $className,
@@ -662,7 +663,7 @@ class SignalModelIntegrationResource extends Resource
 
     /**
      * Raccoglie ricorsivamente tutti i campi delle relazioni annidate.
-     * 
+     *
      * @param  array<string, mixed>  $relations  Configurazione delle relazioni
      * @param  string  $modelClass  Classe del modello corrente
      * @param  SignalModelRegistry  $registry  Registry per ottenere i campi dei modelli
@@ -680,13 +681,13 @@ class SignalModelIntegrationResource extends Resource
             $relationExpand = $relationConfig['expand'] ?? [];
             $relationFields = $relationConfig['fields'] ?? [];
             $relatedModelClass = static::getRelatedModelClassFromRelation($modelClass, $relationName);
-            
+
             if (! $relatedModelClass) {
                 continue;
             }
-            
+
             $currentPath = $basePath === '' ? $relationName : "{$basePath}.{$relationName}";
-            
+
             // Aggiungi i campi della relazione principale (es: unit.inventory_code o unit.model.name)
             if (! empty($relationFields)) {
                 $nestedFieldOptions = static::formatFieldOptions($relationFields, $relatedModelClass);
@@ -696,11 +697,11 @@ class SignalModelIntegrationResource extends Resource
                     $allFieldOptions[$fullKey] = "{$labelPath} → {$fieldLabel}";
                 }
             }
-            
+
             // Se ci sono relazioni annidate da espandere, processale ricorsivamente
             if (! empty($relationExpand)) {
                 $relatedModelFields = $registry->getFields($relatedModelClass);
-                
+
                 // Se il modello correlato ha relazioni configurate, processale
                 if ($relatedModelFields && isset($relatedModelFields['relations'])) {
                     // Filtra solo le relazioni che sono in expand
@@ -721,7 +722,7 @@ class SignalModelIntegrationResource extends Resource
                             }
                         }
                     }
-                    
+
                     // Processa ricorsivamente
                     if (! empty($nestedRelations)) {
                         static::collectNestedRelationFields(
@@ -788,7 +789,7 @@ class SignalModelIntegrationResource extends Resource
         // Prova a ottenere la traduzione dal package filament-signal
         $translationKey = "signal.fields.{$fieldKey}";
         $translated = trans($translationKey);
-        
+
         if ($translated !== $translationKey) {
             return $translated;
         }
@@ -797,7 +798,7 @@ class SignalModelIntegrationResource extends Resource
         $modelName = class_basename($modelClass);
         $translationKey = "signal.models.{$modelName}.fields.{$fieldKey}";
         $translated = trans($translationKey);
-        
+
         if ($translated !== $translationKey) {
             return $translated;
         }

@@ -97,6 +97,7 @@ class ReverseRelationRegistrar
             if (is_array($key)) {
                 return $key[0] ?? null;
             }
+
             return $key;
         }
 
@@ -104,5 +105,3 @@ class ReverseRelationRegistrar
         return Str::snake($relationName) . '_id';
     }
 }
-
-

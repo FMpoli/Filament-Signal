@@ -129,7 +129,6 @@ class SignalPayloadConfigurator
             }
         }
 
-
         // Se non ci sono campi selezionati, usa i campi essenziali del modello correlato
         if (empty($fieldKeys)) {
             $modelClass = $meta['reverse_source_model'] ?? $meta['model_class'] ?? null;
@@ -169,40 +168,41 @@ class SignalPayloadConfigurator
             // Filtra i campi delle relazioni annidate se sono stati selezionati
             // Ordina i path per lunghezza (prima i più corti) per processare correttamente le relazioni annidate
             $sortedPaths = array_keys($nestedFields);
-            usort($sortedPaths, fn($a, $b) => substr_count($a, '.') <=> substr_count($b, '.'));
-            
+            usort($sortedPaths, fn ($a, $b) => substr_count($a, '.') <=> substr_count($b, '.'));
+
             foreach ($sortedPaths as $relationPath) {
                 $selectedFields = $nestedFields[$relationPath];
                 $pathParts = explode('.', $relationPath);
-                
+
                 // Verifica che la relazione esista nel record
                 $currentData = $record;
                 $exists = true;
                 foreach ($pathParts as $part) {
                     if (! isset($currentData[$part]) || ! is_array($currentData[$part])) {
                         $exists = false;
+
                         break;
                     }
                     $currentData = $currentData[$part];
                 }
-                
+
                 if (! $exists) {
                     continue;
                 }
-                
+
                 // Ottieni il valore corrente nel record filtrato (se esiste)
                 $currentFiltered = Arr::get($filtered, $relationPath, []);
                 if (! is_array($currentFiltered)) {
                     $currentFiltered = [];
                 }
-                
+
                 // Aggiungi solo i campi selezionati
                 foreach ($selectedFields as $field) {
                     if (isset($currentData[$field])) {
                         $currentFiltered[$field] = $currentData[$field];
                     }
                 }
-                
+
                 // Imposta il valore filtrato solo se ci sono campi
                 if (! empty($currentFiltered)) {
                     Arr::set($filtered, $relationPath, $currentFiltered);
@@ -346,6 +346,7 @@ class SignalPayloadConfigurator
                             }
 
                             $relationsWithFields[$alias] = true;
+
                             continue;
                         }
 
@@ -808,4 +809,3 @@ class SignalPayloadConfigurator
         return array_unique(array_merge($common, $specific));
     }
 }
-

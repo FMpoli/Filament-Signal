@@ -2,8 +2,6 @@
 
 namespace Base33\FilamentSignal\Support;
 
-use Base33\FilamentSignal\Support\ReverseRelationRegistrar;
-
 /**
  * Registro per modelli che non implementano HasSignal ma vogliono esporre campi per segnali
  */

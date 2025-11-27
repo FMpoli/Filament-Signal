@@ -2,8 +2,6 @@
 
 namespace Base33\FilamentSignal\Support;
 
-use Base33\FilamentSignal\Support\ReverseRelationWarmup;
-
 class ReverseRelationRegistry
 {
     /**
@@ -70,5 +68,3 @@ class ReverseRelationRegistry
         app(ReverseRelationWarmup::class)->warm();
     }
 }
-
-

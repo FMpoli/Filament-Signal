@@ -6,11 +6,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use ReflectionClass;
-use Base33\FilamentSignal\Support\ReverseRelationRegistry;
 
 class SignalPayloadFieldAnalyzer
 {
     protected SignalModelRegistry $modelRegistry;
+
     protected ReverseRelationRegistry $reverseRegistry;
 
     public function __construct(SignalModelRegistry $modelRegistry, ReverseRelationRegistry $reverseRegistry)
@@ -163,7 +163,7 @@ class SignalPayloadFieldAnalyzer
                     foreach ($sourceModelFields['relations'] as $relationName => $relationConfig) {
                         $relationExpand = $relationConfig['expand'] ?? [];
                         $relationFields = $relationConfig['fields'] ?? [];
-                        
+
                         // Aggiungi i campi della relazione principale (es: unit.inventory_code)
                         if (! empty($relationFields)) {
                             $relatedModelClass = $this->getRelatedModelClassFromRelation($sourceModel, $relationName);
@@ -175,7 +175,7 @@ class SignalPayloadFieldAnalyzer
                                 }
                             }
                         }
-                        
+
                         // Aggiungi i campi delle relazioni annidate (es: unit.model.name, unit.brand.name)
                         if (! empty($relationExpand)) {
                             $relatedModelClass = $this->getRelatedModelClassFromRelation($sourceModel, $relationName);
@@ -185,7 +185,7 @@ class SignalPayloadFieldAnalyzer
                                     if ($relatedModelFields && isset($relatedModelFields['relations'][$nestedRelationName])) {
                                         $nestedRelationConfig = $relatedModelFields['relations'][$nestedRelationName];
                                         $nestedRelationFields = $nestedRelationConfig['fields'] ?? [];
-                                        
+
                                         if (! empty($nestedRelationFields)) {
                                             $nestedRelatedModelClass = $this->getRelatedModelClassFromRelation($relatedModelClass, $nestedRelationName);
                                             if ($nestedRelatedModelClass) {
