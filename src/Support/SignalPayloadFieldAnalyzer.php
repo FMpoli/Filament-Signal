@@ -119,10 +119,10 @@ class SignalPayloadFieldAnalyzer
 
             $alias = $reverseConfig['alias'] ?? $this->defaultReverseAlias($descriptor);
             $sourceModel = $descriptor['source_model'] ?? null;
-            
+
             // Verifica se il modello target (quello che ha la relazione inversa) proviene da Model Integration
             $isTargetFromIntegration = $this->isModelFromIntegration($modelClass);
-            
+
             // Se il modello target proviene da Model Integration, usa SOLO i campi configurati
             if ($isTargetFromIntegration) {
                 // Usa solo i campi esplicitamente configurati dall'utente
@@ -130,7 +130,7 @@ class SignalPayloadFieldAnalyzer
                     $reverseConfig['fields'] ?? [],
                     $sourceModel
                 );
-                
+
                 // Non aggiungere campi extra, usa solo quelli configurati
             } else {
                 // Per modelli con HasSignal, usa la logica completa con fallback
@@ -184,7 +184,7 @@ class SignalPayloadFieldAnalyzer
                     }
                 }
             }
-            
+
             // Se il modello target proviene da Model Integration e non ci sono campi configurati, salta questa relazione
             if ($isTargetFromIntegration && empty($fieldOptions)) {
                 continue;
@@ -288,7 +288,7 @@ class SignalPayloadFieldAnalyzer
             if ($relatedModelClass) {
                 $expand = Arr::get($relationConfig, 'expand', []);
                 $alias = Arr::get($relationConfig, 'alias', $relationName);
-                
+
                 // Inizia con i campi diretti della relazione
                 $fieldOptions = $this->formatFieldOptions(
                     Arr::get($relationConfig, 'fields', []),
@@ -300,7 +300,7 @@ class SignalPayloadFieldAnalyzer
                 // Per Model Integration, usiamo solo i campi esplicitamente configurati
                 if ($relatedModelClass) {
                     $isFromModelIntegration = $this->isModelFromIntegration($modelClass);
-                    
+
                     // Se non è da Model Integration, aggiungi ricorsivamente tutti i campi disponibili
                     // Se è da Model Integration, usa solo i campi configurati (già in fieldOptions)
                     if (! $isFromModelIntegration) {
@@ -788,7 +788,7 @@ class SignalPayloadFieldAnalyzer
 
     /**
      * Raccoglie ricorsivamente tutti i campi delle relazioni annidate per le relazioni inverse.
-     * 
+     *
      * @param  array<string, mixed>  $relations  Configurazione delle relazioni
      * @param  string  $modelClass  Classe del modello corrente
      * @param  string  $baseAlias  Alias base (es: 'equipment_loan')
@@ -806,13 +806,13 @@ class SignalPayloadFieldAnalyzer
             $relationExpand = $relationConfig['expand'] ?? [];
             $relationFields = $relationConfig['fields'] ?? [];
             $relatedModelClass = $this->getRelatedModelClassFromRelation($modelClass, $relationName);
-            
+
             if (! $relatedModelClass) {
                 continue;
             }
-            
+
             $currentPath = $basePath === '' ? $relationName : "{$basePath}.{$relationName}";
-            
+
             // Aggiungi i campi della relazione principale (es: unit.inventory_code o unit.model.name)
             if (! empty($relationFields)) {
                 $nestedFieldOptions = $this->formatFieldOptions($relationFields, $relatedModelClass);
@@ -823,11 +823,11 @@ class SignalPayloadFieldAnalyzer
                     $fieldOptions[$fullKey] = "{$labelPath} → {$fieldLabel}";
                 }
             }
-            
+
             // Se ci sono relazioni annidate da espandere, processale ricorsivamente
             if (! empty($relationExpand)) {
                 $relatedModelFields = $this->modelRegistry->getFields($relatedModelClass);
-                
+
                 // Se il modello correlato ha relazioni configurate, processale
                 if ($relatedModelFields && isset($relatedModelFields['relations'])) {
                     // Filtra solo le relazioni che sono in expand
@@ -847,7 +847,7 @@ class SignalPayloadFieldAnalyzer
                             }
                         }
                     }
-                    
+
                     // Processa ricorsivamente
                     if (! empty($nestedRelations)) {
                         $this->collectNestedRelationFieldsForReverse(
@@ -883,7 +883,7 @@ class SignalPayloadFieldAnalyzer
 
     /**
      * Raccoglie ricorsivamente tutti i campi delle relazioni annidate per le relazioni dirette.
-     * 
+     *
      * @param  array<string, mixed>  $relations  Configurazione delle relazioni
      * @param  string  $modelClass  Classe del modello corrente
      * @param  string  $baseRelationName  Nome della relazione base (es: 'unit')
@@ -901,13 +901,13 @@ class SignalPayloadFieldAnalyzer
             $relationExpand = $relationConfig['expand'] ?? [];
             $relationFields = $relationConfig['fields'] ?? [];
             $relatedModelClass = $this->getRelatedModelClassFromRelation($modelClass, $relationName);
-            
+
             if (! $relatedModelClass) {
                 continue;
             }
-            
+
             $currentPath = $basePath === '' ? $relationName : "{$basePath}.{$relationName}";
-            
+
             // Aggiungi i campi della relazione principale (es: unit.inventory_code o unit.model.name)
             if (! empty($relationFields)) {
                 $nestedFieldOptions = $this->formatFieldOptions($relationFields, $relatedModelClass);
@@ -918,11 +918,11 @@ class SignalPayloadFieldAnalyzer
                     $fieldOptions[$fullKey] = "{$labelPath} → {$fieldLabel}";
                 }
             }
-            
+
             // Se ci sono relazioni annidate da espandere, processale ricorsivamente
             if (! empty($relationExpand)) {
                 $relatedModelFields = $this->modelRegistry->getFields($relatedModelClass);
-                
+
                 // Se il modello correlato ha relazioni configurate, processale
                 if ($relatedModelFields && isset($relatedModelFields['relations'])) {
                     // Filtra solo le relazioni che sono in expand
@@ -942,7 +942,7 @@ class SignalPayloadFieldAnalyzer
                             }
                         }
                     }
-                    
+
                     // Processa ricorsivamente
                     if (! empty($nestedRelations)) {
                         $this->collectNestedRelationFieldsForDirect(
