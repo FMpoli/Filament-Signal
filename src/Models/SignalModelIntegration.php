@@ -175,10 +175,17 @@ class SignalModelIntegration extends Model
     {
         $events = [];
 
+        $seen = [];
+
         foreach ($this->eloquent_events ?? [] as $operation) {
             $operation = strtolower($operation);
 
             $eventName = "eloquent.{$operation}: {$this->model_class}";
+            if (isset($seen[$eventName])) {
+                continue;
+            }
+            $seen[$eventName] = true;
+
             $events[] = [
                 'event' => $eventName,
                 'operation' => $operation,
