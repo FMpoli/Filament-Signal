@@ -2,6 +2,7 @@
 
 namespace Base33\FilamentSignal\Services;
 
+use Base33\FilamentSignal\Contracts\SignalIdentifiableEvent;
 use Base33\FilamentSignal\Jobs\RunSignalTrigger;
 use Base33\FilamentSignal\Models\SignalTrigger;
 use Base33\FilamentSignal\Support\SignalPayloadFactory;
@@ -16,7 +17,9 @@ class SignalEventProcessor
 
     public function handle(object $event): void
     {
-        $eventClass = $event::class;
+        $eventClass = $event instanceof SignalIdentifiableEvent
+            ? $event->signalEventIdentifier()
+            : $event::class;
 
         Log::debug('Signal: Event received', [
             'event_class' => $eventClass,

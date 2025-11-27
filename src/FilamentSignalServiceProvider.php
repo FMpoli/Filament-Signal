@@ -3,8 +3,10 @@
 namespace Base33\FilamentSignal;
 
 use Base33\FilamentSignal\Commands\FilamentSignalCommand;
+use Base33\FilamentSignal\Models\SignalModelIntegration;
 use Base33\FilamentSignal\Services\SignalEventRegistrar;
 use Base33\FilamentSignal\Support\SignalEventRegistry;
+use Base33\FilamentSignal\Support\SignalEloquentEventMap;
 use Base33\FilamentSignal\Support\SignalModelRegistry;
 use Base33\FilamentSignal\Support\SignalWebhookTemplate;
 use Base33\FilamentSignal\Support\SignalWebhookTemplateRegistry;
@@ -15,6 +17,7 @@ use Filament\Support\Assets\Js;
 use Filament\Support\Facades\FilamentAsset;
 use Filament\Support\Facades\FilamentIcon;
 use Illuminate\Filesystem\Filesystem;
+use Illuminate\Support\Facades\Schema;
 use Livewire\Features\SupportTesting\Testable;
 use Spatie\LaravelPackageTools\Commands\InstallCommand;
 use Spatie\LaravelPackageTools\Package;
@@ -67,6 +70,7 @@ class FilamentSignalServiceProvider extends PackageServiceProvider
         $this->app->singleton(SignalWebhookTemplateRegistry::class, fn (): SignalWebhookTemplateRegistry => new SignalWebhookTemplateRegistry);
         $this->app->singleton(SignalEventRegistry::class, fn (): SignalEventRegistry => new SignalEventRegistry);
         $this->app->singleton(SignalModelRegistry::class, fn (): SignalModelRegistry => new SignalModelRegistry);
+        $this->app->singleton(SignalEloquentEventMap::class, fn (): SignalEloquentEventMap => new SignalEloquentEventMap);
     }
 
     public function packageBooted(): void
@@ -99,9 +103,29 @@ class FilamentSignalServiceProvider extends PackageServiceProvider
         // Testing
         Testable::mixin(new TestsFilamentSignal);
 
+        $this->bootModelIntegrations();
+
         app()->booted(function (): void {
             app(SignalEventRegistrar::class)->register();
         });
+    }
+
+    protected function bootModelIntegrations(): void
+    {
+        if (! class_exists(SignalModelIntegration::class)) {
+            return;
+        }
+
+        try {
+            $table = config('signal.table_names.model_integrations', 'signal_model_integrations');
+            if (! Schema::hasTable($table)) {
+                return;
+            }
+        } catch (\Throwable $exception) {
+            return;
+        }
+
+        SignalModelIntegration::query()->get()->each->registerOnBoot();
     }
 
     protected function registerConfiguredWebhookTemplates(): void

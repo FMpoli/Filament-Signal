@@ -35,6 +35,7 @@ return [
         'actions' => 'signal_actions',
         'action_logs' => 'signal_action_logs',
         'templates' => 'signal_templates',
+        'model_integrations' => 'signal_model_integrations',
     ],
 
     'editor' => [

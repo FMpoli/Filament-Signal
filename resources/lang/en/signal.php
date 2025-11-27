@@ -8,6 +8,7 @@ return [
             'rules' => 'Automation Rules',
             'templates' => 'Templates',
             'logs' => 'Execution Logs',
+            'integrations' => 'Model Integrations',
         ],
     ],
     'actions' => [
@@ -73,6 +74,50 @@ return [
             'pending' => 'Pending',
             'success' => 'Successful',
             'failed' => 'Failed',
+        ],
+    ],
+    'model_integrations' => [
+        'sections' => [
+            'details' => 'Integration details',
+            'fields' => 'Available fields',
+            'eloquent' => 'Eloquent lifecycle',
+            'custom' => 'Custom events',
+        ],
+        'fields' => [
+            'model_class' => 'Model class',
+            'model_alias' => 'Payload alias',
+            'essential_fields' => 'Essential fields',
+            'field_name' => 'Field key',
+            'field_label' => 'Custom label',
+            'relations' => 'Relations',
+            'relation_name' => 'Relation name',
+            'relation_fields' => 'Relation fields',
+            'expand_relations' => 'Expand nested relations',
+            'eloquent_events' => 'Eloquent events',
+            'custom_events' => 'Custom events',
+            'event_class' => 'Event class',
+            'event_group' => 'Group',
+            'event_description' => 'Description',
+        ],
+        'helpers' => [
+            'model_alias' => 'Used as the root key inside the payload (defaults to the model name).',
+        ],
+        'actions' => [
+            'add_field' => 'Add field',
+            'add_relation' => 'Add relation',
+            'add_event' => 'Add event',
+        ],
+        'operations' => [
+            'created' => 'Created',
+            'updated' => 'Updated',
+            'deleted' => 'Deleted',
+            'restored' => 'Restored',
+        ],
+        'events' => [
+            'eloquent_description' => ':operation event emitted by :model',
+        ],
+        'groups' => [
+            'eloquent' => 'Eloquent',
         ],
     ],
 ];

@@ -4,6 +4,7 @@ namespace Base33\FilamentSignal\Support;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Str;
 use ReflectionClass;
 
 class SignalPayloadFieldAnalyzer
@@ -25,6 +26,10 @@ class SignalPayloadFieldAnalyzer
      */
     public function analyzeEvent(string $eventClass): array
     {
+        if (Str::startsWith($eventClass, 'eloquent.')) {
+            return $this->analyzeEloquentEvent($eventClass);
+        }
+
         if (! class_exists($eventClass)) {
             return ['fields' => [], 'relations' => []];
         }
@@ -86,6 +91,37 @@ class SignalPayloadFieldAnalyzer
         } catch (\Throwable $e) {
             return ['fields' => [], 'relations' => []];
         }
+    }
+
+    protected function analyzeEloquentEvent(string $eventName): array
+    {
+        if (! preg_match('/eloquent\.[a-z_]+:\s*(.+)$/i', $eventName, $matches)) {
+            return ['fields' => [], 'relations' => []];
+        }
+
+        $modelClass = trim($matches[1]);
+
+        if (! class_exists($modelClass) || ! is_subclass_of($modelClass, Model::class)) {
+            return ['fields' => [], 'relations' => []];
+        }
+
+        $alias = $this->modelRegistry->getAlias($modelClass, Str::camel(class_basename($modelClass)));
+
+        $fields = [];
+        $relations = [];
+
+        $modelFields = $this->modelRegistry->getFields($modelClass);
+
+        if ($modelFields) {
+            $this->processModelFields($alias, $modelClass, $modelFields, $fields, $relations);
+        } else {
+            $this->processModelFieldsFallback($alias, $modelClass, $fields, $relations);
+        }
+
+        return [
+            'fields' => $fields,
+            'relations' => $relations,
+        ];
     }
 
     /**

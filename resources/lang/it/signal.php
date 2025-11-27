@@ -8,6 +8,7 @@ return [
             'rules' => 'Regole di automazione',
             'templates' => 'Template',
             'logs' => 'Log esecuzioni',
+            'integrations' => 'Integrazioni modelli',
         ],
     ],
     'actions' => [
@@ -73,6 +74,50 @@ return [
             'pending' => 'In attesa',
             'success' => 'Completata',
             'failed' => 'Fallita',
+        ],
+    ],
+    'model_integrations' => [
+        'sections' => [
+            'details' => 'Dettagli integrazione',
+            'fields' => 'Campi disponibili',
+            'eloquent' => 'Eventi Eloquent',
+            'custom' => 'Eventi personalizzati',
+        ],
+        'fields' => [
+            'model_class' => 'Classe del modello',
+            'model_alias' => 'Alias nel payload',
+            'essential_fields' => 'Campi essenziali',
+            'field_name' => 'Nome campo',
+            'field_label' => 'Etichetta personalizzata',
+            'relations' => 'Relazioni',
+            'relation_name' => 'Nome relazione',
+            'relation_fields' => 'Campi della relazione',
+            'expand_relations' => 'Espandi relazioni annidate',
+            'eloquent_events' => 'Eventi Eloquent',
+            'custom_events' => 'Eventi personalizzati',
+            'event_class' => 'Classe evento',
+            'event_group' => 'Gruppo',
+            'event_description' => 'Descrizione',
+        ],
+        'helpers' => [
+            'model_alias' => 'Utilizzato come chiave principale nel payload (default: nome del modello).',
+        ],
+        'actions' => [
+            'add_field' => 'Aggiungi campo',
+            'add_relation' => 'Aggiungi relazione',
+            'add_event' => 'Aggiungi evento',
+        ],
+        'operations' => [
+            'created' => 'Creato',
+            'updated' => 'Aggiornato',
+            'deleted' => 'Eliminato',
+            'restored' => 'Ripristinato',
+        ],
+        'events' => [
+            'eloquent_description' => 'Evento :operation generato da :model',
+        ],
+        'groups' => [
+            'eloquent' => 'Eloquent',
         ],
     ],
 ];

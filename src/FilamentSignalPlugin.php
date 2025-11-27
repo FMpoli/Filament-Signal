@@ -3,6 +3,7 @@
 namespace Base33\FilamentSignal;
 
 use Base33\FilamentSignal\Filament\Resources\SignalActionLogResource;
+use Base33\FilamentSignal\Filament\Resources\SignalModelIntegrationResource;
 use Base33\FilamentSignal\Filament\Resources\SignalTemplateResource;
 use Base33\FilamentSignal\Filament\Resources\SignalTriggerResource;
 use Filament\Contracts\Plugin;
@@ -21,6 +22,7 @@ class FilamentSignalPlugin implements Plugin
             SignalTemplateResource::class,
             SignalTriggerResource::class,
             SignalActionLogResource::class,
+            SignalModelIntegrationResource::class,
         ]);
     }
 

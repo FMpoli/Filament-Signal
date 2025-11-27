@@ -27,6 +27,11 @@ class SignalEventRegistry
         ];
     }
 
+    public function forget(string $eventClass): void
+    {
+        unset($this->events[$eventClass]);
+    }
+
     /**
      * @return array<string, array{class: string, name: string, description?: string, group?: string}>
      */

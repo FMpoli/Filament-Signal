@@ -13,14 +13,23 @@ class SignalModelRegistry
     protected array $models = [];
 
     /**
+     * @var array<string, string>
+     */
+    protected array $aliases = [];
+
+    /**
      * Registra i campi disponibili per un modello
      *
      * @param  string  $modelClass  Classe del modello
      * @param  array  $fields  Array con struttura getSignalFields()
      */
-    public function register(string $modelClass, array $fields): void
+    public function register(string $modelClass, array $fields, ?string $alias = null): void
     {
         $this->models[$modelClass] = $fields;
+
+        if ($alias) {
+            $this->aliases[$modelClass] = $alias;
+        }
     }
 
     /**
@@ -51,5 +60,15 @@ class SignalModelRegistry
     public function all(): array
     {
         return $this->models;
+    }
+
+    public function getAlias(string $modelClass, ?string $default = null): ?string
+    {
+        return $this->aliases[$modelClass] ?? $default;
+    }
+
+    public function forget(string $modelClass): void
+    {
+        unset($this->models[$modelClass], $this->aliases[$modelClass]);
     }
 }

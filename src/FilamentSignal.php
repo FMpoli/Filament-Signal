@@ -87,10 +87,11 @@ class FilamentSignal
      *
      * @param  string  $modelClass  Classe del modello
      * @param  array  $fields  Array con struttura getSignalFields()
+     * @param  string|null  $alias  Nome logico da usare nel payload (es: loan)
      */
-    public static function registerModelFields(string $modelClass, array $fields): void
+    public static function registerModelFields(string $modelClass, array $fields, ?string $alias = null): void
     {
-        app(SignalModelRegistry::class)->register($modelClass, $fields);
+        app(SignalModelRegistry::class)->register($modelClass, $fields, $alias);
     }
 
     /**

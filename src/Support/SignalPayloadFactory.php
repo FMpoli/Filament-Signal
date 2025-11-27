@@ -2,6 +2,7 @@
 
 namespace Base33\FilamentSignal\Support;
 
+use Base33\FilamentSignal\Contracts\SignalPayloadProvider;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
@@ -15,6 +16,10 @@ class SignalPayloadFactory
      */
     public function fromEvent(object $event): array
     {
+        if ($event instanceof SignalPayloadProvider) {
+            return $event->toSignalPayload();
+        }
+
         $publicProperties = get_object_vars($event);
 
         $payload = [];

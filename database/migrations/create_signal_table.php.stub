@@ -12,6 +12,7 @@ return new class extends Migration
         $triggersTable = config('signal.table_names.triggers', 'signal_triggers');
         $actionsTable = config('signal.table_names.actions', 'signal_actions');
         $logsTable = config('signal.table_names.action_logs', 'signal_action_logs');
+        $modelIntegrationsTable = config('signal.table_names.model_integrations', 'signal_model_integrations');
 
         Schema::create($templatesTable, function (Blueprint $table): void {
             $table->id();
@@ -83,6 +84,18 @@ return new class extends Migration
             $table->index(['status', 'executed_at']);
             $table->index('event_class');
         });
+
+        Schema::create($modelIntegrationsTable, function (Blueprint $table): void {
+            $table->id();
+            $table->string('name');
+            $table->string('model_class')->unique();
+            $table->string('model_alias')->nullable();
+            $table->json('fields')->nullable();
+            $table->json('eloquent_events')->nullable();
+            $table->json('custom_events')->nullable();
+            $table->timestamps();
+            $table->softDeletes();
+        });
     }
 
     public function down(): void
@@ -91,7 +104,9 @@ return new class extends Migration
         $triggersTable = config('signal.table_names.triggers', 'signal_triggers');
         $actionsTable = config('signal.table_names.actions', 'signal_actions');
         $logsTable = config('signal.table_names.action_logs', 'signal_action_logs');
+        $modelIntegrationsTable = config('signal.table_names.model_integrations', 'signal_model_integrations');
 
+        Schema::dropIfExists($modelIntegrationsTable);
         Schema::dropIfExists($logsTable);
         Schema::dropIfExists($actionsTable);
         Schema::dropIfExists($triggersTable);
