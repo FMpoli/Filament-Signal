@@ -212,14 +212,6 @@ class WebhookActionHandler implements SignalActionHandler
 
             $configurator = app(SignalPayloadConfigurator::class);
             $payload = $configurator->configure($payload, $payloadConfig);
-
-            // DEBUG: Log del payload dopo configure
-            \Illuminate\Support\Facades\Log::info('Signal: WebhookActionHandler - payload dopo configure', [
-                'loan_unit_keys' => isset($payload['loan']['unit']) && is_array($payload['loan']['unit']) ? array_keys($payload['loan']['unit']) : [],
-                'loan_unit_has_inventory_code' => isset($payload['loan']['unit']['inventory_code']),
-                'loan_unit_has_serial_number' => isset($payload['loan']['unit']['serial_number']),
-                'loan_unit_has_short_description' => isset($payload['loan']['unit']['short_description']),
-            ]);
         }
 
         $finalPayload = match ($mode) {
@@ -236,16 +228,6 @@ class WebhookActionHandler implements SignalActionHandler
             ],
             default => $payload,
         };
-
-        // DEBUG: Log del payload finale prima di essere inviato
-        if ($mode === 'event' && isset($finalPayload['data']['loan']['unit'])) {
-            \Illuminate\Support\Facades\Log::info('Signal: WebhookActionHandler - payload FINALE prima invio', [
-                'loan_unit_keys' => is_array($finalPayload['data']['loan']['unit']) ? array_keys($finalPayload['data']['loan']['unit']) : [],
-                'loan_unit_has_inventory_code' => isset($finalPayload['data']['loan']['unit']['inventory_code']),
-                'loan_unit_has_serial_number' => isset($finalPayload['data']['loan']['unit']['serial_number']),
-                'loan_unit_has_short_description' => isset($finalPayload['data']['loan']['unit']['short_description']),
-            ]);
-        }
 
         return $finalPayload;
     }
