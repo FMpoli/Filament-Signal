@@ -327,6 +327,7 @@ class SignalPayloadFieldAnalyzer
                     'id_field' => $idField,
                     'relation_field' => $relationField,
                     'model_class' => $relatedModelClass,
+                    'parent_model_class' => $modelClass, // Aggiungi il modello padre
                     'label' => $this->getRelationLabel("{$propertyName}.{$relationName}", $relatedModelClass),
                     'expand' => $expand, // Relazioni annidate da espandere
                     'field_options' => $fieldOptions,

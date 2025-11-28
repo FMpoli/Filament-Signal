@@ -2,8 +2,10 @@
 
 namespace Base33\FilamentSignal\Support;
 
+use Base33\FilamentSignal\Support\SignalModelRegistry;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Log;
 
 class SignalPayloadConfigurator
 {
@@ -24,6 +26,7 @@ class SignalPayloadConfigurator
         $reverseSelections = Arr::get($config, 'reverse_relations', []);
         $relationMetaMap = Arr::get($config, 'relation_meta_map', []);
 
+
         // IMPORTANTE: Espandi PRIMA le relazioni, così i campi espansi possono essere inclusi nel filtro
         if (! empty($expandRelations)) {
             $payload = $this->expandRelations($payload, $expandRelations, $expandNested);
@@ -40,13 +43,31 @@ class SignalPayloadConfigurator
 
         // Filtra i campi delle relazioni selezionati (DOPO includeOnly, così le relazioni sono già nel risultato)
         if (! empty($relationFields)) {
+            Log::info('Signal: configure - prima di filterRelationFields', [
+                'loan_unit_keys' => isset($payload['loan']['unit']) && is_array($payload['loan']['unit']) ? array_keys($payload['loan']['unit']) : [],
+                'loan_unit_has_inventory_code' => isset($payload['loan']['unit']['inventory_code']),
+                'loan_unit_has_serial_number' => isset($payload['loan']['unit']['serial_number']),
+            ]);
             $payload = $this->filterRelationFields($payload, $relationFields, $relationMetaMap);
+            Log::info('Signal: configure - dopo filterRelationFields', [
+                'loan_unit_keys' => isset($payload['loan']['unit']) && is_array($payload['loan']['unit']) ? array_keys($payload['loan']['unit']) : [],
+                'loan_unit_has_inventory_code' => isset($payload['loan']['unit']['inventory_code']),
+                'loan_unit_has_serial_number' => isset($payload['loan']['unit']['serial_number']),
+            ]);
         }
 
         // Infine rimuovi i campi esclusi
         if (! empty($excludeFields)) {
             $payload = $this->excludeFields($payload, $excludeFields);
         }
+
+        // DEBUG: Log finale del payload configurato
+        Log::info('Signal: configure - payload FINALE', [
+            'loan_unit_keys' => isset($payload['loan']['unit']) && is_array($payload['loan']['unit']) ? array_keys($payload['loan']['unit']) : [],
+            'loan_unit_has_inventory_code' => isset($payload['loan']['unit']['inventory_code']),
+            'loan_unit_has_serial_number' => isset($payload['loan']['unit']['serial_number']),
+            'loan_unit_has_short_description' => isset($payload['loan']['unit']['short_description']),
+        ]);
 
         return $payload;
     }
@@ -168,7 +189,7 @@ class SignalPayloadConfigurator
             // Filtra i campi delle relazioni annidate se sono stati selezionati
             // Ordina i path per lunghezza (prima i più corti) per processare correttamente le relazioni annidate
             $sortedPaths = array_keys($nestedFields);
-            usort($sortedPaths, fn ($a, $b) => substr_count($a, '.') <=> substr_count($b, '.'));
+            usort($sortedPaths, fn($a, $b) => substr_count($a, '.') <=> substr_count($b, '.'));
 
             foreach ($sortedPaths as $relationPath) {
                 $selectedFields = $nestedFields[$relationPath];
@@ -252,7 +273,7 @@ class SignalPayloadConfigurator
                 $query->with($expand);
             }
 
-            $records = $query->get()->map(fn ($model) => $model->toArray())->all();
+            $records = $query->get()->map(fn($model) => $model->toArray())->all();
 
             return $records;
         } catch (\Throwable $exception) {
@@ -422,30 +443,76 @@ class SignalPayloadConfigurator
                 }
 
                 $relationData = $payload[$parentKey][$alias];
-                $fieldKeys = [];
 
-                // Se non ci sono campi selezionati, usa i campi essenziali del modello correlato
-                if (empty($selectedFields)) {
-                    $modelClass = $meta['model_class'] ?? null;
-                    if ($modelClass && class_exists($modelClass)) {
-                        $registry = app(SignalModelRegistry::class);
-                        $modelFields = $registry->getFields($modelClass);
-                        if ($modelFields && isset($modelFields['essential'])) {
-                            $fieldKeys = array_keys($modelFields['essential']);
-                        } else {
-                            // Fallback: includi almeno i campi comuni
-                            $fieldKeys = ['id', 'name', 'created_at', 'updated_at'];
+                // USA LA CONFIGURAZIONE DA getSignalFields() DEL MODELLO PADRE invece dei campi selezionati nell'UI
+                // Questo funziona come "model integration" - la configurazione è nel codice, non nell'UI
+                // Il modello padre è quello che ha la relazione (es: EquipmentLoan), non il modello correlato (es: EquipmentUnit)
+                $parentModelClass = $meta['parent_model_class'] ?? null;
+                $fieldKeys = [];
+                $nestedFields = [];
+
+                // DEBUG: Log per vedere cosa abbiamo
+                Log::info('Signal: filterRelationFields - DEBUG', [
+                    'parentKey' => $parentKey,
+                    'alias' => $alias,
+                    'parentModelClass' => $parentModelClass,
+                    'meta_keys' => array_keys($meta),
+                    'relationData_keys' => array_keys($relationData),
+                ]);
+
+                // La chiave in 'relations' è il nome della relazione (es: 'unit', 'borrower')
+                // Usa 'relation_name' dal meta, o fallback su 'alias'
+                $relationName = $meta['relation_name'] ?? $alias ?? null;
+
+                if ($parentModelClass && $relationName && class_exists($parentModelClass)) {
+                    $registry = app(SignalModelRegistry::class);
+                    $parentModelFields = $registry->getFields($parentModelClass);
+
+                    if ($parentModelFields && isset($parentModelFields['relations'][$relationName])) {
+                        // Usa la configurazione della relazione da getSignalFields() DEL MODELLO PADRE
+                        $relationConfig = $parentModelFields['relations'][$relationName];
+
+                        // Estrai i campi diretti configurati
+                        if (isset($relationConfig['fields']) && is_array($relationConfig['fields'])) {
+                            foreach ($relationConfig['fields'] as $field) {
+                                // Gestisci sia array associativi che numerici
+                                $fieldName = is_array($field) ? ($field['field'] ?? null) : $field;
+                                if ($fieldName && ! in_array($fieldName, $fieldKeys)) {
+                                    $fieldKeys[] = $fieldName;
+                                }
+                            }
                         }
-                    } else {
-                        // Fallback: includi almeno id e name se disponibili
-                        $fieldKeys = ['id', 'name'];
-                    }
-                } else {
-                    // Estrai i field keys dai selectedFields
-                    foreach ($selectedFields as $field) {
-                        $fieldParts = explode('.', $field);
-                        if (count($fieldParts) === 2 && $fieldParts[0] === $alias) {
-                            $fieldKeys[] = $fieldParts[1];
+
+                        // Estrai le relazioni annidate configurate
+                        if (isset($relationConfig['expand']) && is_array($relationConfig['expand'])) {
+                            // Per ottenere il modello correlato, usa il modello correlato dalla meta
+                            // Il modello correlato è quello che ha la relazione annidata (es: EquipmentUnit ha model, brand, type)
+                            $relatedModelClass = $meta['model_class'] ?? null;
+
+                            if ($relatedModelClass && class_exists($relatedModelClass)) {
+                                // Ottieni i campi configurati per il modello correlato
+                                $relatedModelFields = $registry->getFields($relatedModelClass);
+
+                                foreach ($relationConfig['expand'] as $nestedRelation) {
+                                    // Per ogni relazione annidata, usa la configurazione da getSignalFields() del modello correlato
+                                    if ($relatedModelFields && isset($relatedModelFields['relations'][$nestedRelation])) {
+                                        $nestedRelationConfig = $relatedModelFields['relations'][$nestedRelation];
+
+                                        // Estrai i campi configurati per la relazione annidata
+                                        if (isset($nestedRelationConfig['fields']) && is_array($nestedRelationConfig['fields'])) {
+                                            if (! isset($nestedFields[$nestedRelation])) {
+                                                $nestedFields[$nestedRelation] = [];
+                                            }
+                                            foreach ($nestedRelationConfig['fields'] as $nestedField) {
+                                                $nestedFieldName = is_array($nestedField) ? ($nestedField['field'] ?? null) : $nestedField;
+                                                if ($nestedFieldName && ! in_array($nestedFieldName, $nestedFields[$nestedRelation])) {
+                                                    $nestedFields[$nestedRelation][] = $nestedFieldName;
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                 }
@@ -455,10 +522,50 @@ class SignalPayloadConfigurator
                     $fieldKeys[] = 'id';
                 }
 
+                // DEBUG: Log dei fieldKeys estratti
+                Log::info('Signal: filterRelationFields - fieldKeys estratti', [
+                    'alias' => $alias,
+                    'fieldKeys' => $fieldKeys,
+                    'nestedFields' => $nestedFields,
+                    'parentModelClass' => $parentModelClass,
+                    'relationName' => $relationName,
+                ]);
+
+                // Filtra i campi diretti - IMPORTANTE: seleziona SOLO i campi in fieldKeys
+                // Se fieldKeys è vuoto (solo 'id'), allora includiamo solo 'id'
+                // NON includere altri campi che non sono in fieldKeys
                 $filtered = [];
                 foreach ($fieldKeys as $fieldKey) {
                     if (Arr::has($relationData, $fieldKey)) {
                         Arr::set($filtered, $fieldKey, Arr::get($relationData, $fieldKey));
+                    }
+                }
+
+                // IMPORTANTE: Se fieldKeys contiene solo 'id', allora filtered dovrebbe contenere solo 'id'
+                // Se filtered contiene altri campi, significa che qualcosa non va
+
+                // DEBUG: Log del risultato filtrato
+                Log::info('Signal: filterRelationFields - risultato filtrato', [
+                    'alias' => $alias,
+                    'filtered_keys' => array_keys($filtered),
+                    'filtered_content' => $filtered,
+                    'relationData_keys_BEFORE' => array_keys($relationData),
+                ]);
+
+                // Filtra le relazioni annidate se necessario
+                foreach ($nestedFields as $nestedRelation => $nestedFieldKeys) {
+                    if (isset($relationData[$nestedRelation]) && is_array($relationData[$nestedRelation])) {
+                        $nestedFiltered = [];
+                        foreach ($nestedFieldKeys as $nestedFieldKey) {
+                            if (Arr::has($relationData[$nestedRelation], $nestedFieldKey)) {
+                                Arr::set($nestedFiltered, $nestedFieldKey, Arr::get($relationData[$nestedRelation], $nestedFieldKey));
+                            }
+                        }
+                        // Assicurati che 'id' sia sempre incluso per le relazioni annidate
+                        if (! isset($nestedFiltered['id']) && isset($relationData[$nestedRelation]['id'])) {
+                            $nestedFiltered['id'] = $relationData[$nestedRelation]['id'];
+                        }
+                        $filtered[$nestedRelation] = $nestedFiltered;
                     }
                 }
 
@@ -532,6 +639,7 @@ class SignalPayloadConfigurator
             return $payload;
         }
 
+
         // Separa le relazioni root da quelle annidate
         $rootRelations = [];
         $nestedRelations = [];
@@ -546,6 +654,7 @@ class SignalPayloadConfigurator
 
         // Espandi le relazioni a livello root
         $this->recursiveExpand($payload, $rootRelations, $expandNested);
+
 
         // Espandi le relazioni annidate
         foreach ($nestedRelations as $nestedIdField => $modelClass) {
@@ -602,6 +711,12 @@ class SignalPayloadConfigurator
             $idField = $relationName . '_id';
 
             if (! isset($modelData[$idField]) || ! $modelData[$idField]) {
+                continue;
+            }
+
+            // Se la relazione annidata è già presente con dati, preservala
+            if (isset($modelData[$relationName]) && is_array($modelData[$relationName]) && count($modelData[$relationName]) > 1) {
+                // La relazione è già caricata, non sovrascriverla
                 continue;
             }
 
@@ -673,11 +788,8 @@ class SignalPayloadConfigurator
             }
         }
 
-        foreach ($commonModels as $key => $class) {
-            if (stripos($relationName, strtolower($key)) !== false && class_exists($class)) {
-                return $class;
-            }
-        }
+        // Rimuoviamo questo codice che usa una variabile non definita
+        // Se necessario, definire $commonModels prima di questo punto
 
         return null;
     }
@@ -700,8 +812,9 @@ class SignalPayloadConfigurator
                 $modelClass = $relations[$key];
                 $relationField = str_replace('_id', '', $key);
 
-                // Se la relazione non è già presente o non è un array completo
-                if (! isset($data[$relationField]) || ! is_array($data[$relationField]) || ! isset($data[$relationField]['name'])) {
+                // Se la relazione non è già presente o è solo un ID
+                if (! isset($data[$relationField]) || ! is_array($data[$relationField]) || (count($data[$relationField]) === 1 && isset($data[$relationField]['id']))) {
+                    // La relazione non esiste o è solo un ID, espandila completamente
                     try {
                         if (class_exists($modelClass)) {
                             $model = $modelClass::find($value);
@@ -720,8 +833,22 @@ class SignalPayloadConfigurator
                         // Ignora errori
                     }
                 } else {
-                    // Se la relazione è già presente, espandi le sue relazioni annidate
-                    $this->recursiveExpand($data[$relationField], $relations);
+                    // La relazione è già presente con dati (caricata da loadEventRelationsForDispatch)
+                    // PRESERVALA COMPLETAMENTE - NON SOVRASCRIVERLA!
+                    // Non aggiungere 'name' o altri campi, i dati sono già corretti e completi
+                    // Espandi solo le relazioni annidate se configurate (es: model, brand, type per unit)
+                    $nestedToExpand = [];
+                    foreach ($expandNested as $nestedIdField => $nestedRelations) {
+                        // Se expandNested contiene 'loan.unit_id' => ['model', 'brand', 'type']
+                        // e stiamo processando 'unit_id', usa quelle relazioni
+                        if ($nestedIdField === $key || str_ends_with($nestedIdField, '.' . $key)) {
+                            $nestedToExpand = $nestedRelations;
+                            break;
+                        }
+                    }
+                    if (! empty($nestedToExpand)) {
+                        $this->expandNestedRelationsInModel($data[$relationField], $nestedToExpand, $modelClass);
+                    }
                 }
             } elseif (is_array($value)) {
                 // Continua la ricerca ricorsiva
