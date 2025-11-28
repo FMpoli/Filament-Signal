@@ -212,7 +212,7 @@ class WebhookActionHandler implements SignalActionHandler
 
             $configurator = app(SignalPayloadConfigurator::class);
             $payload = $configurator->configure($payload, $payloadConfig);
-            
+
             // DEBUG: Log del payload dopo configure
             \Illuminate\Support\Facades\Log::info('Signal: WebhookActionHandler - payload dopo configure', [
                 'loan_unit_keys' => isset($payload['loan']['unit']) && is_array($payload['loan']['unit']) ? array_keys($payload['loan']['unit']) : [],
@@ -236,7 +236,7 @@ class WebhookActionHandler implements SignalActionHandler
             ],
             default => $payload,
         };
-        
+
         // DEBUG: Log del payload finale prima di essere inviato
         if ($mode === 'event' && isset($finalPayload['data']['loan']['unit'])) {
             \Illuminate\Support\Facades\Log::info('Signal: WebhookActionHandler - payload FINALE prima invio', [
@@ -246,7 +246,7 @@ class WebhookActionHandler implements SignalActionHandler
                 'loan_unit_has_short_description' => isset($finalPayload['data']['loan']['unit']['short_description']),
             ]);
         }
-        
+
         return $finalPayload;
     }
 

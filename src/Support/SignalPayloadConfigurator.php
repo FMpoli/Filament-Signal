@@ -2,7 +2,6 @@
 
 namespace Base33\FilamentSignal\Support;
 
-use Base33\FilamentSignal\Support\SignalModelRegistry;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Log;
@@ -25,7 +24,6 @@ class SignalPayloadConfigurator
         $relationFields = Arr::get($config, 'relation_fields', []); // Campi selezionati per ogni relazione
         $reverseSelections = Arr::get($config, 'reverse_relations', []);
         $relationMetaMap = Arr::get($config, 'relation_meta_map', []);
-
 
         // IMPORTANTE: Espandi PRIMA le relazioni, così i campi espansi possono essere inclusi nel filtro
         if (! empty($expandRelations)) {
@@ -189,7 +187,7 @@ class SignalPayloadConfigurator
             // Filtra i campi delle relazioni annidate se sono stati selezionati
             // Ordina i path per lunghezza (prima i più corti) per processare correttamente le relazioni annidate
             $sortedPaths = array_keys($nestedFields);
-            usort($sortedPaths, fn($a, $b) => substr_count($a, '.') <=> substr_count($b, '.'));
+            usort($sortedPaths, fn ($a, $b) => substr_count($a, '.') <=> substr_count($b, '.'));
 
             foreach ($sortedPaths as $relationPath) {
                 $selectedFields = $nestedFields[$relationPath];
@@ -273,7 +271,7 @@ class SignalPayloadConfigurator
                 $query->with($expand);
             }
 
-            $records = $query->get()->map(fn($model) => $model->toArray())->all();
+            $records = $query->get()->map(fn ($model) => $model->toArray())->all();
 
             return $records;
         } catch (\Throwable $exception) {
@@ -639,7 +637,6 @@ class SignalPayloadConfigurator
             return $payload;
         }
 
-
         // Separa le relazioni root da quelle annidate
         $rootRelations = [];
         $nestedRelations = [];
@@ -654,7 +651,6 @@ class SignalPayloadConfigurator
 
         // Espandi le relazioni a livello root
         $this->recursiveExpand($payload, $rootRelations, $expandNested);
-
 
         // Espandi le relazioni annidate
         foreach ($nestedRelations as $nestedIdField => $modelClass) {
@@ -843,6 +839,7 @@ class SignalPayloadConfigurator
                         // e stiamo processando 'unit_id', usa quelle relazioni
                         if ($nestedIdField === $key || str_ends_with($nestedIdField, '.' . $key)) {
                             $nestedToExpand = $nestedRelations;
+
                             break;
                         }
                     }
