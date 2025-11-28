@@ -4,7 +4,6 @@ namespace Base33\FilamentSignal\Support;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Log;
 
 class SignalPayloadConfigurator
 {
@@ -27,7 +26,7 @@ class SignalPayloadConfigurator
 
         // IMPORTANTE: Filtra PRIMA le relazioni usando getSignalFields(), POI espandi solo se necessario
         // Questo evita che expandRelations sovrascriva i campi già caricati con solo i campi essenziali
-        
+
         // Se includeFields è vuoto, usa i campi essenziali dal modello principale (se disponibile)
         if (empty($includeFields)) {
             // Cerca il modello principale nel payload (es: 'loan' -> EquipmentLoan)
@@ -61,7 +60,7 @@ class SignalPayloadConfigurator
                 }
             }
         }
-        
+
         // Poi filtra i campi da includere (PRIMA di filtrare le relazioni, così le relazioni vengono preservate)
         if (! empty($includeFields)) {
             $payload = $this->includeOnly($payload, $includeFields, $relationFields, $relationMetaMap);
@@ -77,7 +76,7 @@ class SignalPayloadConfigurator
         // IMPORTANTE: expandRelations NON deve sovrascrivere le relazioni già filtrate da filterRelationFields
         // Se una relazione è già presente con più di solo 'id', significa che è già stata filtrata
         // e non deve essere espansa (perché espandere sovrascriverebbe i dati filtrati con solo i campi essenziali)
-        // IMPORTANTE: Se expandRelations è vuoto ma ci sono relazioni configurate in getSignalFields(), 
+        // IMPORTANTE: Se expandRelations è vuoto ma ci sono relazioni configurate in getSignalFields(),
         // dobbiamo comunque espandere le relazioni annidate (es: unit.model, unit.brand, unit.type)
         if (! empty($expandRelations)) {
             $payload = $this->expandRelations($payload, $expandRelations, $expandNested);
@@ -90,7 +89,6 @@ class SignalPayloadConfigurator
         if (! empty($reverseSelections)) {
             $payload = $this->appendReverseRelations($payload, $reverseSelections);
         }
-
 
         // Infine rimuovi i campi esclusi
         if (! empty($excludeFields)) {
@@ -476,7 +474,7 @@ class SignalPayloadConfigurator
                 // Questo funziona come "model integration" - la configurazione è nel codice, non nell'UI
                 // Il modello padre è quello che ha la relazione (es: EquipmentLoan), non il modello correlato (es: EquipmentUnit)
                 $parentModelClass = $meta['parent_model_class'] ?? null;
-                
+
                 // FALLBACK: Se parent_model_class non è nel meta, prova a ottenerlo dal payload
                 // Il parentKey (es: 'loan') dovrebbe corrispondere al modello principale dell'evento
                 if (! $parentModelClass && isset($payload[$parentKey]) && isset($payload[$parentKey]['id'])) {
@@ -484,10 +482,9 @@ class SignalPayloadConfigurator
                     // Per ora, assumiamo che il modello padre sia quello che ha getSignalFields() configurato
                     // e che la chiave nel payload corrisponda al nome del modello (es: 'loan' -> EquipmentLoan)
                 }
-                
+
                 $fieldKeys = [];
                 $nestedFields = [];
-
 
                 // La chiave in 'relations' è il nome della relazione (es: 'unit', 'borrower')
                 // Usa 'relation_name' dal meta, o fallback su 'alias'
@@ -551,7 +548,6 @@ class SignalPayloadConfigurator
                     $fieldKeys[] = 'id';
                 }
 
-
                 // Filtra i campi diretti - IMPORTANTE: seleziona SOLO i campi in fieldKeys
                 // Se fieldKeys è vuoto (solo 'id'), allora includiamo solo 'id'
                 // NON includere altri campi che non sono in fieldKeys
@@ -564,7 +560,6 @@ class SignalPayloadConfigurator
 
                 // IMPORTANTE: Se fieldKeys contiene solo 'id', allora filtered dovrebbe contenere solo 'id'
                 // Se filtered contiene altri campi, significa che qualcosa non va
-
 
                 // Filtra le relazioni annidate se necessario
                 foreach ($nestedFields as $nestedRelation => $nestedFieldKeys) {
@@ -748,7 +743,7 @@ class SignalPayloadConfigurator
                     $registry = app(SignalModelRegistry::class);
                     $parentModelFields = $registry->getFields($parentModelClass);
                     $fieldsToInclude = ['id'];
-                    
+
                     if ($parentModelFields && isset($parentModelFields['relations'][$relationName])) {
                         // Usa i campi configurati per questa relazione nel modello padre
                         $relationConfig = $parentModelFields['relations'][$relationName];
@@ -767,13 +762,13 @@ class SignalPayloadConfigurator
                         // Fallback: usa i campi essenziali
                         $fieldsToInclude = array_merge($fieldsToInclude, $this->getEssentialFields($modelClass));
                     }
-                    
+
                     // Rimuovi duplicati e assicurati che 'id' sia sempre incluso
                     $fieldsToInclude = array_unique($fieldsToInclude);
                     if (! in_array('id', $fieldsToInclude)) {
                         array_unshift($fieldsToInclude, 'id');
                     }
-                    
+
                     $modelData[$relationName] = [
                         'id' => $relatedModel->id,
                         'name' => $this->getModelName($relatedModel),
@@ -859,7 +854,7 @@ class SignalPayloadConfigurator
                 // Se la relazione non è già presente o è solo un ID
                 $hasOnlyId = isset($data[$relationField]) && is_array($data[$relationField]) && count($data[$relationField]) === 1 && isset($data[$relationField]['id']);
                 $notPresent = ! isset($data[$relationField]) || ! is_array($data[$relationField]);
-                
+
                 // IMPORTANTE: Se la relazione è già presente con più di solo 'id', NON espanderla
                 // perché significa che è già stata filtrata da filterRelationFields o caricata con tutti i campi
                 // Espandere qui sovrascriverebbe i dati già filtrati con solo i campi essenziali
@@ -991,26 +986,25 @@ class SignalPayloadConfigurator
      * Trova la chiave principale nel payload (es: 'loan')
      *
      * @param  array<string, mixed>  $payload
-     * @return string|null
      */
     protected function findMainKey(array $payload): ?string
     {
         // Cerca chiavi comuni che rappresentano il modello principale
         $commonKeys = ['loan', 'equipment_loan', 'user', 'equipment_unit'];
-        
+
         foreach ($commonKeys as $key) {
             if (isset($payload[$key]) && is_array($payload[$key]) && isset($payload[$key]['id'])) {
                 return $key;
             }
         }
-        
+
         // Se non trovato, cerca la prima chiave che ha un array con 'id'
         foreach ($payload as $key => $value) {
             if (is_array($value) && isset($value['id']) && ! in_array($key, ['previousStatus', 'currentStatus', 'metadata'])) {
                 return $key;
             }
         }
-        
+
         return null;
     }
 
@@ -1019,7 +1013,6 @@ class SignalPayloadConfigurator
      *
      * @param  array<string, mixed>  $payload
      * @param  array<string, array>  $relationMetaMap
-     * @return string|null
      */
     protected function findMainModelClass(array $payload, array $relationMetaMap): ?string
     {
@@ -1027,7 +1020,7 @@ class SignalPayloadConfigurator
         if (! $mainKey) {
             return null;
         }
-        
+
         // Cerca parent_model_class nel relationMetaMap
         foreach ($relationMetaMap as $meta) {
             $parentKey = $meta['parent_property'] ?? null;
@@ -1035,7 +1028,7 @@ class SignalPayloadConfigurator
                 return $meta['parent_model_class'] ?? null;
             }
         }
-        
+
         // Fallback: prova a dedurre dal nome della chiave
         $modelClassMap = [
             'loan' => 'DetIT\\FilamentLabOps\\Models\\EquipmentLoan',
@@ -1043,7 +1036,7 @@ class SignalPayloadConfigurator
             'unit' => 'DetIT\\FilamentLabOps\\Models\\EquipmentUnit',
             'equipment_unit' => 'DetIT\\FilamentLabOps\\Models\\EquipmentUnit',
         ];
-        
+
         return $modelClassMap[$mainKey] ?? null;
     }
 
@@ -1083,11 +1076,11 @@ class SignalPayloadConfigurator
             // Ottieni la configurazione della relazione da getSignalFields()
             $registry = app(SignalModelRegistry::class);
             $parentModelFields = $registry->getFields($parentModelClass);
-            
+
             if ($parentModelFields && isset($parentModelFields['relations'][$relationName])) {
                 $relationConfig = $parentModelFields['relations'][$relationName];
                 $expandList = $relationConfig['expand'] ?? [];
-                
+
                 if (! empty($expandList)) {
                     // Espandi le relazioni annidate
                     $relationModelClass = $meta['model_class'] ?? null;
