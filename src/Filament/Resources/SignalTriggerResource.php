@@ -756,14 +756,14 @@ class SignalTriggerResource extends Resource
                     ->modalDescription(__('filament-signal::signal.actions.clone_trigger_description'))
                     ->action(function (SignalTrigger $record) {
                         // Replica solo gli attributi fillable, escludendo attributi virtuali come actions_count
-                        $cloned = new SignalTrigger();
+                        $cloned = new SignalTrigger;
                         $cloned->fill($record->only($record->getFillable()));
-                        
+
                         // Aggiungi "(Copy)" al nome se non è già presente
                         $cloned->name = str_ends_with($record->name, ' (Copy)')
                             ? $record->name . ' (Copy)'
                             : $record->name . ' (Copy)';
-                        
+
                         $cloned->status = SignalTrigger::STATUS_DRAFT;
                         $cloned->activated_at = null;
                         $cloned->save();
@@ -771,15 +771,15 @@ class SignalTriggerResource extends Resource
                         // Clona anche le azioni associate
                         foreach ($record->actions as $action) {
                             // Replica solo gli attributi fillable, escludendo attributi virtuali
-                            $clonedAction = new \Base33\FilamentSignal\Models\SignalAction();
+                            $clonedAction = new \Base33\FilamentSignal\Models\SignalAction;
                             $clonedAction->fill($action->only($action->getFillable()));
                             $clonedAction->trigger_id = $cloned->id;
-                            
+
                             // Aggiungi "(Copy)" al nome dell'azione se non è già presente
                             $clonedAction->name = str_ends_with($action->name, ' (Copy)')
                                 ? $action->name . ' (Copy)'
                                 : $action->name . ' (Copy)';
-                            
+
                             $clonedAction->save();
                         }
 

@@ -74,6 +74,7 @@ class EloquentSignalEvent implements SignalIdentifiableEvent, SignalPayloadProvi
         // Se il modello implementa HasSignal, usa loadEventRelationsForDispatch
         if (is_subclass_of($modelClass, HasSignal::class) && method_exists($modelClass, 'loadEventRelationsForDispatch')) {
             $this->model->loadEventRelationsForDispatch();
+
             return;
         }
 

@@ -556,12 +556,12 @@ class SignalPayloadConfigurator
                     // - "field" (es: "name")
                     foreach ($selectedFields as $field) {
                         $parts = explode('.', $field);
-                        
+
                         // Rimuovi il parentKey se presente (es: "blog_post.author.name" -> "author.name")
                         if (count($parts) >= 3 && $parts[0] === $parentKey) {
                             $parts = array_slice($parts, 1);
                         }
-                        
+
                         if (count($parts) === 1) {
                             // Campo diretto della relazione (es: "name", "email")
                             if (! in_array($field, $fieldKeys)) {
@@ -577,7 +577,7 @@ class SignalPayloadConfigurator
                             // Campo di una relazione annidata (es: "author.photo" quando alias è "author" e c'è una relazione "photo")
                             // Oppure campo di una relazione diversa (es: "category.name" quando alias è "author")
                             $firstPart = $parts[0];
-                            
+
                             if ($firstPart === $alias) {
                                 // Se la prima parte è l'alias, potrebbe essere un campo diretto o una relazione annidata
                                 if (count($parts) === 2) {
@@ -613,6 +613,7 @@ class SignalPayloadConfigurator
                 if (empty($fieldKeys) && empty($nestedFields)) {
                     // Se non ci sono campi selezionati, rimuovi completamente la relazione dal payload
                     unset($payload[$parentKey][$alias]);
+
                     continue;
                 }
 
