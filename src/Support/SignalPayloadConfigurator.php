@@ -545,61 +545,75 @@ class SignalPayloadConfigurator
                 $fieldKeys = [];
                 $nestedFields = [];
 
-                // La chiave in 'relations' è il nome della relazione (es: 'unit', 'borrower')
-                // Usa 'relation_name' dal meta, o fallback su 'alias'
-                $relationName = $meta['relation_name'] ?? $alias ?? null;
-
-                if ($parentModelClass && $relationName && class_exists($parentModelClass)) {
-                    $registry = app(SignalModelRegistry::class);
-                    $parentModelFields = $registry->getFields($parentModelClass);
-
-                    if ($parentModelFields && isset($parentModelFields['relations'][$relationName])) {
-                        // Usa la configurazione della relazione da getSignalFields() DEL MODELLO PADRE
-                        $relationConfig = $parentModelFields['relations'][$relationName];
-
-                        // Estrai i campi diretti configurati
-                        if (isset($relationConfig['fields']) && is_array($relationConfig['fields'])) {
-                            foreach ($relationConfig['fields'] as $field) {
-                                // Gestisci sia array associativi che numerici
-                                $fieldName = is_array($field) ? ($field['field'] ?? null) : $field;
-                                if ($fieldName && ! in_array($fieldName, $fieldKeys)) {
-                                    $fieldKeys[] = $fieldName;
-                                }
-                            }
+                // IMPORTANTE: Usa SOLO i campi selezionati nella Payload Configuration
+                // La Model Integration definisce i campi DISPONIBILI, ma la Payload Configuration decide quali INCLUDERE
+                // Se non ci sono campi selezionati, non includere quella relazione (o solo 'id' se necessario)
+                if (! empty($selectedFields)) {
+                    // Estrai i campi selezionati dall'UI
+                    // I campi possono essere in formato:
+                    // - "parentKey.alias.field" (es: "blog_post.author.name")
+                    // - "alias.field" (es: "author.name")
+                    // - "field" (es: "name")
+                    foreach ($selectedFields as $field) {
+                        $parts = explode('.', $field);
+                        
+                        // Rimuovi il parentKey se presente (es: "blog_post.author.name" -> "author.name")
+                        if (count($parts) >= 3 && $parts[0] === $parentKey) {
+                            $parts = array_slice($parts, 1);
                         }
-
-                        // Estrai le relazioni annidate configurate
-                        if (isset($relationConfig['expand']) && is_array($relationConfig['expand'])) {
-                            // Per ottenere il modello correlato, usa il modello correlato dalla meta
-                            // Il modello correlato è quello che ha la relazione annidata (es: EquipmentUnit ha model, brand, type)
-                            $relatedModelClass = $meta['model_class'] ?? null;
-
-                            if ($relatedModelClass && class_exists($relatedModelClass)) {
-                                // Ottieni i campi configurati per il modello correlato
-                                $relatedModelFields = $registry->getFields($relatedModelClass);
-
-                                foreach ($relationConfig['expand'] as $nestedRelation) {
-                                    // Per ogni relazione annidata, usa la configurazione da getSignalFields() del modello correlato
-                                    if ($relatedModelFields && isset($relatedModelFields['relations'][$nestedRelation])) {
-                                        $nestedRelationConfig = $relatedModelFields['relations'][$nestedRelation];
-
-                                        // Estrai i campi configurati per la relazione annidata
-                                        if (isset($nestedRelationConfig['fields']) && is_array($nestedRelationConfig['fields'])) {
-                                            if (! isset($nestedFields[$nestedRelation])) {
-                                                $nestedFields[$nestedRelation] = [];
-                                            }
-                                            foreach ($nestedRelationConfig['fields'] as $nestedField) {
-                                                $nestedFieldName = is_array($nestedField) ? ($nestedField['field'] ?? null) : $nestedField;
-                                                if ($nestedFieldName && ! in_array($nestedFieldName, $nestedFields[$nestedRelation])) {
-                                                    $nestedFields[$nestedRelation][] = $nestedFieldName;
-                                                }
-                                            }
+                        
+                        if (count($parts) === 1) {
+                            // Campo diretto della relazione (es: "name", "email")
+                            if (! in_array($field, $fieldKeys)) {
+                                $fieldKeys[] = $field;
+                            }
+                        } elseif (count($parts) === 2 && $parts[0] === $alias) {
+                            // Campo diretto della relazione quando è specificato con l'alias (es: "author.name")
+                            $nestedField = $parts[1];
+                            if (! in_array($nestedField, $fieldKeys)) {
+                                $fieldKeys[] = $nestedField;
+                            }
+                        } elseif (count($parts) >= 2) {
+                            // Campo di una relazione annidata (es: "author.photo" quando alias è "author" e c'è una relazione "photo")
+                            // Oppure campo di una relazione diversa (es: "category.name" quando alias è "author")
+                            $firstPart = $parts[0];
+                            
+                            if ($firstPart === $alias) {
+                                // Se la prima parte è l'alias, potrebbe essere un campo diretto o una relazione annidata
+                                if (count($parts) === 2) {
+                                    // Campo diretto (es: "author.name")
+                                    $nestedField = $parts[1];
+                                    if (! in_array($nestedField, $fieldKeys)) {
+                                        $fieldKeys[] = $nestedField;
+                                    }
+                                } else {
+                                    // Relazione annidata (es: "author.photo.url")
+                                    $nestedRelation = $parts[1];
+                                    $nestedField = $parts[2] ?? null;
+                                    if ($nestedField) {
+                                        if (! isset($nestedFields[$nestedRelation])) {
+                                            $nestedFields[$nestedRelation] = [];
+                                        }
+                                        if (! in_array($nestedField, $nestedFields[$nestedRelation])) {
+                                            $nestedFields[$nestedRelation][] = $nestedField;
                                         }
                                     }
                                 }
+                            } else {
+                                // Relazione diversa (non gestita qui, sarà gestita quando processiamo quella relazione)
+                                // Per ora, ignoriamo
                             }
                         }
                     }
+                }
+
+                // Se non ci sono campi selezionati, non includere la relazione
+                // La Model Integration definisce solo cosa è DISPONIBILE, non cosa viene incluso
+                // La Payload Configuration decide quali campi includere nel payload finale
+                if (empty($fieldKeys) && empty($nestedFields)) {
+                    // Se non ci sono campi selezionati, rimuovi completamente la relazione dal payload
+                    unset($payload[$parentKey][$alias]);
+                    continue;
                 }
 
                 // Assicurati che 'id' sia sempre incluso

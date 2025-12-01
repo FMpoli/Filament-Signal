@@ -8,6 +8,7 @@ use Base33\FilamentSignal\FilamentSignal;
 use Base33\FilamentSignal\Models\SignalTrigger;
 use Base33\FilamentSignal\Support\SignalPayloadFieldAnalyzer;
 use Base33\FilamentSignal\Support\SignalWebhookTemplateRegistry;
+use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -746,6 +747,49 @@ class SignalTriggerResource extends Resource
                 EditAction::make()
                     ->url(fn (SignalTrigger $record): string => static::getUrl('edit', ['record' => $record]))
                     ->openUrlInNewTab(false),
+                Action::make('clone')
+                    ->label(__('filament-signal::signal.actions.clone'))
+                    ->icon('heroicon-o-document-duplicate')
+                    ->color('gray')
+                    ->requiresConfirmation()
+                    ->modalHeading(__('filament-signal::signal.actions.clone_trigger'))
+                    ->modalDescription(__('filament-signal::signal.actions.clone_trigger_description'))
+                    ->action(function (SignalTrigger $record) {
+                        // Replica solo gli attributi fillable, escludendo attributi virtuali come actions_count
+                        $cloned = new SignalTrigger();
+                        $cloned->fill($record->only($record->getFillable()));
+                        
+                        // Aggiungi "(Copy)" al nome se non è già presente
+                        $cloned->name = str_ends_with($record->name, ' (Copy)')
+                            ? $record->name . ' (Copy)'
+                            : $record->name . ' (Copy)';
+                        
+                        $cloned->status = SignalTrigger::STATUS_DRAFT;
+                        $cloned->activated_at = null;
+                        $cloned->save();
+
+                        // Clona anche le azioni associate
+                        foreach ($record->actions as $action) {
+                            // Replica solo gli attributi fillable, escludendo attributi virtuali
+                            $clonedAction = new \Base33\FilamentSignal\Models\SignalAction();
+                            $clonedAction->fill($action->only($action->getFillable()));
+                            $clonedAction->trigger_id = $cloned->id;
+                            
+                            // Aggiungi "(Copy)" al nome dell'azione se non è già presente
+                            $clonedAction->name = str_ends_with($action->name, ' (Copy)')
+                                ? $action->name . ' (Copy)'
+                                : $action->name . ' (Copy)';
+                            
+                            $clonedAction->save();
+                        }
+
+                        \Filament\Notifications\Notification::make()
+                            ->title(__('filament-signal::signal.actions.clone_success'))
+                            ->success()
+                            ->send();
+
+                        return redirect()->route(static::getRouteBaseName() . '.edit', ['record' => $cloned]);
+                    }),
             ])
             ->bulkActions([
                 BulkActionGroup::make([

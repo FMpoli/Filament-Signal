@@ -46,6 +46,13 @@ class SignalModelIntegration extends Model
     {
         $this->unregisterFromSignal();
         $this->registerOnBoot();
+        
+        // IMPORTANTE: Ricarica i listener degli eventi dopo aver registrato nuovi eventi
+        // Questo è necessario perché SignalEventRegistrar::register() viene chiamato solo all'avvio
+        // e se aggiungiamo una nuova Model Integration dopo l'avvio, i listener non vengono ricaricati
+        if (app()->isBooted()) {
+            app(\Base33\FilamentSignal\Services\SignalEventRegistrar::class)->register();
+        }
     }
 
     public function registerOnBoot(): void

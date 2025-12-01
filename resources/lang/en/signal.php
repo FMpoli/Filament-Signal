@@ -14,6 +14,10 @@ return [
     'actions' => [
         'add_action' => 'Add action',
         'view_log' => 'View log',
+        'clone' => 'Clone',
+        'clone_trigger' => 'Clone automation',
+        'clone_trigger_description' => 'Do you want to create a copy of this automation? All actions will be cloned.',
+        'clone_success' => 'Automation cloned successfully',
     ],
     'fields' => [
         'name' => 'Name',

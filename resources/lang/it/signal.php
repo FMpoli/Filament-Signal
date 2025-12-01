@@ -14,6 +14,10 @@ return [
     'actions' => [
         'add_action' => 'Aggiungi azione',
         'view_log' => 'Vedi log',
+        'clone' => 'Clona',
+        'clone_trigger' => 'Clona automazione',
+        'clone_trigger_description' => 'Vuoi creare una copia di questa automazione? Tutte le azioni verranno clonate.',
+        'clone_success' => 'Automazione clonata con successo',
     ],
     'fields' => [
         'name' => 'Nome',

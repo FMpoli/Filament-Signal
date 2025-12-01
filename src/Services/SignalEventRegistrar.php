@@ -27,6 +27,11 @@ class SignalEventRegistrar
         $events = $this->discoverEvents();
 
         foreach ($events as $eventName) {
+            // Rimuovi i listener esistenti per questo evento per evitare duplicati
+            // Nota: questo rimuove TUTTI i listener per questo evento, non solo quelli di Signal
+            // Ma è necessario per evitare listener duplicati quando si ricarica dopo aver salvato una Model Integration
+            $this->dispatcher->forget($eventName);
+            
             $this->dispatcher->listen($eventName, function (...$payload) use ($eventName): void {
                 $event = $this->wrapEventPayload($eventName, $payload);
 
