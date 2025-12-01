@@ -86,7 +86,7 @@ class SignalModelIntegrationResource extends Resource
                                     Forms\Components\CheckboxList::make('eloquent_events')
                                         ->label(__('filament-signal::signal.model_integrations.fields.eloquent_events'))
                                         ->options(self::eloquentEventOptions())
-                                        ->columns(2)
+                                        ->columns(2),
                                 ]),
                         ]),
                     // Seconda colonna (più larga) - Tabs con Available Fields, Relations, Custom Events
@@ -103,7 +103,7 @@ class SignalModelIntegrationResource extends Resource
                                             Forms\Components\Select::make('field')
                                                 ->label(__('filament-signal::signal.model_integrations.fields.field_name'))
                                                 ->required()
-                                                ->options(fn(SchemaGet $get): array => static::getModelFieldOptions(static::resolveModelClass($get)))
+                                                ->options(fn (SchemaGet $get): array => static::getModelFieldOptions(static::resolveModelClass($get)))
                                                 ->reactive()
                                                 ->searchable()
                                                 ->preload(),
@@ -124,7 +124,7 @@ class SignalModelIntegrationResource extends Resource
                                         ->schema([
                                             Forms\Components\Select::make('name')
                                                 ->label(__('filament-signal::signal.model_integrations.fields.relation_name'))
-                                                ->options(fn(SchemaGet $get): array => static::getRelationOptions(static::resolveModelClass($get)))
+                                                ->options(fn (SchemaGet $get): array => static::getRelationOptions(static::resolveModelClass($get)))
                                                 ->searchable()
                                                 ->preload()
                                                 ->reactive()
@@ -154,7 +154,7 @@ class SignalModelIntegrationResource extends Resource
                                                 ->schema([
                                                     Forms\Components\Select::make('field')
                                                         ->label(__('filament-signal::signal.model_integrations.fields.field_name'))
-                                                        ->options(fn(SchemaGet $get): array => static::getRelationFieldOptions($get))
+                                                        ->options(fn (SchemaGet $get): array => static::getRelationFieldOptions($get))
                                                         ->required()
                                                         ->live()
                                                         ->reactive()
@@ -174,7 +174,7 @@ class SignalModelIntegrationResource extends Resource
                                             Forms\Components\Select::make('expand')
                                                 ->label(__('filament-signal::signal.model_integrations.fields.expand_relations'))
                                                 ->multiple()
-                                                ->options(fn(SchemaGet $get): array => static::getRelationExpandOptions($get))
+                                                ->options(fn (SchemaGet $get): array => static::getRelationExpandOptions($get))
                                                 ->reactive()
                                                 ->searchable()
                                                 ->preload(),
@@ -231,7 +231,7 @@ class SignalModelIntegrationResource extends Resource
                     ->placeholder('—'),
                 Tables\Columns\TextColumn::make('eloquent_events')
                     ->label(__('filament-signal::signal.model_integrations.fields.eloquent_events'))
-                    ->formatStateUsing(fn($state) => collect($state ?? [])->map(fn($event) => self::eloquentEventOptions()[$event] ?? $event)->implode(', '))
+                    ->formatStateUsing(fn ($state) => collect($state ?? [])->map(fn ($event) => self::eloquentEventOptions()[$event] ?? $event)->implode(', '))
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('updated_at')
                     ->label(__('filament-signal::signal.fields.updated_at'))
@@ -346,7 +346,7 @@ class SignalModelIntegrationResource extends Resource
         $fieldOptions = collect($fields ?? [])
             ->merge(['id', 'created_at', 'updated_at'])
             ->unique()
-            ->mapWithKeys(fn($field) => [$field => Str::headline(str_replace('_', ' ', $field))])
+            ->mapWithKeys(fn ($field) => [$field => Str::headline(str_replace('_', ' ', $field))])
             ->toArray();
 
         $relations = [];
