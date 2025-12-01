@@ -116,60 +116,10 @@ class SignalActionLogResource extends Resource
                                 $payload = $decoded !== null ? $decoded : $payload;
                             }
 
-                            // Applica la configurazione del payload per mostrare quello che viene effettivamente inviato
-                            if ($record->action && is_array($payload)) {
-                                $configuration = $record->action->configuration ?? [];
-                                $payloadConfig = \Illuminate\Support\Arr::get($configuration, 'payload_config', []);
-
-                                if (! empty($payloadConfig)) {
-                                    $configurator = app(\Base33\FilamentSignal\Support\SignalPayloadConfigurator::class);
-
-                                    // Se ci sono relationFields, espandi automaticamente quelle relazioni
-                                    $relationFields = \Illuminate\Support\Arr::get($payloadConfig, 'relation_fields', []);
-                                    if (! empty($relationFields) && is_array($relationFields)) {
-                                        $analyzer = app(\Base33\FilamentSignal\Support\SignalPayloadFieldAnalyzer::class);
-                                        $analysis = $analyzer->analyzeEvent($record->event_class);
-
-                                        $relationsMap = [];
-                                        $expandNested = [];
-
-                                        foreach ($relationFields as $idField => $fields) {
-                                            $originalIdField = str_contains($idField, '.') ? $idField : str_replace('_', '.', $idField);
-
-                                            if (isset($analysis['relations'][$originalIdField])) {
-                                                $relation = $analysis['relations'][$originalIdField];
-                                                if ($relation['model_class']) {
-                                                    $relationsMap[$originalIdField] = $relation['model_class'];
-
-                                                    if (! empty($relation['expand'])) {
-                                                        $expandNested[$originalIdField] = $relation['expand'];
-                                                    }
-                                                }
-                                            }
-                                        }
-
-                                        $payloadConfig['expand_relations'] = $relationsMap;
-                                        $payloadConfig['expand_nested'] = $expandNested;
-                                    }
-
-                                    $payload = $configurator->configure($payload, $payloadConfig);
-
-                                    // Se il body mode è 'event', applica anche la formattazione finale
-                                    $bodyMode = \Illuminate\Support\Arr::get($configuration, 'body', 'payload');
-                                    if ($bodyMode === 'event') {
-                                        $handler = app(\Base33\FilamentSignal\Actions\WebhookActionHandler::class);
-                                        $reflection = new \ReflectionClass($handler);
-                                        $method = $reflection->getMethod('buildPayload');
-                                        $method->setAccessible(true);
-                                        $payload = $method->invoke($handler, $bodyMode, $payload, $record->event_class, $record->action);
-                                        // Estrai solo la parte 'data' se è in formato event
-                                        if (isset($payload['data'])) {
-                                            $payload = $payload['data'];
-                                        }
-                                    }
-                                }
-                            }
-
+                            // IMPORTANTE: Il payload salvato è già quello configurato e inviato al webhook
+                            // Non riconfigurarlo, altrimenti si perdono le relazioni inverse già presenti
+                            // Mostra direttamente il payload salvato
+                            
                             // Formatta come JSON leggibile
                             $formatted = is_array($payload) || is_object($payload)
                                 ? json_encode($payload, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)

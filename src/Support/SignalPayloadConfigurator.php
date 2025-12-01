@@ -60,14 +60,47 @@ class SignalPayloadConfigurator
                 }
             }
         }
-
+        
+        // IMPORTANTE: Se ci sono relazioni inverse, salva gli id originali PRIMA di filtrare il payload
+        // perché appendReverseRelations() ne ha bisogno per recuperare i record correlati
+        $originalIds = [];
+        if (! empty($reverseSelections)) {
+            foreach ($reverseSelections as $selection) {
+                $meta = $selection['meta'] ?? [];
+                $parentKey = $meta['parent_property'] ?? null;
+                if ($parentKey && isset($payload[$parentKey]['id'])) {
+                    $originalIds[$parentKey] = $payload[$parentKey]['id'];
+                }
+            }
+            
+            // Assicurati che 'id' sia sempre incluso nei includeFields quando ci sono relazioni inverse
+            $mainKey = $this->findMainKey($payload);
+            if ($mainKey && ! empty($includeFields)) {
+                $idField = $mainKey . '.id';
+                if (! in_array($idField, $includeFields)) {
+                    $includeFields[] = $idField;
+                }
+            } elseif ($mainKey && empty($includeFields)) {
+                // Se includeFields è vuoto, aggiungi almeno id
+                $includeFields[] = $mainKey . '.id';
+            }
+        }
+        
         // Poi filtra i campi da includere (PRIMA di filtrare le relazioni, così le relazioni vengono preservate)
         if (! empty($includeFields)) {
             $payload = $this->includeOnly($payload, $includeFields, $relationFields, $relationMetaMap);
         }
 
+        // IMPORTANTE: Aggiungi PRIMA le relazioni inverse al payload, così possono essere filtrate successivamente
+        // Le relazioni inverse devono essere aggiunte prima di filterRelationFields() perché altrimenti
+        // filterReverseRelationFields() non trova i record da filtrare
+        if (! empty($reverseSelections)) {
+            $payload = $this->appendReverseRelations($payload, $reverseSelections, $originalIds);
+        }
+
         // Filtra i campi delle relazioni selezionati PRIMA di expandRelations
         // così preserviamo i campi già caricati (inventory_code, serial_number, ecc.)
+        // Questo include anche il filtraggio delle relazioni inverse appena aggiunte
         if (! empty($relationFields)) {
             $payload = $this->filterRelationFields($payload, $relationFields, $relationMetaMap);
         }
@@ -86,10 +119,6 @@ class SignalPayloadConfigurator
             $payload = $this->expandNestedRelationsFromConfig($payload, $relationFields, $relationMetaMap);
         }
 
-        if (! empty($reverseSelections)) {
-            $payload = $this->appendReverseRelations($payload, $reverseSelections);
-        }
-
         // Infine rimuovi i campi esclusi
         if (! empty($excludeFields)) {
             $payload = $this->excludeFields($payload, $excludeFields);
@@ -100,8 +129,9 @@ class SignalPayloadConfigurator
 
     /**
      * @param  array<int, array{meta: array, fields: array<string>}>  $reverseSelections
+     * @param  array<string, mixed>  $originalIds  Array di [parentKey => id] per recuperare l'id se non è nel payload filtrato
      */
-    protected function appendReverseRelations(array $payload, array $reverseSelections): array
+    protected function appendReverseRelations(array $payload, array $reverseSelections, array $originalIds = []): array
     {
         if (empty($reverseSelections)) {
             return $payload;
@@ -119,16 +149,45 @@ class SignalPayloadConfigurator
                 continue;
             }
 
-            if (
-                ! isset($payload[$parentKey]) ||
-                ! is_array($payload[$parentKey]) ||
-                ! isset($payload[$parentKey]['id'])
-            ) {
+            if (! isset($payload[$parentKey]) || ! is_array($payload[$parentKey])) {
                 continue;
             }
 
-            $parentId = $payload[$parentKey]['id'];
-            $records = $this->fetchReverseRelationRecords($modelClass, $foreignKey, $parentId, $meta['expand'] ?? []);
+            // Prova a recuperare l'id dal payload filtrato, altrimenti usa quello originale
+            $parentId = $payload[$parentKey]['id'] ?? $originalIds[$parentKey] ?? null;
+            
+            if (! $parentId) {
+                continue;
+            }
+            
+            // Determina le relazioni da espandere: usa quelle specificate nel meta, o quelle configurate nel modello
+            $expand = $meta['expand'] ?? [];
+            
+            // Se expand è vuoto, prova a leggere le relazioni da espandere da getSignalFields() del modello correlato
+            if (empty($expand) && $modelClass) {
+                $registry = app(SignalModelRegistry::class);
+                $modelFields = $registry->getFields($modelClass);
+                if ($modelFields && isset($modelFields['relations'])) {
+                    foreach ($modelFields['relations'] as $relationName => $relationConfig) {
+                        $relationExpand = $relationConfig['expand'] ?? [];
+                        if (! empty($relationExpand)) {
+                            // Costruisci il path completo per l'espansione (es: unit.model, unit.brand, unit.type)
+                            foreach ($relationExpand as $nestedRelation) {
+                                $expandPath = "{$relationName}.{$nestedRelation}";
+                                if (! in_array($expandPath, $expand)) {
+                                    $expand[] = $expandPath;
+                                }
+                            }
+                            // Aggiungi anche la relazione principale se non è già presente
+                            if (! in_array($relationName, $expand)) {
+                                $expand[] = $relationName;
+                            }
+                        }
+                    }
+                }
+            }
+            
+            $records = $this->fetchReverseRelationRecords($modelClass, $foreignKey, $parentId, $expand);
 
             $payload[$parentKey][$alias] = $records;
         }
@@ -661,7 +720,7 @@ class SignalPayloadConfigurator
         }
 
         // Espandi le relazioni a livello root
-        $this->recursiveExpand($payload, $rootRelations, $expandNested);
+        $this->recursiveExpand($payload, $rootRelations, $expandNested, '');
 
         // Espandi le relazioni annidate
         foreach ($nestedRelations as $nestedIdField => $modelClass) {
@@ -839,7 +898,7 @@ class SignalPayloadConfigurator
      * @param  array<string, string>  $relations
      * @param  array<string, array<string>>  $expandNested
      */
-    protected function recursiveExpand(mixed &$data, array $relations, array $expandNested = []): void
+    protected function recursiveExpand(mixed &$data, array $relations, array $expandNested = [], string $currentPath = ''): void
     {
         if (! is_array($data)) {
             return;
@@ -850,6 +909,9 @@ class SignalPayloadConfigurator
             if (str_ends_with($key, '_id') && isset($relations[$key]) && $value && is_numeric($value)) {
                 $modelClass = $relations[$key];
                 $relationField = str_replace('_id', '', $key);
+
+                // Costruisci il path completo per il matching con expandNested
+                $fullPath = $currentPath ? $currentPath . '.' . $key : $key;
 
                 // Se la relazione non è già presente o è solo un ID
                 $hasOnlyId = isset($data[$relationField]) && is_array($data[$relationField]) && count($data[$relationField]) === 1 && isset($data[$relationField]['id']);
@@ -871,7 +933,8 @@ class SignalPayloadConfigurator
                                 ];
 
                                 // Espandi ricorsivamente le relazioni annidate
-                                $this->recursiveExpand($data[$relationField], $relations);
+                                $nextPath = $currentPath ? $currentPath . '.' . $relationField : $relationField;
+                                $this->recursiveExpand($data[$relationField], $relations, $expandNested, $nextPath);
                             }
                         }
                     } catch (\Throwable $e) {
@@ -885,10 +948,9 @@ class SignalPayloadConfigurator
                     $nestedToExpand = [];
                     foreach ($expandNested as $nestedIdField => $nestedRelations) {
                         // Se expandNested contiene 'loan.unit_id' => ['model', 'brand', 'type']
-                        // e stiamo processando 'unit_id', usa quelle relazioni
-                        if ($nestedIdField === $key || str_ends_with($nestedIdField, '.' . $key)) {
+                        // e stiamo processando 'unit_id' in 'loan', usa quelle relazioni
+                        if ($nestedIdField === $fullPath || $nestedIdField === $key || str_ends_with($nestedIdField, '.' . $key)) {
                             $nestedToExpand = $nestedRelations;
-
                             break;
                         }
                     }
@@ -898,7 +960,8 @@ class SignalPayloadConfigurator
                 }
             } elseif (is_array($value)) {
                 // Continua la ricerca ricorsiva
-                $this->recursiveExpand($value, $relations);
+                $nextPath = $currentPath ? $currentPath . '.' . $key : $key;
+                $this->recursiveExpand($value, $relations, $expandNested, $nextPath);
             }
         }
     }

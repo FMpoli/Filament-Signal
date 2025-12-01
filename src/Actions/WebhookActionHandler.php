@@ -4,6 +4,7 @@ namespace Base33\FilamentSignal\Actions;
 
 use Base33\FilamentSignal\Contracts\SignalActionHandler;
 use Base33\FilamentSignal\Models\SignalAction;
+use Base33\FilamentSignal\Models\SignalActionLog;
 use Base33\FilamentSignal\Support\SignalPayloadConfigurator;
 use Base33\FilamentSignal\Support\SignalPayloadFieldAnalyzer;
 use Illuminate\Support\Arr;
@@ -12,7 +13,7 @@ use Spatie\WebhookServer\WebhookCall;
 
 class WebhookActionHandler implements SignalActionHandler
 {
-    public function handle(SignalAction $action, array $payload, string $eventClass): ?array
+    public function handle(SignalAction $action, array $payload, string $eventClass, ?SignalActionLog $log = null): ?array
     {
         $configuration = $action->configuration ?? [];
 
@@ -49,6 +50,23 @@ class WebhookActionHandler implements SignalActionHandler
         }
 
         $payloadForWebhook = $this->buildPayload($bodyMode, $payload, $eventClass, $action);
+
+        // Aggiorna il log con il payload finale elaborato
+        // IMPORTANTE: Salva esattamente lo stesso payload che viene inviato al webhook
+        // Il log viene passato da SignalActionExecutor, quindi dovrebbe essere sempre presente
+        if ($log) {
+            // Se bodyMode è 'event', il payload inviato ha la struttura completa con 'data'
+            // ma nella UI mostriamo solo 'data', quindi salviamo quello per coerenza
+            // Se bodyMode è 'payload', il payload è direttamente quello che viene inviato
+            // In entrambi i casi, salva il payload configurato (che contiene le relazioni inverse)
+            $logPayload = $bodyMode === 'event' && isset($payloadForWebhook['data']) 
+                ? $payloadForWebhook['data'] 
+                : $payloadForWebhook;
+            
+            // Salva il payload configurato nel log
+            // IMPORTANTE: Usa update() per aggiornare solo il campo payload, preservando gli altri campi
+            $log->update(['payload' => $logPayload]);
+        }
 
         $webhookCall = WebhookCall::create()
             ->url($url)

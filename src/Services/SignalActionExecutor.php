@@ -38,13 +38,15 @@ class SignalActionExecutor
 
             $handler = $this->resolveHandler($action->action_type);
 
-            $response = $handler->handle($action, $payload, $eventClass);
+            $response = $handler->handle($action, $payload, $eventClass, $log);
 
             Log::info("Signal: Action [{$action->id}] executed successfully", [
                 'action_id' => $action->id,
                 'response' => $response,
             ]);
 
+            // Aggiorna il log con status e response, preservando il payload già aggiornato dal handler
+            $log->refresh(); // Ricarica il log per avere l'ultima versione (in caso il handler l'abbia aggiornato)
             $log->update([
                 'status' => 'success',
                 'response' => $response,

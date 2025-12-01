@@ -4,6 +4,7 @@ namespace Base33\FilamentSignal\Actions;
 
 use Base33\FilamentSignal\Contracts\SignalActionHandler;
 use Base33\FilamentSignal\Models\SignalAction;
+use Base33\FilamentSignal\Models\SignalActionLog;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Mail;
@@ -12,7 +13,7 @@ use InvalidArgumentException;
 
 class EmailActionHandler implements SignalActionHandler
 {
-    public function handle(SignalAction $action, array $payload, string $eventClass): ?array
+    public function handle(SignalAction $action, array $payload, string $eventClass, ?SignalActionLog $log = null): ?array
     {
         $template = $action->template;
 
