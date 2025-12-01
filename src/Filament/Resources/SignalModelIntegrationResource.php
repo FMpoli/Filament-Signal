@@ -15,6 +15,7 @@ use Filament\Forms;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Grid as SchemaGrid;
 use Filament\Schemas\Components\Section as SchemaSection;
+use Filament\Schemas\Components\Tabs as SchemaTabs;
 use Filament\Schemas\Components\Utilities\Get as SchemaGet;
 use Filament\Schemas\Schema;
 use Filament\Tables;
@@ -47,107 +48,65 @@ class SignalModelIntegrationResource extends Resource
     public static function form(Schema $schema): Schema
     {
         return $schema->schema([
-            SchemaSection::make(__('filament-signal::signal.model_integrations.sections.details'))
-                ->schema([
-                    SchemaGrid::make()
-                        ->columns([
-                            'default' => 1,
-                            '@md' => 2,
-                        ])
-                        ->schema([
-                            Forms\Components\TextInput::make('name')
-                                ->label(__('filament-signal::signal.fields.name'))
-                                ->required(),
-                            Forms\Components\TextInput::make('model_class')
-                                ->label(__('filament-signal::signal.model_integrations.fields.model_class'))
-                                ->required()
-                                ->unique(SignalModelIntegration::class, 'model_class', ignoreRecord: true)
-                                ->live()
-                                ->afterStateUpdated(function ($state, callable $set, SchemaGet $get): void {
-                                    $set('fields', [
-                                        'essential' => [],
-                                        'relations' => [],
-                                    ]);
+            SchemaGrid::make([
+                'default' => 2,
+            ])
 
-                                    if (! $get('model_alias') && is_string($state)) {
-                                        $set('model_alias', Str::camel(class_basename($state)));
-                                    }
-                                }),
-                            Forms\Components\TextInput::make('model_alias')
-                                ->label(__('filament-signal::signal.model_integrations.fields.model_alias'))
-                                ->helperText(__('filament-signal::signal.model_integrations.helpers.model_alias')),
-                        ]),
-                ]),
-            SchemaSection::make(__('filament-signal::signal.model_integrations.sections.fields'))
                 ->schema([
+                    // Prima colonna (più stretta) - Core Details e Eloquent Lifecycle
                     SchemaGrid::make()
-                        ->columns([
-                            'default' => 1,
-                            '@md' => 2,
-                        ])
+                        ->columns(1)
                         ->schema([
-                            Forms\Components\Repeater::make('fields.essential')
-                                ->label(__('filament-signal::signal.model_integrations.fields.essential_fields'))
+                            SchemaSection::make(__('filament-signal::signal.model_integrations.sections.details'))
                                 ->schema([
-                                    Forms\Components\Select::make('field')
-                                        ->label(__('filament-signal::signal.model_integrations.fields.field_name'))
-                                        ->required()
-                                        ->options(fn (SchemaGet $get): array => static::getModelFieldOptions(static::resolveModelClass($get)))
-                                        ->reactive()
-                                        ->searchable()
-                                        ->preload(),
-                                    Forms\Components\TextInput::make('label')
-                                        ->label(__('filament-signal::signal.model_integrations.fields.field_label')),
-                                ])
-                                ->default([])
-                                ->addActionLabel(__('filament-signal::signal.model_integrations.actions.add_field'))
-                                ->reorderable()
-                                ->collapsed(),
-                            Forms\Components\Repeater::make('fields.relations')
-                                ->label(__('filament-signal::signal.model_integrations.fields.relations'))
-                                ->schema([
-                                    Forms\Components\Select::make('name')
-                                        ->label(__('filament-signal::signal.model_integrations.fields.relation_name'))
-                                        ->options(fn (SchemaGet $get): array => static::getRelationOptions(static::resolveModelClass($get)))
-                                        ->searchable()
-                                        ->preload()
-                                        ->reactive()
-                                        ->live()
-                                        ->afterStateHydrated(function ($state, callable $set, SchemaGet $get): void {
-                                            if (! $state) {
-                                                return;
-                                            }
-
-                                            static::syncRelationMetadata($state, $set, $get);
-                                        })
-                                        ->afterStateUpdated(function ($state, callable $set, SchemaGet $get): void {
-                                            static::syncRelationMetadata($state, $set, $get);
-                                            $set('fields', []);
-                                            $set('expand', []);
-                                        })
+                                    Forms\Components\TextInput::make('name')
+                                        ->label(__('filament-signal::signal.fields.name'))
                                         ->required(),
-                                    Forms\Components\Hidden::make('related_class'),
-                                    Forms\Components\Hidden::make('relation_mode')->default('direct'),
-                                    Forms\Components\Hidden::make('relation_descriptor'),
-                                    Forms\Components\TextInput::make('alias')
-                                        ->label(__('filament-signal::signal.model_integrations.fields.relation_alias'))
-                                        ->placeholder('loans_sent')
-                                        ->helperText(__('filament-signal::signal.model_integrations.helpers.relation_alias')),
-                                    Forms\Components\Repeater::make('fields')
-                                        ->label(__('filament-signal::signal.model_integrations.fields.relation_fields'))
+                                    Forms\Components\TextInput::make('model_class')
+                                        ->label(__('filament-signal::signal.model_integrations.fields.model_class'))
+                                        ->required()
+                                        ->unique(SignalModelIntegration::class, 'model_class', ignoreRecord: true)
+                                        ->live()
+                                        ->afterStateUpdated(function ($state, callable $set, SchemaGet $get): void {
+                                            $set('fields', [
+                                                'essential' => [],
+                                                'relations' => [],
+                                            ]);
+
+                                            if (! $get('model_alias') && is_string($state)) {
+                                                $set('model_alias', Str::camel(class_basename($state)));
+                                            }
+                                        }),
+                                    Forms\Components\TextInput::make('model_alias')
+                                        ->label(__('filament-signal::signal.model_integrations.fields.model_alias'))
+                                        ->helperText(__('filament-signal::signal.model_integrations.helpers.model_alias')),
+                                ])->columns(1),
+                            SchemaSection::make(__('filament-signal::signal.model_integrations.sections.eloquent'))
+                                ->schema([
+                                    Forms\Components\CheckboxList::make('eloquent_events')
+                                        ->label(__('filament-signal::signal.model_integrations.fields.eloquent_events'))
+                                        ->options(self::eloquentEventOptions())
+                                        ->columns(2)
+                                ]),
+                        ]),
+                    // Seconda colonna (più larga) - Tabs con Available Fields, Relations, Custom Events
+                    SchemaTabs::make('fields_tabs')
+
+                        ->tabs([
+                            SchemaTabs\Tab::make('essential_fields')
+                                ->label(__('filament-signal::signal.model_integrations.fields.essential_fields'))
+                                ->icon('heroicon-o-list-bullet')
+                                ->schema([
+                                    Forms\Components\Repeater::make('fields.essential')
+                                        ->label(__('filament-signal::signal.model_integrations.fields.essential_fields'))
                                         ->schema([
                                             Forms\Components\Select::make('field')
                                                 ->label(__('filament-signal::signal.model_integrations.fields.field_name'))
-                                                ->options(fn (SchemaGet $get): array => static::getRelationFieldOptions($get))
                                                 ->required()
-                                                ->live()
+                                                ->options(fn(SchemaGet $get): array => static::getModelFieldOptions(static::resolveModelClass($get)))
                                                 ->reactive()
                                                 ->searchable()
-                                                ->preload()
-                                                ->afterStateHydrated(function (SchemaGet $get, callable $set): void {
-                                                    // Force refresh when relation changes
-                                                    $get('../../name');
-                                                }),
+                                                ->preload(),
                                             Forms\Components\TextInput::make('label')
                                                 ->label(__('filament-signal::signal.model_integrations.fields.field_label')),
                                         ])
@@ -155,46 +114,99 @@ class SignalModelIntegrationResource extends Resource
                                         ->addActionLabel(__('filament-signal::signal.model_integrations.actions.add_field'))
                                         ->reorderable()
                                         ->collapsed(),
-                                    Forms\Components\Select::make('expand')
-                                        ->label(__('filament-signal::signal.model_integrations.fields.expand_relations'))
-                                        ->multiple()
-                                        ->options(fn (SchemaGet $get): array => static::getRelationExpandOptions($get))
-                                        ->reactive()
-                                        ->searchable()
-                                        ->preload(),
-                                ])
-                                ->default([])
-                                ->addActionLabel(__('filament-signal::signal.model_integrations.actions.add_relation'))
-                                ->reorderable()
-                                ->collapsed(),
+                                ]),
+                            SchemaTabs\Tab::make('relations')
+                                ->label(__('filament-signal::signal.model_integrations.fields.relations'))
+                                ->icon('heroicon-o-circle-stack')
+                                ->schema([
+                                    Forms\Components\Repeater::make('fields.relations')
+                                        ->label(__('filament-signal::signal.model_integrations.fields.relations'))
+                                        ->schema([
+                                            Forms\Components\Select::make('name')
+                                                ->label(__('filament-signal::signal.model_integrations.fields.relation_name'))
+                                                ->options(fn(SchemaGet $get): array => static::getRelationOptions(static::resolveModelClass($get)))
+                                                ->searchable()
+                                                ->preload()
+                                                ->reactive()
+                                                ->live()
+                                                ->afterStateHydrated(function ($state, callable $set, SchemaGet $get): void {
+                                                    if (! $state) {
+                                                        return;
+                                                    }
+
+                                                    static::syncRelationMetadata($state, $set, $get);
+                                                })
+                                                ->afterStateUpdated(function ($state, callable $set, SchemaGet $get): void {
+                                                    static::syncRelationMetadata($state, $set, $get);
+                                                    $set('fields', []);
+                                                    $set('expand', []);
+                                                })
+                                                ->required(),
+                                            Forms\Components\Hidden::make('related_class'),
+                                            Forms\Components\Hidden::make('relation_mode')->default('direct'),
+                                            Forms\Components\Hidden::make('relation_descriptor'),
+                                            Forms\Components\TextInput::make('alias')
+                                                ->label(__('filament-signal::signal.model_integrations.fields.relation_alias'))
+                                                ->placeholder('loans_sent')
+                                                ->helperText(__('filament-signal::signal.model_integrations.helpers.relation_alias')),
+                                            Forms\Components\Repeater::make('fields')
+                                                ->label(__('filament-signal::signal.model_integrations.fields.relation_fields'))
+                                                ->schema([
+                                                    Forms\Components\Select::make('field')
+                                                        ->label(__('filament-signal::signal.model_integrations.fields.field_name'))
+                                                        ->options(fn(SchemaGet $get): array => static::getRelationFieldOptions($get))
+                                                        ->required()
+                                                        ->live()
+                                                        ->reactive()
+                                                        ->searchable()
+                                                        ->preload()
+                                                        ->afterStateHydrated(function (SchemaGet $get, callable $set): void {
+                                                            // Force refresh when relation changes
+                                                            $get('../../name');
+                                                        }),
+                                                    Forms\Components\TextInput::make('label')
+                                                        ->label(__('filament-signal::signal.model_integrations.fields.field_label')),
+                                                ])
+                                                ->default([])
+                                                ->addActionLabel(__('filament-signal::signal.model_integrations.actions.add_field'))
+                                                ->reorderable()
+                                                ->collapsed(),
+                                            Forms\Components\Select::make('expand')
+                                                ->label(__('filament-signal::signal.model_integrations.fields.expand_relations'))
+                                                ->multiple()
+                                                ->options(fn(SchemaGet $get): array => static::getRelationExpandOptions($get))
+                                                ->reactive()
+                                                ->searchable()
+                                                ->preload(),
+                                        ])
+                                        ->default([])
+                                        ->addActionLabel(__('filament-signal::signal.model_integrations.actions.add_relation'))
+                                        ->reorderable()
+                                        ->collapsed(),
+                                ]),
+                            SchemaTabs\Tab::make('custom_events')
+                                ->label(__('filament-signal::signal.model_integrations.fields.custom_events'))
+                                ->icon('heroicon-o-bolt')
+                                ->schema([
+                                    Forms\Components\Repeater::make('custom_events')
+                                        ->label(__('filament-signal::signal.model_integrations.fields.custom_events'))
+                                        ->schema([
+                                            Forms\Components\TextInput::make('class')
+                                                ->label(__('filament-signal::signal.model_integrations.fields.event_class'))
+                                                ->required(),
+                                            Forms\Components\TextInput::make('label')
+                                                ->label(__('filament-signal::signal.fields.name')),
+                                            Forms\Components\TextInput::make('group')
+                                                ->label(__('filament-signal::signal.model_integrations.fields.event_group')),
+                                            Forms\Components\Textarea::make('description')
+                                                ->label(__('filament-signal::signal.model_integrations.fields.event_description'))
+                                                ->rows(2),
+                                        ])
+                                        ->default([])
+                                        ->addActionLabel(__('filament-signal::signal.model_integrations.actions.add_event'))
+                                        ->collapsed(),
+                                ]),
                         ]),
-                ]),
-            SchemaSection::make(__('filament-signal::signal.model_integrations.sections.eloquent'))
-                ->schema([
-                    Forms\Components\CheckboxList::make('eloquent_events')
-                        ->label(__('filament-signal::signal.model_integrations.fields.eloquent_events'))
-                        ->options(self::eloquentEventOptions())
-                        ->columns(2),
-                ]),
-            SchemaSection::make(__('filament-signal::signal.model_integrations.sections.custom'))
-                ->schema([
-                    Forms\Components\Repeater::make('custom_events')
-                        ->label(__('filament-signal::signal.model_integrations.fields.custom_events'))
-                        ->schema([
-                            Forms\Components\TextInput::make('class')
-                                ->label(__('filament-signal::signal.model_integrations.fields.event_class'))
-                                ->required(),
-                            Forms\Components\TextInput::make('label')
-                                ->label(__('filament-signal::signal.fields.name')),
-                            Forms\Components\TextInput::make('group')
-                                ->label(__('filament-signal::signal.model_integrations.fields.event_group')),
-                            Forms\Components\Textarea::make('description')
-                                ->label(__('filament-signal::signal.model_integrations.fields.event_description'))
-                                ->rows(2),
-                        ])
-                        ->default([])
-                        ->addActionLabel(__('filament-signal::signal.model_integrations.actions.add_event'))
-                        ->collapsed(),
                 ]),
         ]);
     }
@@ -219,7 +231,7 @@ class SignalModelIntegrationResource extends Resource
                     ->placeholder('—'),
                 Tables\Columns\TextColumn::make('eloquent_events')
                     ->label(__('filament-signal::signal.model_integrations.fields.eloquent_events'))
-                    ->formatStateUsing(fn ($state) => collect($state ?? [])->map(fn ($event) => self::eloquentEventOptions()[$event] ?? $event)->implode(', '))
+                    ->formatStateUsing(fn($state) => collect($state ?? [])->map(fn($event) => self::eloquentEventOptions()[$event] ?? $event)->implode(', '))
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('updated_at')
                     ->label(__('filament-signal::signal.fields.updated_at'))
@@ -334,7 +346,7 @@ class SignalModelIntegrationResource extends Resource
         $fieldOptions = collect($fields ?? [])
             ->merge(['id', 'created_at', 'updated_at'])
             ->unique()
-            ->mapWithKeys(fn ($field) => [$field => Str::headline(str_replace('_', ' ', $field))])
+            ->mapWithKeys(fn($field) => [$field => Str::headline(str_replace('_', ' ', $field))])
             ->toArray();
 
         $relations = [];
