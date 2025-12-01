@@ -119,7 +119,7 @@ class SignalActionLogResource extends Resource
                             // IMPORTANTE: Il payload salvato è già quello configurato e inviato al webhook
                             // Non riconfigurarlo, altrimenti si perdono le relazioni inverse già presenti
                             // Mostra direttamente il payload salvato
-                            
+
                             // Formatta come JSON leggibile
                             $formatted = is_array($payload) || is_object($payload)
                                 ? json_encode($payload, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)

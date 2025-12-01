@@ -59,10 +59,10 @@ class WebhookActionHandler implements SignalActionHandler
             // ma nella UI mostriamo solo 'data', quindi salviamo quello per coerenza
             // Se bodyMode è 'payload', il payload è direttamente quello che viene inviato
             // In entrambi i casi, salva il payload configurato (che contiene le relazioni inverse)
-            $logPayload = $bodyMode === 'event' && isset($payloadForWebhook['data']) 
-                ? $payloadForWebhook['data'] 
+            $logPayload = $bodyMode === 'event' && isset($payloadForWebhook['data'])
+                ? $payloadForWebhook['data']
                 : $payloadForWebhook;
-            
+
             // Salva il payload configurato nel log
             // IMPORTANTE: Usa update() per aggiornare solo il campo payload, preservando gli altri campi
             $log->update(['payload' => $logPayload]);

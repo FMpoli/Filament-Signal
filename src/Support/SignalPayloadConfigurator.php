@@ -60,7 +60,7 @@ class SignalPayloadConfigurator
                 }
             }
         }
-        
+
         // IMPORTANTE: Se ci sono relazioni inverse, salva gli id originali PRIMA di filtrare il payload
         // perché appendReverseRelations() ne ha bisogno per recuperare i record correlati
         $originalIds = [];
@@ -72,7 +72,7 @@ class SignalPayloadConfigurator
                     $originalIds[$parentKey] = $payload[$parentKey]['id'];
                 }
             }
-            
+
             // Assicurati che 'id' sia sempre incluso nei includeFields quando ci sono relazioni inverse
             $mainKey = $this->findMainKey($payload);
             if ($mainKey && ! empty($includeFields)) {
@@ -85,7 +85,7 @@ class SignalPayloadConfigurator
                 $includeFields[] = $mainKey . '.id';
             }
         }
-        
+
         // Poi filtra i campi da includere (PRIMA di filtrare le relazioni, così le relazioni vengono preservate)
         if (! empty($includeFields)) {
             $payload = $this->includeOnly($payload, $includeFields, $relationFields, $relationMetaMap);
@@ -155,14 +155,14 @@ class SignalPayloadConfigurator
 
             // Prova a recuperare l'id dal payload filtrato, altrimenti usa quello originale
             $parentId = $payload[$parentKey]['id'] ?? $originalIds[$parentKey] ?? null;
-            
+
             if (! $parentId) {
                 continue;
             }
-            
+
             // Determina le relazioni da espandere: usa quelle specificate nel meta, o quelle configurate nel modello
             $expand = $meta['expand'] ?? [];
-            
+
             // Se expand è vuoto, prova a leggere le relazioni da espandere da getSignalFields() del modello correlato
             if (empty($expand) && $modelClass) {
                 $registry = app(SignalModelRegistry::class);
@@ -186,7 +186,7 @@ class SignalPayloadConfigurator
                     }
                 }
             }
-            
+
             $records = $this->fetchReverseRelationRecords($modelClass, $foreignKey, $parentId, $expand);
 
             $payload[$parentKey][$alias] = $records;
@@ -951,6 +951,7 @@ class SignalPayloadConfigurator
                         // e stiamo processando 'unit_id' in 'loan', usa quelle relazioni
                         if ($nestedIdField === $fullPath || $nestedIdField === $key || str_ends_with($nestedIdField, '.' . $key)) {
                             $nestedToExpand = $nestedRelations;
+
                             break;
                         }
                     }

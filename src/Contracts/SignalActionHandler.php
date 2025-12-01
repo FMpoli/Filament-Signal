@@ -3,7 +3,6 @@
 namespace Base33\FilamentSignal\Contracts;
 
 use Base33\FilamentSignal\Models\SignalAction;
-
 use Base33\FilamentSignal\Models\SignalActionLog;
 
 interface SignalActionHandler
