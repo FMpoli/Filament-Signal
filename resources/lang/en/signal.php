@@ -84,7 +84,7 @@ return [
         'sections' => [
             'details' => 'Integration details',
             'fields' => 'Available fields',
-            'eloquent' => 'Eloquent lifecycle',
+            'eloquent' => 'Eloquent Lifecycle',
             'custom' => 'Custom events',
         ],
         'fields' => [

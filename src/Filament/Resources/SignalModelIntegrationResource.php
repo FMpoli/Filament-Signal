@@ -13,10 +13,13 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Forms;
 use Filament\Resources\Resource;
-use Filament\Schemas\Components\Grid as SchemaGrid;
-use Filament\Schemas\Components\Section as SchemaSection;
-use Filament\Schemas\Components\Tabs as SchemaTabs;
-use Filament\Schemas\Components\Utilities\Get as SchemaGet;
+use Filament\Schemas\Components\Flex;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Group;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Tabs;
+use Filament\Schemas\Components\Tabs\Tab;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -31,7 +34,7 @@ class SignalModelIntegrationResource extends Resource
 {
     protected static ?string $model = SignalModelIntegration::class;
 
-    protected static BackedEnum | string | null $navigationIcon = 'heroicon-o-link';
+    protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-link';
 
     protected static array $modelMetadataCache = [];
 
@@ -44,66 +47,60 @@ class SignalModelIntegrationResource extends Resource
     {
         return __('filament-signal::signal.plugin.navigation.integrations');
     }
-
     public static function form(Schema $schema): Schema
     {
-        return $schema->schema([
-            SchemaGrid::make([
-                'default' => 2,
-            ])
-
-                ->schema([
-                    // Prima colonna (più stretta) - Core Details e Eloquent Lifecycle
-                    SchemaGrid::make()
-                        ->columns(1)
+        return $schema
+            ->columns(12)
+            ->components([
+                Group::make([
+                    Section::make(__('filament-signal::signal.model_integrations.sections.details'))
+                        ->icon('heroicon-o-cube')
                         ->schema([
-                            SchemaSection::make(__('filament-signal::signal.model_integrations.sections.details'))
-                                ->schema([
-                                    Forms\Components\TextInput::make('name')
-                                        ->label(__('filament-signal::signal.fields.name'))
-                                        ->required(),
-                                    Forms\Components\TextInput::make('model_class')
-                                        ->label(__('filament-signal::signal.model_integrations.fields.model_class'))
-                                        ->required()
-                                        ->unique(SignalModelIntegration::class, 'model_class', ignoreRecord: true)
-                                        ->live()
-                                        ->afterStateUpdated(function ($state, callable $set, SchemaGet $get): void {
-                                            $set('fields', [
-                                                'essential' => [],
-                                                'relations' => [],
-                                            ]);
+                            Forms\Components\TextInput::make('name')
+                                ->label(__('filament-signal::signal.fields.name'))
+                                ->required(),
+                            Forms\Components\TextInput::make('model_class')
+                                ->label(__('filament-signal::signal.model_integrations.fields.model_class'))
+                                ->required()
+                                ->unique(SignalModelIntegration::class, 'model_class', ignoreRecord: true)
+                                ->live()
+                                ->afterStateUpdated(function ($state, callable $set, Get $get): void {
+                                    $set('fields', [
+                                        'essential' => [],
+                                        'relations' => [],
+                                    ]);
 
-                                            if (! $get('model_alias') && is_string($state)) {
-                                                $set('model_alias', Str::camel(class_basename($state)));
-                                            }
-                                        }),
-                                    Forms\Components\TextInput::make('model_alias')
-                                        ->label(__('filament-signal::signal.model_integrations.fields.model_alias'))
-                                        ->helperText(__('filament-signal::signal.model_integrations.helpers.model_alias')),
-                                ])->columns(1),
-                            SchemaSection::make(__('filament-signal::signal.model_integrations.sections.eloquent'))
-                                ->schema([
-                                    Forms\Components\CheckboxList::make('eloquent_events')
-                                        ->label(__('filament-signal::signal.model_integrations.fields.eloquent_events'))
-                                        ->options(self::eloquentEventOptions())
-                                        ->columns(2),
-                                ]),
+                                    if (! $get('model_alias') && is_string($state)) {
+                                        $set('model_alias', Str::camel(class_basename($state)));
+                                    }
+                                }),
+                            Forms\Components\TextInput::make('model_alias')
+                                ->label(__('filament-signal::signal.model_integrations.fields.model_alias'))
+                                ->helperText(__('filament-signal::signal.model_integrations.helpers.model_alias')),
+                        ])->columns(1),
+                    Section::make(__('filament-signal::signal.model_integrations.sections.eloquent'))
+                        ->icon('heroicon-o-heart')
+                        ->schema([
+                            Forms\Components\CheckboxList::make('eloquent_events')
+                                ->options(self::eloquentEventOptions())
+                                ->columns(2)
                         ]),
-                    // Seconda colonna (più larga) - Tabs con Available Fields, Relations, Custom Events
-                    SchemaTabs::make('fields_tabs')
-
+                ])->columnSpan(4),
+                Group::make([
+                    Tabs::make('fields_tabs')
                         ->tabs([
-                            SchemaTabs\Tab::make('essential_fields')
+                            Tab::make('essential_fields')
                                 ->label(__('filament-signal::signal.model_integrations.fields.essential_fields'))
                                 ->icon('heroicon-o-list-bullet')
                                 ->schema([
                                     Forms\Components\Repeater::make('fields.essential')
                                         ->label(__('filament-signal::signal.model_integrations.fields.essential_fields'))
+                                        ->itemLabel(fn(array $state): ?string => ($state['field'] ?? ''))
                                         ->schema([
                                             Forms\Components\Select::make('field')
                                                 ->label(__('filament-signal::signal.model_integrations.fields.field_name'))
                                                 ->required()
-                                                ->options(fn (SchemaGet $get): array => static::getModelFieldOptions(static::resolveModelClass($get)))
+                                                ->options(fn(Get $get): array => static::getModelFieldOptions(static::resolveModelClass($get)))
                                                 ->reactive()
                                                 ->searchable()
                                                 ->preload(),
@@ -115,28 +112,29 @@ class SignalModelIntegrationResource extends Resource
                                         ->reorderable()
                                         ->collapsed(),
                                 ]),
-                            SchemaTabs\Tab::make('relations')
+                            Tab::make('relations')
                                 ->label(__('filament-signal::signal.model_integrations.fields.relations'))
                                 ->icon('heroicon-o-circle-stack')
                                 ->schema([
                                     Forms\Components\Repeater::make('fields.relations')
                                         ->label(__('filament-signal::signal.model_integrations.fields.relations'))
+                                        ->itemLabel(fn(array $state): ?string => ($state['name'] ?? ''))
                                         ->schema([
                                             Forms\Components\Select::make('name')
                                                 ->label(__('filament-signal::signal.model_integrations.fields.relation_name'))
-                                                ->options(fn (SchemaGet $get): array => static::getRelationOptions(static::resolveModelClass($get)))
+                                                ->options(fn(Get $get): array => static::getRelationOptions(static::resolveModelClass($get)))
                                                 ->searchable()
                                                 ->preload()
                                                 ->reactive()
                                                 ->live()
-                                                ->afterStateHydrated(function ($state, callable $set, SchemaGet $get): void {
+                                                ->afterStateHydrated(function ($state, callable $set, Get $get): void {
                                                     if (! $state) {
                                                         return;
                                                     }
 
                                                     static::syncRelationMetadata($state, $set, $get);
                                                 })
-                                                ->afterStateUpdated(function ($state, callable $set, SchemaGet $get): void {
+                                                ->afterStateUpdated(function ($state, callable $set, Get $get): void {
                                                     static::syncRelationMetadata($state, $set, $get);
                                                     $set('fields', []);
                                                     $set('expand', []);
@@ -151,16 +149,17 @@ class SignalModelIntegrationResource extends Resource
                                                 ->helperText(__('filament-signal::signal.model_integrations.helpers.relation_alias')),
                                             Forms\Components\Repeater::make('fields')
                                                 ->label(__('filament-signal::signal.model_integrations.fields.relation_fields'))
+                                                ->itemLabel(fn(array $state): ?string => ($state['field'] ?? ''))
                                                 ->schema([
                                                     Forms\Components\Select::make('field')
                                                         ->label(__('filament-signal::signal.model_integrations.fields.field_name'))
-                                                        ->options(fn (SchemaGet $get): array => static::getRelationFieldOptions($get))
+                                                        ->options(fn(Get $get): array => static::getRelationFieldOptions($get))
                                                         ->required()
                                                         ->live()
                                                         ->reactive()
                                                         ->searchable()
                                                         ->preload()
-                                                        ->afterStateHydrated(function (SchemaGet $get, callable $set): void {
+                                                        ->afterStateHydrated(function (Get $get, callable $set): void {
                                                             // Force refresh when relation changes
                                                             $get('../../name');
                                                         }),
@@ -169,22 +168,26 @@ class SignalModelIntegrationResource extends Resource
                                                 ])
                                                 ->default([])
                                                 ->addActionLabel(__('filament-signal::signal.model_integrations.actions.add_field'))
+
                                                 ->reorderable()
+                                                ->columnSpan(2)
                                                 ->collapsed(),
                                             Forms\Components\Select::make('expand')
                                                 ->label(__('filament-signal::signal.model_integrations.fields.expand_relations'))
                                                 ->multiple()
-                                                ->options(fn (SchemaGet $get): array => static::getRelationExpandOptions($get))
+                                                ->options(fn(Get $get): array => static::getRelationExpandOptions($get))
                                                 ->reactive()
                                                 ->searchable()
+                                                ->hidden()
                                                 ->preload(),
                                         ])
+                                        ->columns(2)
                                         ->default([])
                                         ->addActionLabel(__('filament-signal::signal.model_integrations.actions.add_relation'))
                                         ->reorderable()
                                         ->collapsed(),
                                 ]),
-                            SchemaTabs\Tab::make('custom_events')
+                            Tab::make('custom_events')
                                 ->label(__('filament-signal::signal.model_integrations.fields.custom_events'))
                                 ->icon('heroicon-o-bolt')
                                 ->schema([
@@ -207,8 +210,9 @@ class SignalModelIntegrationResource extends Resource
                                         ->collapsed(),
                                 ]),
                         ]),
-                ]),
-        ]);
+                ])
+                    ->columnSpan(8),
+            ]);
     }
 
     public static function table(Table $table): Table
@@ -384,7 +388,7 @@ class SignalModelIntegrationResource extends Resource
         ];
     }
 
-    protected static function syncRelationMetadata(string $state, callable $set, SchemaGet $get): void
+    protected static function syncRelationMetadata(string $state, callable $set, Get $get): void
     {
         if (str_starts_with($state, 'reverse::')) {
             $descriptorKey = substr($state, 9);
@@ -411,7 +415,7 @@ class SignalModelIntegrationResource extends Resource
         }
     }
 
-    protected static function getRelationFieldOptions(SchemaGet $get): array
+    protected static function getRelationFieldOptions(Get $get): array
     {
         $mode = static::resolveRelationMode($get);
 
@@ -479,7 +483,7 @@ class SignalModelIntegrationResource extends Resource
         return static::getModelFieldOptions($relatedClass);
     }
 
-    protected static function getRelationExpandOptions(SchemaGet $get): array
+    protected static function getRelationExpandOptions(Get $get): array
     {
         $mode = static::resolveRelationMode($get);
 
@@ -528,7 +532,7 @@ class SignalModelIntegrationResource extends Resource
         return Str::camel(class_basename($descriptor['source_model'] ?? 'relation') . '_' . ($descriptor['relation_name'] ?? 'related'));
     }
 
-    protected static function resolveRelationMode(SchemaGet $get): string
+    protected static function resolveRelationMode(Get $get): string
     {
         $paths = [
             'relation_mode',
@@ -547,7 +551,7 @@ class SignalModelIntegrationResource extends Resource
         return 'direct';
     }
 
-    protected static function resolveRelatedClass(SchemaGet $get): ?string
+    protected static function resolveRelatedClass(Get $get): ?string
     {
         $paths = [
             'related_class',
@@ -566,7 +570,7 @@ class SignalModelIntegrationResource extends Resource
         return null;
     }
 
-    protected static function resolveRelationDescriptorKey(SchemaGet $get): ?string
+    protected static function resolveRelationDescriptorKey(Get $get): ?string
     {
         $paths = [
             'relation_descriptor',
@@ -818,7 +822,7 @@ class SignalModelIntegrationResource extends Resource
         return null;
     }
 
-    protected static function resolveModelClass(SchemaGet $get): ?string
+    protected static function resolveModelClass(Get $get): ?string
     {
         $paths = [
             'model_class',
