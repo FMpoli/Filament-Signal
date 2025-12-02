@@ -13,8 +13,6 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Forms;
 use Filament\Resources\Resource;
-use Filament\Schemas\Components\Flex;
-use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Group;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
@@ -34,7 +32,7 @@ class SignalModelIntegrationResource extends Resource
 {
     protected static ?string $model = SignalModelIntegration::class;
 
-    protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-link';
+    protected static BackedEnum | string | null $navigationIcon = 'heroicon-o-link';
 
     protected static array $modelMetadataCache = [];
 
@@ -47,6 +45,7 @@ class SignalModelIntegrationResource extends Resource
     {
         return __('filament-signal::signal.plugin.navigation.integrations');
     }
+
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -83,7 +82,7 @@ class SignalModelIntegrationResource extends Resource
                         ->schema([
                             Forms\Components\CheckboxList::make('eloquent_events')
                                 ->options(self::eloquentEventOptions())
-                                ->columns(2)
+                                ->columns(2),
                         ]),
                 ])->columnSpan(4),
                 Group::make([
@@ -95,12 +94,12 @@ class SignalModelIntegrationResource extends Resource
                                 ->schema([
                                     Forms\Components\Repeater::make('fields.essential')
                                         ->label(__('filament-signal::signal.model_integrations.fields.essential_fields'))
-                                        ->itemLabel(fn(array $state): ?string => ($state['field'] ?? ''))
+                                        ->itemLabel(fn (array $state): ?string => ($state['field'] ?? ''))
                                         ->schema([
                                             Forms\Components\Select::make('field')
                                                 ->label(__('filament-signal::signal.model_integrations.fields.field_name'))
                                                 ->required()
-                                                ->options(fn(Get $get): array => static::getModelFieldOptions(static::resolveModelClass($get)))
+                                                ->options(fn (Get $get): array => static::getModelFieldOptions(static::resolveModelClass($get)))
                                                 ->reactive()
                                                 ->searchable()
                                                 ->preload(),
@@ -118,11 +117,11 @@ class SignalModelIntegrationResource extends Resource
                                 ->schema([
                                     Forms\Components\Repeater::make('fields.relations')
                                         ->label(__('filament-signal::signal.model_integrations.fields.relations'))
-                                        ->itemLabel(fn(array $state): ?string => ($state['name'] ?? ''))
+                                        ->itemLabel(fn (array $state): ?string => ($state['name'] ?? ''))
                                         ->schema([
                                             Forms\Components\Select::make('name')
                                                 ->label(__('filament-signal::signal.model_integrations.fields.relation_name'))
-                                                ->options(fn(Get $get): array => static::getRelationOptions(static::resolveModelClass($get)))
+                                                ->options(fn (Get $get): array => static::getRelationOptions(static::resolveModelClass($get)))
                                                 ->searchable()
                                                 ->preload()
                                                 ->reactive()
@@ -149,11 +148,11 @@ class SignalModelIntegrationResource extends Resource
                                                 ->helperText(__('filament-signal::signal.model_integrations.helpers.relation_alias')),
                                             Forms\Components\Repeater::make('fields')
                                                 ->label(__('filament-signal::signal.model_integrations.fields.relation_fields'))
-                                                ->itemLabel(fn(array $state): ?string => ($state['field'] ?? ''))
+                                                ->itemLabel(fn (array $state): ?string => ($state['field'] ?? ''))
                                                 ->schema([
                                                     Forms\Components\Select::make('field')
                                                         ->label(__('filament-signal::signal.model_integrations.fields.field_name'))
-                                                        ->options(fn(Get $get): array => static::getRelationFieldOptions($get))
+                                                        ->options(fn (Get $get): array => static::getRelationFieldOptions($get))
                                                         ->required()
                                                         ->live()
                                                         ->reactive()
@@ -175,7 +174,7 @@ class SignalModelIntegrationResource extends Resource
                                             Forms\Components\Select::make('expand')
                                                 ->label(__('filament-signal::signal.model_integrations.fields.expand_relations'))
                                                 ->multiple()
-                                                ->options(fn(Get $get): array => static::getRelationExpandOptions($get))
+                                                ->options(fn (Get $get): array => static::getRelationExpandOptions($get))
                                                 ->reactive()
                                                 ->searchable()
                                                 ->hidden()
