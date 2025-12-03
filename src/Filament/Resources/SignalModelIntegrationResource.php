@@ -93,6 +93,7 @@ class SignalModelIntegrationResource extends Resource
                                 ->icon('heroicon-o-list-bullet')
                                 ->schema([
                                     Forms\Components\Repeater::make('fields.essential')
+                                        ->compact()
                                         ->label(__('filament-signal::signal.model_integrations.fields.essential_fields'))
                                         ->itemLabel(fn (array $state): ?string => ($state['field'] ?? ''))
                                         ->schema([
@@ -234,7 +235,7 @@ class SignalModelIntegrationResource extends Resource
                     ->placeholder('—'),
                 Tables\Columns\TextColumn::make('eloquent_events')
                     ->label(__('filament-signal::signal.model_integrations.fields.eloquent_events'))
-                    ->formatStateUsing(fn ($state) => collect($state ?? [])->map(fn ($event) => self::eloquentEventOptions()[$event] ?? $event)->implode(', '))
+                    ->formatStateUsing(fn($state) => collect($state ?? [])->map(fn($event) => self::eloquentEventOptions()[$event] ?? $event)->implode(', '))
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('updated_at')
                     ->label(__('filament-signal::signal.fields.updated_at'))
@@ -349,7 +350,7 @@ class SignalModelIntegrationResource extends Resource
         $fieldOptions = collect($fields ?? [])
             ->merge(['id', 'created_at', 'updated_at'])
             ->unique()
-            ->mapWithKeys(fn ($field) => [$field => Str::headline(str_replace('_', ' ', $field))])
+            ->mapWithKeys(fn($field) => [$field => Str::headline(str_replace('_', ' ', $field))])
             ->toArray();
 
         $relations = [];
