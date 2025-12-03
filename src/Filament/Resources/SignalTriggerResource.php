@@ -241,16 +241,19 @@ class SignalTriggerResource extends Resource
                                         ->icon(function (array $arguments, Repeater $component): string {
                                             $itemData = $component->getRawItemState($arguments['item']);
                                             $isActive = $itemData['is_active'] ?? true;
+
                                             return $isActive ? 'heroicon-o-check-circle' : 'heroicon-o-x-circle';
                                         })
                                         ->color(function (array $arguments, Repeater $component): string {
                                             $itemData = $component->getRawItemState($arguments['item']);
                                             $isActive = $itemData['is_active'] ?? true;
+
                                             return $isActive ? 'success' : 'danger';
                                         })
                                         ->tooltip(function (array $arguments, Repeater $component): string {
                                             $itemData = $component->getRawItemState($arguments['item']);
                                             $isActive = $itemData['is_active'] ?? true;
+
                                             return $isActive
                                                 ? __('filament-signal::signal.actions.deactivate_action')
                                                 : __('filament-signal::signal.actions.activate_action');
@@ -261,7 +264,7 @@ class SignalTriggerResource extends Resource
 
                                             if (isset($state[$itemId])) {
                                                 $currentActive = $state[$itemId]['is_active'] ?? true;
-                                                $state[$itemId]['is_active'] = !$currentActive;
+                                                $state[$itemId]['is_active'] = ! $currentActive;
                                                 $component->state($state);
                                             }
                                         }),
@@ -276,10 +279,10 @@ class SignalTriggerResource extends Resource
 
                                             if (isset($state[$itemId])) {
                                                 $itemData = $state[$itemId];
-                                                
+
                                                 // Crea una copia dell'item
                                                 $clonedData = $itemData;
-                                                
+
                                                 // Aggiungi "(Copy)" al nome se non è già presente
                                                 $copySuffix = __('filament-signal::signal.actions.copy_suffix');
                                                 if (isset($clonedData['name'])) {
@@ -287,10 +290,10 @@ class SignalTriggerResource extends Resource
                                                         ? $clonedData['name'] . $copySuffix
                                                         : $clonedData['name'] . $copySuffix;
                                                 }
-                                                
+
                                                 // Genera un nuovo ID per l'item clonato
                                                 $newItemId = \Illuminate\Support\Str::uuid()->toString();
-                                                
+
                                                 // Aggiungi l'item clonato allo stato
                                                 $state[$newItemId] = $clonedData;
                                                 $component->state($state);
@@ -471,7 +474,7 @@ class SignalTriggerResource extends Resource
                                     ->label(__('filament-signal::signal.fields.signing_secret'))
                                     ->password()
                                     ->revealable()
-                                    ->default(fn() => config('signal.webhook.secret') ?: Str::random(40))
+                                    ->default(fn () => config('signal.webhook.secret') ?: Str::random(40))
                                     ->helperText(__('filament-signal::signal.helpers.signing_secret'))
                                     ->columnSpan(2),
                                 // Forms\Components\Toggle::make('configuration.verify_ssl')
@@ -743,7 +746,7 @@ class SignalTriggerResource extends Resource
                             ->description(__('filament-signal::signal.helpers.log_configuration'))
                             ->icon('heroicon-o-document-text')
                             ->compact()
-                            ->visible(fn(Get $get): bool => $get('action_type') === 'log')
+                            ->visible(fn (Get $get): bool => $get('action_type') === 'log')
                             ->schema([
                                 Forms\Components\Textarea::make('log_info')
                                     ->label('')
@@ -872,7 +875,7 @@ class SignalTriggerResource extends Resource
                                 $analyzer = app(SignalPayloadFieldAnalyzer::class);
                                 $analysis = $analyzer->analyzeEvent($eventClass);
 
-                                if (!empty($analysis['relations'])) {
+                                if (! empty($analysis['relations'])) {
                                     foreach ($analysis['relations'] as $relation) {
                                         $fieldOptions = $relation['field_options'] ?? [];
                                         if (empty($fieldOptions)) {
@@ -939,7 +942,7 @@ class SignalTriggerResource extends Resource
 
                             return $components;
                         })
-                        ->visible(fn(Get $get): bool => filled($get('../../event_class'))),
+                        ->visible(fn (Get $get): bool => filled($get('../../event_class'))),
 
                     // Group::make([
                     //     SchemaSection::make()->heading('RIGHT 1')->schema([]),
@@ -1042,7 +1045,7 @@ class SignalTriggerResource extends Resource
         return collect(config('signal.action_handlers', []))
             ->keys()
             ->mapWithKeys(fn (string $type) => [
-                $type => __("filament-signal::signal.action_types.{$type}", [], ucfirst($type))
+                $type => __("filament-signal::signal.action_types.{$type}", [], ucfirst($type)),
             ])
             ->all();
     }

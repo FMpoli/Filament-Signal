@@ -18,7 +18,7 @@ class LogActionHandler implements SignalActionHandler
         // Il log viene già creato dal SignalActionExecutor prima di chiamare questo handler
         // Questo handler serve solo per marcare l'action come "log monitoring"
         // Non esegue alcuna operazione esterna, solo monitoraggio
-        
+
         return [
             'monitored' => true,
             'action_name' => $action->name,
@@ -26,4 +26,3 @@ class LogActionHandler implements SignalActionHandler
         ];
     }
 }
-

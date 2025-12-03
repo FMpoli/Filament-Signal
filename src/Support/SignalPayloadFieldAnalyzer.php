@@ -576,7 +576,7 @@ class SignalPayloadFieldAnalyzer
             // Evita la ripetizione se il nome della relazione già contiene il nome della classe
             $normalizedRelationName = strtolower(str_replace([' ', '→'], '', $formattedRelationName));
             $normalizedClassName = strtolower($className);
-            
+
             // Se il nome della relazione termina con il nome della classe, non aggiungere la parentesi
             if (str_ends_with($normalizedRelationName, $normalizedClassName)) {
                 return $formattedRelationName;

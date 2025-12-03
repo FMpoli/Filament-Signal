@@ -95,7 +95,7 @@ class SignalActionLogResource extends Resource
                     ->action(function () {
                         $count = SignalActionLog::query()->count();
                         SignalActionLog::query()->delete();
-                        
+
                         \Filament\Notifications\Notification::make()
                             ->title(__('filament-signal::signal.actions.delete_all_logs_success', ['count' => $count]))
                             ->success()
