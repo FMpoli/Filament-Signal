@@ -1,6 +1,6 @@
 <?php
 
-use Base33\FilamentSignal\Actions\EmailActionHandler;
+use Base33\FilamentSignal\Actions\LogActionHandler;
 use Base33\FilamentSignal\Actions\WebhookActionHandler;
 use Base33\FilamentSignal\Models\SignalAction;
 use Base33\FilamentSignal\Models\SignalActionLog;
@@ -56,8 +56,23 @@ return [
         ],
     ],
 
+    /*
+     * Action handlers registrati nel sistema.
+     * 
+     * Per aggiungere nuovi action handlers da plugin esterni, puoi:
+     * 1. Creare un Service Provider nel tuo plugin
+     * 2. Nel metodo boot(), aggiungere:
+     * 
+     *    config(['signal.action_handlers.telegram' => \YourPlugin\Actions\TelegramActionHandler::class]);
+     * 
+     * Oppure pubblicare il file di configurazione e aggiungere manualmente:
+     * 
+     *    'telegram' => \YourPlugin\Actions\TelegramActionHandler::class,
+     * 
+     * Il tuo handler deve implementare SignalActionHandler interface.
+     */
     'action_handlers' => [
-        'email' => EmailActionHandler::class,
+        'log' => LogActionHandler::class,
         'webhook' => WebhookActionHandler::class,
     ],
 

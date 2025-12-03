@@ -571,8 +571,18 @@ class SignalPayloadFieldAnalyzer
             $className = end($parts);
             $cleanRelationName = str_replace('_', ' ', $relationName);
             $cleanRelationName = str_replace('.', ' → ', $cleanRelationName);
+            $formattedRelationName = ucwords($cleanRelationName);
 
-            return ucwords($cleanRelationName) . " ({$className})";
+            // Evita la ripetizione se il nome della relazione già contiene il nome della classe
+            $normalizedRelationName = strtolower(str_replace([' ', '→'], '', $formattedRelationName));
+            $normalizedClassName = strtolower($className);
+            
+            // Se il nome della relazione termina con il nome della classe, non aggiungere la parentesi
+            if (str_ends_with($normalizedRelationName, $normalizedClassName)) {
+                return $formattedRelationName;
+            }
+
+            return $formattedRelationName . " ({$className})";
         }
 
         return ucfirst(str_replace('_', ' ', $relationName));

@@ -6,6 +6,9 @@ use BackedEnum;
 use Base33\FilamentSignal\Filament\Resources\SignalActionLogResource\Pages;
 use Base33\FilamentSignal\Models\SignalActionLog;
 use Filament\Actions\Action;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
 use Filament\Forms;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Section as SchemaSection;
@@ -71,6 +74,33 @@ class SignalActionLogResource extends Resource
                     ->modalHeading(__('filament-signal::signal.actions.view_log'))
                     ->modalWidth('3xl')
                     ->form(static::logFormSchema()),
+                DeleteAction::make()
+                    ->label(__('filament-signal::signal.actions.delete_log')),
+            ])
+            ->bulkActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make()
+                        ->label(__('filament-signal::signal.actions.delete_selected_logs')),
+                ]),
+            ])
+            ->toolbarActions([
+                Action::make('deleteAll')
+                    ->label(__('filament-signal::signal.actions.delete_all_logs'))
+                    ->icon('heroicon-o-trash')
+                    ->color('danger')
+                    ->requiresConfirmation()
+                    ->modalHeading(__('filament-signal::signal.actions.delete_all_logs'))
+                    ->modalDescription(__('filament-signal::signal.actions.delete_all_logs_description'))
+                    ->modalSubmitActionLabel(__('filament-signal::signal.actions.delete_all_logs_confirm'))
+                    ->action(function () {
+                        $count = SignalActionLog::query()->count();
+                        SignalActionLog::query()->delete();
+                        
+                        \Filament\Notifications\Notification::make()
+                            ->title(__('filament-signal::signal.actions.delete_all_logs_success', ['count' => $count]))
+                            ->success()
+                            ->send();
+                    }),
             ])
             ->defaultSort('executed_at', 'desc');
     }
