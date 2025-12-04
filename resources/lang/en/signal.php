@@ -49,6 +49,8 @@ return [
         'filters' => 'Filters',
         'no_filters_configured' => 'No filters configured',
         'match_type' => 'Match type',
+        'match_logic' => 'Match logic',
+        'total_actions' => 'Total actions',
         'actions' => 'Actions',
         'action_type' => 'Action type',
         'configuration' => 'Configuration',
@@ -96,6 +98,8 @@ return [
         'add_header' => 'Add header',
         'add_meta' => 'Add meta',
         'relation_prefix' => 'Relation',
+        'copied' => 'Copied!',
+        'event' => 'Event',
     ],
     'sections' => [
         'template_content' => 'Template content',

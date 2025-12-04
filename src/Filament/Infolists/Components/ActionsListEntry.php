@@ -1,0 +1,11 @@
+<?php
+
+namespace Base33\FilamentSignal\Filament\Infolists\Components;
+
+use Filament\Infolists\Components\Entry;
+
+class ActionsListEntry extends Entry
+{
+    protected string $view = 'filament-signal::infolists.entries.actions-list';
+}
+

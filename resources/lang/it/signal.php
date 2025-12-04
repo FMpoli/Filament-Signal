@@ -49,6 +49,8 @@ return [
         'filters' => 'Filtri',
         'no_filters_configured' => 'Nessun filtro configurato',
         'match_type' => 'Tipo di corrispondenza',
+        'match_logic' => 'Logica di corrispondenza',
+        'total_actions' => 'Totale azioni',
         'actions' => 'Azioni',
         'action_type' => 'Tipo di azione',
         'configuration' => 'Configurazione',
@@ -96,6 +98,8 @@ return [
         'add_header' => 'Aggiungi intestazione',
         'add_meta' => 'Aggiungi meta',
         'relation_prefix' => 'Relazione',
+        'copied' => 'Copiato!',
+        'event' => 'Evento',
     ],
     'sections' => [
         'template_content' => 'Contenuto del template',

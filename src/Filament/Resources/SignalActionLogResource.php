@@ -11,7 +11,7 @@ use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Forms;
 use Filament\Resources\Resource;
-use Filament\Schemas\Components\Section as SchemaSection;
+use Filament\Schemas\Components\Section;
 use Filament\Tables;
 use Filament\Tables\Table;
 
@@ -108,29 +108,29 @@ class SignalActionLogResource extends Resource
     protected static function logFormSchema(): array
     {
         return [
-            SchemaSection::make(__('filament-signal::signal.sections.log_details'))
+            Section::make(__('filament-signal::signal.sections.log_details'))
                 ->schema([
                     Forms\Components\Placeholder::make('trigger_name')
                         ->label(__('filament-signal::signal.fields.name'))
-                        ->content(fn (SignalActionLog $record): ?string => $record->trigger?->name),
+                        ->content(fn(SignalActionLog $record): ?string => $record->trigger?->name),
                     Forms\Components\Placeholder::make('action_name')
                         ->label(__('filament-signal::signal.fields.actions'))
-                        ->content(fn (SignalActionLog $record): ?string => $record->action?->name),
+                        ->content(fn(SignalActionLog $record): ?string => $record->action?->name),
                     Forms\Components\Placeholder::make('event_class')
                         ->label(__('filament-signal::signal.fields.event_class'))
-                        ->content(fn (SignalActionLog $record): string => $record->event_class),
+                        ->content(fn(SignalActionLog $record): string => $record->event_class),
                     Forms\Components\Placeholder::make('status')
                         ->label(__('filament-signal::signal.fields.status'))
-                        ->content(fn (SignalActionLog $record): string => ucfirst($record->status)),
+                        ->content(fn(SignalActionLog $record): string => ucfirst($record->status)),
                     Forms\Components\Placeholder::make('message')
                         ->label(__('filament-signal::signal.fields.status_message'))
-                        ->content(fn (SignalActionLog $record): ?string => $record->message),
+                        ->content(fn(SignalActionLog $record): ?string => $record->message),
                     Forms\Components\Placeholder::make('executed_at')
                         ->label(__('filament-signal::signal.fields.executed_at'))
-                        ->content(fn (SignalActionLog $record): ?string => optional($record->executed_at)->toDateTimeString()),
+                        ->content(fn(SignalActionLog $record): ?string => optional($record->executed_at)->toDateTimeString()),
                 ])
                 ->columns(2),
-            SchemaSection::make(__('filament-signal::signal.sections.payload'))
+            Section::make(__('filament-signal::signal.sections.payload'))
                 ->schema([
                     Forms\Components\Placeholder::make('payload')
                         ->label(__('filament-signal::signal.fields.payload_preview'))
@@ -157,13 +157,13 @@ class SignalActionLogResource extends Resource
 
                             return new \Illuminate\Support\HtmlString(
                                 '<pre class="max-h-64 overflow-auto rounded-lg bg-gray-950/5 p-3 text-xs font-mono text-gray-900 dark:bg-white/5 dark:text-gray-100 whitespace-pre-wrap">' .
-                                htmlspecialchars($formatted, ENT_QUOTES, 'UTF-8') .
-                                '</pre>'
+                                    htmlspecialchars($formatted, ENT_QUOTES, 'UTF-8') .
+                                    '</pre>'
                             );
                         })
                         ->columnSpanFull(),
                 ]),
-            SchemaSection::make(__('filament-signal::signal.sections.response'))
+            Section::make(__('filament-signal::signal.sections.response'))
                 ->schema([
                     Forms\Components\Placeholder::make('response')
                         ->label(__('filament-signal::signal.fields.response_preview'))
@@ -186,8 +186,8 @@ class SignalActionLogResource extends Resource
 
                             return new \Illuminate\Support\HtmlString(
                                 '<pre class="max-h-64 overflow-auto rounded-lg bg-gray-950/5 p-3 text-xs font-mono text-gray-900 dark:bg-white/5 dark:text-gray-100 whitespace-pre-wrap">' .
-                                htmlspecialchars($formatted, ENT_QUOTES, 'UTF-8') .
-                                '</pre>'
+                                    htmlspecialchars($formatted, ENT_QUOTES, 'UTF-8') .
+                                    '</pre>'
                             );
                         })
                         ->columnSpanFull(),
