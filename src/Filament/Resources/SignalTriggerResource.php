@@ -23,6 +23,7 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Components\Grid as SchemaGrid;
 use Filament\Schemas\Components\Group;
 use Filament\Schemas\Components\Section as SchemaSection;
+use Filament\Schemas\Components\Text as SchemaText;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Filament\Tables;
@@ -53,13 +54,13 @@ class SignalTriggerResource extends Resource
                             ->label(__('filament-signal::signal.fields.name')),
                         TextEntry::make('status')
                             ->label(__('filament-signal::signal.fields.status'))
-                            ->formatStateUsing(fn (SignalTrigger $record): string => ucfirst($record->status)),
+                            ->formatStateUsing(fn(SignalTrigger $record): string => ucfirst($record->status)),
                         TextEntry::make('event_class')
                             ->label(__('filament-signal::signal.fields.event_class')),
                         TextEntry::make('match_type')
 
                             ->label(__('filament-signal::signal.fields.match_type'))
-                            ->formatStateUsing(fn (SignalTrigger $record): ?string => $record->match_type
+                            ->formatStateUsing(fn(SignalTrigger $record): ?string => $record->match_type
                                 ? __('filament-signal::signal.options.match_type.' . $record->match_type)
                                 : null),
                         TextEntry::make('description')
@@ -447,12 +448,12 @@ class SignalTriggerResource extends Resource
                                 '@md' => 2,
                                 '@xl' => 2,
                             ])
-                            ->visible(fn (Get $get): bool => $get('action_type') === 'webhook')
+                            ->visible(fn(Get $get): bool => $get('action_type') === 'webhook')
                             ->schema([
                                 Forms\Components\TextInput::make('configuration.url')
                                     ->label(__('filament-signal::signal.fields.endpoint_url'))
                                     ->url()
-                                    ->required(fn (Get $get): bool => $get('action_type') === 'webhook')
+                                    ->required(fn(Get $get): bool => $get('action_type') === 'webhook')
                                     ->columnSpanFull(),
                                 Forms\Components\Select::make('configuration.method')
                                     ->label(__('filament-signal::signal.fields.http_method'))
@@ -481,191 +482,6 @@ class SignalTriggerResource extends Resource
                                 //     ->label(__('filament-signal::signal.fields.verify_ssl'))
                                 //     ->default(true),
                             ]),
-                        SchemaSection::make(__('filament-signal::signal.sections.payload_configuration'))
-
-                            ->description('Seleziona i campi da includere nel payload e le relazioni da espandere')
-
-                            ->schema(function (Get $get): array {
-                                $components = [
-                                    Forms\Components\CheckboxList::make('configuration.payload_config.include_fields')
-                                        ->label('Campi essenziali')
-                                        ->options(function (Get $get): array {
-                                            $eventClass = $get('../../event_class');
-                                            if (! $eventClass) {
-                                                return [];
-                                            }
-
-                                            $analyzer = app(SignalPayloadFieldAnalyzer::class);
-                                            $analysis = $analyzer->analyzeEvent($eventClass);
-
-                                            // Mostra solo i campi essenziali del modello principale (non delle relazioni)
-                                            $options = [];
-                                            foreach ($analysis['fields'] as $field => $data) {
-                                                // Mostra solo i campi del modello principale (es: model.id, model.status)
-                                                // Escludi i campi delle relazioni (es: model.relation.field)
-                                                if (substr_count($field, '.') > 1) {
-                                                    continue;
-                                                }
-
-                                                // Salta i campi tecnici meno usati (created_at, updated_at, attachments, etc.)
-                                                $parts = explode('.', $field);
-                                                if (count($parts) === 2) {
-                                                    $fieldName = $parts[1];
-                                                    if (in_array($fieldName, ['created_at', 'updated_at', 'attachments'])) {
-                                                        continue;
-                                                    }
-                                                }
-
-                                                $options[$field] = $data['label'];
-                                            }
-
-                                            return $options;
-                                        })
-                                        ->columns(2)
-                                        ->gridDirection('row')
-                                        ->helperText('Seleziona i campi essenziali del prestito da includere.')
-                                        ->columnSpanFull()
-                                        ->live(onBlur: false)
-                                        ->dehydrated()
-                                        ->rules([])
-                                        ->afterStateHydrated(function ($state, callable $set, Get $get) {
-                                            // Pulisci i valori non validi quando viene caricato lo stato
-                                            $eventClass = $get('../../event_class');
-                                            if (! $eventClass || ! is_array($state)) {
-                                                return;
-                                            }
-
-                                            $analyzer = app(SignalPayloadFieldAnalyzer::class);
-                                            $analysis = $analyzer->analyzeEvent($eventClass);
-
-                                            $validFields = [];
-                                            foreach ($analysis['fields'] as $field => $data) {
-                                                if (substr_count($field, '.') <= 1) {
-                                                    // Salta i campi tecnici meno usati
-                                                    $parts = explode('.', $field);
-                                                    if (count($parts) === 2) {
-                                                        $fieldName = $parts[1];
-                                                        if (! in_array($fieldName, ['created_at', 'updated_at', 'attachments'])) {
-                                                            $validFields[] = $field;
-                                                        }
-                                                    } else {
-                                                        $validFields[] = $field;
-                                                    }
-                                                }
-                                            }
-
-                                            $filtered = array_intersect($state, $validFields);
-                                            if (count($filtered) !== count($state)) {
-                                                $set('configuration.payload_config.include_fields', array_values($filtered));
-                                            }
-                                        })
-                                        ->afterStateUpdated(function ($state, callable $set, Get $get) {
-                                            // Pulisci i valori che non sono più nelle opzioni disponibili quando cambia l'evento
-                                            $eventClass = $get('../../event_class');
-                                            if (! $eventClass || ! is_array($state)) {
-                                                return;
-                                            }
-
-                                            $analyzer = app(SignalPayloadFieldAnalyzer::class);
-                                            $analysis = $analyzer->analyzeEvent($eventClass);
-
-                                            $validFields = [];
-                                            foreach ($analysis['fields'] as $field => $data) {
-                                                if (substr_count($field, '.') <= 1) {
-                                                    // Salta i campi tecnici meno usati
-                                                    $parts = explode('.', $field);
-                                                    if (count($parts) === 2) {
-                                                        $fieldName = $parts[1];
-                                                        if (! in_array($fieldName, ['created_at', 'updated_at', 'attachments'])) {
-                                                            $validFields[] = $field;
-                                                        }
-                                                    } else {
-                                                        $validFields[] = $field;
-                                                    }
-                                                }
-                                            }
-
-                                            $filtered = array_intersect($state, $validFields);
-                                            if (count($filtered) !== count($state)) {
-                                                $set('configuration.payload_config.include_fields', array_values($filtered));
-                                            }
-                                        }),
-                                ];
-
-                                // Aggiungi le CheckboxList per le relazioni direttamente nella stessa sezione
-                                $eventClass = $get('../../event_class');
-                                if ($eventClass) {
-                                    $analyzer = app(SignalPayloadFieldAnalyzer::class);
-                                    $analysis = $analyzer->analyzeEvent($eventClass);
-
-                                    if (! empty($analysis['relations'])) {
-                                        foreach ($analysis['relations'] as $relation) {
-                                            $fieldOptions = $relation['field_options'] ?? [];
-                                            if (empty($fieldOptions)) {
-                                                continue;
-                                            }
-
-                                            $alias = $relation['alias'] ?? 'relation';
-                                            $formKey = $relation['form_key'] ?? str_replace(['.', ' '], '_', $relation['id_field']);
-
-                                            $options = [];
-                                            foreach ($fieldOptions as $fieldKey => $label) {
-                                                // Formatta l'etichetta per renderla più leggibile
-                                                $formattedLabel = $label;
-
-                                                if (str_contains($label, '.')) {
-                                                    $parts = explode('.', $label);
-                                                    $formattedParts = [];
-                                                    foreach ($parts as $part) {
-                                                        $trimmed = trim($part);
-                                                        $formattedParts[] = ucfirst(strtolower($trimmed));
-                                                    }
-                                                    $formattedLabel = implode(' → ', $formattedParts);
-                                                } elseif (str_contains($label, ' - ')) {
-                                                    $formattedLabel = str_replace(' - ', ' → ', $label);
-                                                }
-
-                                                $options["{$alias}.{$fieldKey}"] = $formattedLabel;
-                                            }
-
-                                            $components[] = Forms\Components\CheckboxList::make($formKey)
-                                                ->label($relation['label'])
-                                                ->options($options)
-                                                ->columns(2)
-                                                ->gridDirection('row')
-                                                ->bulkToggleable()
-                                                ->statePath("configuration.payload_config.relation_fields.{$formKey}")
-                                                ->rules([])
-                                                ->live(onBlur: false)
-                                                ->dehydrated()
-                                                ->columnSpanFull()
-                                                ->afterStateHydrated(function (?array $state, callable $set) use ($options, $formKey): void {
-                                                    if (blank($state)) {
-                                                        return;
-                                                    }
-
-                                                    $valid = array_intersect($state, array_keys($options));
-                                                    if (count($valid) !== count($state)) {
-                                                        $set("configuration.payload_config.relation_fields.{$formKey}", array_values($valid));
-                                                    }
-                                                })
-                                                ->afterStateUpdated(function ($state, callable $set) use ($options, $formKey): void {
-                                                    if (! is_array($state)) {
-                                                        return;
-                                                    }
-
-                                                    $valid = array_intersect($state, array_keys($options));
-                                                    if (count($valid) !== count($state)) {
-                                                        $set("configuration.payload_config.relation_fields.{$formKey}", array_values($valid));
-                                                    }
-                                                });
-                                        }
-                                    }
-                                }
-
-                                return $components;
-                            })
-                            ->visible(fn (Get $get): bool => filled($get('../../event_class'))),
                         SchemaSection::make(__('filament-signal::signal.sections.webhook_configuration_advanced'))
                             ->collapsible()
                             ->collapsed()
@@ -742,20 +558,15 @@ class SignalTriggerResource extends Resource
                                             ->label(__('filament-signal::signal.fields.custom_signer_class')),
                                     ]),
                             ]),
-                        SchemaSection::make(__('filament-signal::signal.sections.log_configuration'))
-                            ->description(__('filament-signal::signal.helpers.log_configuration'))
-                            ->icon('heroicon-o-document-text')
-                            ->compact()
-                            ->visible(fn (Get $get): bool => $get('action_type') === 'log')
+                        SchemaSection::make()
+                            ->heading('')
+                            ->label(__('filament-signal::signal.fields.log_info'))
                             ->schema([
-                                Forms\Components\Textarea::make('log_info')
-                                    ->label('')
-                                    ->default(__('filament-signal::signal.helpers.log_info'))
-                                    ->disabled()
-                                    ->dehydrated(false)
-                                    ->rows(3)
-                                    ->columnSpanFull(),
-                            ]),
+                                SchemaText::make('log_info')
+                                    ->content(__('filament-signal::signal.helpers.log_info')),
+                            ])
+                            ->visible(fn(Get $get): bool => $get('action_type') === 'log')
+                            ->columnSpanFull(),
                     ])->columnSpan(8),
                     SchemaSection::make(__('filament-signal::signal.sections.payload_configuration'))
                         ->description(__('filament-signal::signal.helpers.payload_configuration'))
@@ -1044,9 +855,15 @@ class SignalTriggerResource extends Resource
     {
         return collect(config('signal.action_handlers', []))
             ->keys()
-            ->mapWithKeys(fn (string $type) => [
-                $type => __("filament-signal::signal.action_types.{$type}", [], ucfirst($type)),
-            ])
+            ->mapWithKeys(function (string $type) {
+                $translationKey = "filament-signal::signal.action_types.{$type}";
+                $translated = __($translationKey);
+
+                // Se la traduzione non esiste (restituisce la chiave stessa), usa ucfirst come fallback
+                $label = ($translated !== $translationKey) ? $translated : ucfirst($type);
+
+                return [$type => $label];
+            })
             ->all();
     }
 
@@ -1087,10 +904,10 @@ class SignalTriggerResource extends Resource
             ])
             ->actions([
                 ViewAction::make()
-                    ->url(fn (SignalTrigger $record): string => static::getUrl('view', ['record' => $record]))
+                    ->url(fn(SignalTrigger $record): string => static::getUrl('view', ['record' => $record]))
                     ->openUrlInNewTab(false),
                 EditAction::make()
-                    ->url(fn (SignalTrigger $record): string => static::getUrl('edit', ['record' => $record]))
+                    ->url(fn(SignalTrigger $record): string => static::getUrl('edit', ['record' => $record]))
                     ->openUrlInNewTab(false),
                 Action::make('clone')
                     ->label(__('filament-signal::signal.actions.clone'))
