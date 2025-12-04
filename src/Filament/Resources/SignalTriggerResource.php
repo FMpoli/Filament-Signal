@@ -54,13 +54,13 @@ class SignalTriggerResource extends Resource
                             ->label(__('filament-signal::signal.fields.name')),
                         TextEntry::make('status')
                             ->label(__('filament-signal::signal.fields.status'))
-                            ->formatStateUsing(fn(SignalTrigger $record): string => ucfirst($record->status)),
+                            ->formatStateUsing(fn (SignalTrigger $record): string => ucfirst($record->status)),
                         TextEntry::make('event_class')
                             ->label(__('filament-signal::signal.fields.event_class')),
                         TextEntry::make('match_type')
 
                             ->label(__('filament-signal::signal.fields.match_type'))
-                            ->formatStateUsing(fn(SignalTrigger $record): ?string => $record->match_type
+                            ->formatStateUsing(fn (SignalTrigger $record): ?string => $record->match_type
                                 ? __('filament-signal::signal.options.match_type.' . $record->match_type)
                                 : null),
                         TextEntry::make('description')
@@ -448,12 +448,12 @@ class SignalTriggerResource extends Resource
                                 '@md' => 2,
                                 '@xl' => 2,
                             ])
-                            ->visible(fn(Get $get): bool => $get('action_type') === 'webhook')
+                            ->visible(fn (Get $get): bool => $get('action_type') === 'webhook')
                             ->schema([
                                 Forms\Components\TextInput::make('configuration.url')
                                     ->label(__('filament-signal::signal.fields.endpoint_url'))
                                     ->url()
-                                    ->required(fn(Get $get): bool => $get('action_type') === 'webhook')
+                                    ->required(fn (Get $get): bool => $get('action_type') === 'webhook')
                                     ->columnSpanFull(),
                                 Forms\Components\Select::make('configuration.method')
                                     ->label(__('filament-signal::signal.fields.http_method'))
@@ -565,7 +565,7 @@ class SignalTriggerResource extends Resource
                                 SchemaText::make('log_info')
                                     ->content(__('filament-signal::signal.helpers.log_info')),
                             ])
-                            ->visible(fn(Get $get): bool => $get('action_type') === 'log')
+                            ->visible(fn (Get $get): bool => $get('action_type') === 'log')
                             ->columnSpanFull(),
                     ])->columnSpan(8),
                     SchemaSection::make(__('filament-signal::signal.sections.payload_configuration'))
@@ -904,10 +904,10 @@ class SignalTriggerResource extends Resource
             ])
             ->actions([
                 ViewAction::make()
-                    ->url(fn(SignalTrigger $record): string => static::getUrl('view', ['record' => $record]))
+                    ->url(fn (SignalTrigger $record): string => static::getUrl('view', ['record' => $record]))
                     ->openUrlInNewTab(false),
                 EditAction::make()
-                    ->url(fn(SignalTrigger $record): string => static::getUrl('edit', ['record' => $record]))
+                    ->url(fn (SignalTrigger $record): string => static::getUrl('edit', ['record' => $record]))
                     ->openUrlInNewTab(false),
                 Action::make('clone')
                     ->label(__('filament-signal::signal.actions.clone'))

@@ -115,7 +115,7 @@ class SignalActionExecutor
     /**
      * Determina se dobbiamo tracciare i success per questa action.
      * Gli errori vengono sempre tracciati.
-     * 
+     *
      * Regole:
      * - Se action_type === 'log': traccia sempre i success (non controlla log_success)
      * - Se action_type !== 'log': traccia i success solo se log_success è true
@@ -129,6 +129,7 @@ class SignalActionExecutor
 
         // Per altre action types, controlla la configurazione log_success
         $configuration = $action->configuration ?? [];
+
         return Arr::get($configuration, 'log_success', false);
     }
 }
