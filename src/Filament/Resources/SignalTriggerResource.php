@@ -17,7 +17,6 @@ use Filament\Forms;
 use Filament\Forms\Components\Builder;
 use Filament\Forms\Components\Builder\Block;
 use Filament\Forms\Components\Repeater;
-use Filament\Infolists\Components\CodeEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Grid as SchemaGrid;
@@ -70,18 +69,27 @@ class SignalTriggerResource extends Resource
                     ->columns(2),
                 SchemaSection::make(__('filament-signal::signal.sections.trigger_conditions'))
                     ->schema([
-                        CodeEntry::make('filters')
+                        TextEntry::make('filters')
                             ->label(__('filament-signal::signal.fields.filters'))
-                            ->formatStateUsing(function (SignalTrigger $record): ?string {
-                                $filters = $record->filters;
-                                if (blank($filters)) {
-                                    return null;
+                            ->formatStateUsing(function (SignalTrigger $record): string {
+                                $filters = $record->filters ?? [];
+                                if (is_string($filters)) {
+                                    $filters = json_decode($filters, true) ?? [];
                                 }
 
-                                return is_string($filters)
-                                    ? $filters
-                                    : json_encode($filters, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
-                            }),
+                                if (blank($filters) || empty($filters)) {
+                                    return view('filament-signal::infolists.filters-list', [
+                                        'filters' => [],
+                                        'matchType' => $record->match_type,
+                                    ])->render();
+                                }
+
+                                return view('filament-signal::infolists.filters-list', [
+                                    'filters' => $filters,
+                                    'matchType' => $record->match_type,
+                                ])->render();
+                            })
+                            ->html(),
                     ]),
                 SchemaSection::make(__('filament-signal::signal.sections.trigger_actions'))
                     ->schema([
@@ -475,7 +483,7 @@ class SignalTriggerResource extends Resource
                                     ->label(__('filament-signal::signal.fields.signing_secret'))
                                     ->password()
                                     ->revealable()
-                                    ->default(fn () => config('signal.webhook.secret') ?: Str::random(40))
+                                    ->default(fn() => config('signal.webhook.secret') ?: Str::random(40))
                                     ->helperText(__('filament-signal::signal.helpers.signing_secret'))
                                     ->columnSpan(2),
                                 // Forms\Components\Toggle::make('configuration.verify_ssl')
@@ -753,7 +761,7 @@ class SignalTriggerResource extends Resource
 
                             return $components;
                         })
-                        ->visible(fn (Get $get): bool => filled($get('../../event_class'))),
+                        ->visible(fn(Get $get): bool => filled($get('../../event_class'))),
 
                     // Group::make([
                     //     SchemaSection::make()->heading('RIGHT 1')->schema([]),
