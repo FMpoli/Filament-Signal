@@ -112,22 +112,22 @@ class SignalActionLogResource extends Resource
                 ->schema([
                     Forms\Components\Placeholder::make('trigger_name')
                         ->label(__('filament-signal::signal.fields.name'))
-                        ->content(fn(SignalActionLog $record): ?string => $record->trigger?->name),
+                        ->content(fn (SignalActionLog $record): ?string => $record->trigger?->name),
                     Forms\Components\Placeholder::make('action_name')
                         ->label(__('filament-signal::signal.fields.actions'))
-                        ->content(fn(SignalActionLog $record): ?string => $record->action?->name),
+                        ->content(fn (SignalActionLog $record): ?string => $record->action?->name),
                     Forms\Components\Placeholder::make('event_class')
                         ->label(__('filament-signal::signal.fields.event_class'))
-                        ->content(fn(SignalActionLog $record): string => $record->event_class),
+                        ->content(fn (SignalActionLog $record): string => $record->event_class),
                     Forms\Components\Placeholder::make('status')
                         ->label(__('filament-signal::signal.fields.status'))
-                        ->content(fn(SignalActionLog $record): string => ucfirst($record->status)),
+                        ->content(fn (SignalActionLog $record): string => ucfirst($record->status)),
                     Forms\Components\Placeholder::make('message')
                         ->label(__('filament-signal::signal.fields.status_message'))
-                        ->content(fn(SignalActionLog $record): ?string => $record->message),
+                        ->content(fn (SignalActionLog $record): ?string => $record->message),
                     Forms\Components\Placeholder::make('executed_at')
                         ->label(__('filament-signal::signal.fields.executed_at'))
-                        ->content(fn(SignalActionLog $record): ?string => optional($record->executed_at)->toDateTimeString()),
+                        ->content(fn (SignalActionLog $record): ?string => optional($record->executed_at)->toDateTimeString()),
                 ])
                 ->columns(2),
             Section::make(__('filament-signal::signal.sections.payload'))

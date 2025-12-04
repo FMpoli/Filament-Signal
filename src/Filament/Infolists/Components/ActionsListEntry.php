@@ -8,4 +8,3 @@ class ActionsListEntry extends Entry
 {
     protected string $view = 'filament-signal::infolists.entries.actions-list';
 }
-
