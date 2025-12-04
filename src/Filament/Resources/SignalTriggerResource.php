@@ -483,7 +483,7 @@ class SignalTriggerResource extends Resource
                                     ->label(__('filament-signal::signal.fields.signing_secret'))
                                     ->password()
                                     ->revealable()
-                                    ->default(fn() => config('signal.webhook.secret') ?: Str::random(40))
+                                    ->default(fn () => config('signal.webhook.secret') ?: Str::random(40))
                                     ->helperText(__('filament-signal::signal.helpers.signing_secret'))
                                     ->columnSpan(2),
                                 // Forms\Components\Toggle::make('configuration.verify_ssl')
@@ -761,7 +761,7 @@ class SignalTriggerResource extends Resource
 
                             return $components;
                         })
-                        ->visible(fn(Get $get): bool => filled($get('../../event_class'))),
+                        ->visible(fn (Get $get): bool => filled($get('../../event_class'))),
 
                     // Group::make([
                     //     SchemaSection::make()->heading('RIGHT 1')->schema([]),
