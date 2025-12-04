@@ -20,6 +20,7 @@ use Filament\Support\Assets\Css;
 use Filament\Support\Assets\Js;
 use Filament\Support\Facades\FilamentAsset;
 use Filament\Support\Facades\FilamentIcon;
+use Illuminate\Support\Facades\Vite;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Facades\Schema;
 use Livewire\Features\SupportTesting\Testable;
@@ -71,20 +72,20 @@ class FilamentSignalServiceProvider extends PackageServiceProvider
 
     public function packageRegistered(): void
     {
-        $this->app->singleton(SignalWebhookTemplateRegistry::class, fn (): SignalWebhookTemplateRegistry => new SignalWebhookTemplateRegistry);
-        $this->app->singleton(SignalEventRegistry::class, fn (): SignalEventRegistry => new SignalEventRegistry);
-        $this->app->singleton(SignalModelRegistry::class, fn (): SignalModelRegistry => new SignalModelRegistry);
-        $this->app->singleton(ReverseRelationRegistry::class, fn (): ReverseRelationRegistry => new ReverseRelationRegistry);
-        $this->app->singleton(ReverseRelationRegistrar::class, fn ($app): ReverseRelationRegistrar => new ReverseRelationRegistrar(
+        $this->app->singleton(SignalWebhookTemplateRegistry::class, fn(): SignalWebhookTemplateRegistry => new SignalWebhookTemplateRegistry);
+        $this->app->singleton(SignalEventRegistry::class, fn(): SignalEventRegistry => new SignalEventRegistry);
+        $this->app->singleton(SignalModelRegistry::class, fn(): SignalModelRegistry => new SignalModelRegistry);
+        $this->app->singleton(ReverseRelationRegistry::class, fn(): ReverseRelationRegistry => new ReverseRelationRegistry);
+        $this->app->singleton(ReverseRelationRegistrar::class, fn($app): ReverseRelationRegistrar => new ReverseRelationRegistrar(
             $app->make(ReverseRelationRegistry::class)
         ));
-        $this->app->singleton(ReverseRelationWarmup::class, fn ($app): ReverseRelationWarmup => new ReverseRelationWarmup(
+        $this->app->singleton(ReverseRelationWarmup::class, fn($app): ReverseRelationWarmup => new ReverseRelationWarmup(
             $app->make(SignalEventRegistry::class),
             $app->make(SignalPayloadFieldAnalyzer::class),
             $app->make(SignalModelRegistry::class),
             $app->make(ReverseRelationRegistrar::class)
         ));
-        $this->app->singleton(SignalEloquentEventMap::class, fn (): SignalEloquentEventMap => new SignalEloquentEventMap);
+        $this->app->singleton(SignalEloquentEventMap::class, fn(): SignalEloquentEventMap => new SignalEloquentEventMap);
     }
 
     public function packageBooted(): void
@@ -175,10 +176,14 @@ class FilamentSignalServiceProvider extends PackageServiceProvider
     {
         $assets = [];
 
-        $cssPath = __DIR__ . '/../resources/dist/filament-signal.css';
-        if (file_exists($cssPath)) {
-            $assets[] = Css::make('filament-signal-styles', $cssPath);
-        }
+        // Vite risolve il symlink e registra il percorso reale nel manifest
+        // In sviluppo con symlink: packages/Base33/...
+        // In produzione: vendor/base33/...
+        $cssPath = is_link(base_path('vendor/base33/filament-signal'))
+            ? 'packages/Base33/Filament-Signal/resources/css/theme.css'
+            : 'vendor/base33/filament-signal/resources/css/theme.css';
+
+        $assets[] = Css::make('filament-signal-styles', Vite::asset($cssPath));
 
         $jsPath = __DIR__ . '/../resources/dist/filament-signal.js';
         if (file_exists($jsPath)) {

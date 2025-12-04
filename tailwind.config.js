@@ -5,6 +5,7 @@ module.exports = {
     content: [
         './app/Filament/**/*.php',
         './resources/views/filament/**/*.blade.php',
+        './resources/views/infolists/**/*.blade.php',
         './vendor/filament/**/*.blade.php',
     ],
 }
