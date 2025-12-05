@@ -20,7 +20,7 @@ class SignalEventProcessor
         // Log diretto su file per debug
         try {
             $logFile = base_path('storage/logs/signal-debug.log');
-            $logMessage = date('Y-m-d H:i:s') . " - SignalEventProcessor::handle called - Event class: " . ($event instanceof SignalIdentifiableEvent ? $event->signalEventIdentifier() : get_class($event)) . "\n";
+            $logMessage = date('Y-m-d H:i:s') . ' - SignalEventProcessor::handle called - Event class: ' . ($event instanceof SignalIdentifiableEvent ? $event->signalEventIdentifier() : get_class($event)) . "\n";
             @file_put_contents($logFile, $logMessage, FILE_APPEND);
         } catch (\Throwable $e) {
             // Ignora errori di scrittura
@@ -55,12 +55,13 @@ class SignalEventProcessor
 
         foreach ($triggers as $trigger) {
             // Controlla se il trigger passa i filtri configurati
-            if (!$trigger->passesFilters($payload)) {
+            if (! $trigger->passesFilters($payload)) {
                 Log::info("Signal: Trigger [{$trigger->id}] did not pass filters", [
                     'trigger_id' => $trigger->id,
                     'trigger_name' => $trigger->name,
                     'event_class' => $eventClass,
                 ]);
+
                 continue;
             }
 

@@ -67,9 +67,9 @@ class SignalModelIntegrationResource extends Resource
                                 ->unique(SignalModelIntegration::class, 'model_class', ignoreRecord: true)
                                 ->searchable()
                                 ->preload()
-                                ->options(fn() => static::getAvailableModelOptions())
-                                ->getSearchResultsUsing(fn(string $search): array => static::getAvailableModelOptions($search))
-                                ->getOptionLabelUsing(fn(?string $value): ?string => $value ? class_basename($value) : null)
+                                ->options(fn () => static::getAvailableModelOptions())
+                                ->getSearchResultsUsing(fn (string $search): array => static::getAvailableModelOptions($search))
+                                ->getOptionLabelUsing(fn (?string $value): ?string => $value ? class_basename($value) : null)
                                 ->live()
                                 ->afterStateUpdated(function ($state, callable $set, Get $get): void {
                                     $set('fields', [
@@ -105,12 +105,12 @@ class SignalModelIntegrationResource extends Resource
                                     Forms\Components\Repeater::make('fields.essential')
                                         ->compact()
                                         ->label(__('filament-signal::signal.model_integrations.fields.essential_fields'))
-                                        ->itemLabel(fn(array $state): ?string => ($state['field'] ?? ''))
+                                        ->itemLabel(fn (array $state): ?string => ($state['field'] ?? ''))
                                         ->schema([
                                             Forms\Components\Select::make('field')
                                                 ->label(__('filament-signal::signal.model_integrations.fields.field_name'))
                                                 ->required()
-                                                ->options(fn(Get $get): array => static::getModelFieldOptions(static::resolveModelClass($get)))
+                                                ->options(fn (Get $get): array => static::getModelFieldOptions(static::resolveModelClass($get)))
                                                 ->reactive()
                                                 ->searchable()
                                                 ->preload(),
@@ -128,11 +128,11 @@ class SignalModelIntegrationResource extends Resource
                                 ->schema([
                                     Forms\Components\Repeater::make('fields.relations')
                                         ->label(__('filament-signal::signal.model_integrations.fields.relations'))
-                                        ->itemLabel(fn(array $state): ?string => ($state['name'] ?? ''))
+                                        ->itemLabel(fn (array $state): ?string => ($state['name'] ?? ''))
                                         ->schema([
                                             Forms\Components\Select::make('name')
                                                 ->label(__('filament-signal::signal.model_integrations.fields.relation_name'))
-                                                ->options(fn(Get $get): array => static::getRelationOptions(static::resolveModelClass($get)))
+                                                ->options(fn (Get $get): array => static::getRelationOptions(static::resolveModelClass($get)))
                                                 ->searchable()
                                                 ->preload()
                                                 ->reactive()
@@ -159,11 +159,11 @@ class SignalModelIntegrationResource extends Resource
                                                 ->helperText(__('filament-signal::signal.model_integrations.helpers.relation_alias')),
                                             Forms\Components\Repeater::make('fields')
                                                 ->label(__('filament-signal::signal.model_integrations.fields.relation_fields'))
-                                                ->itemLabel(fn(array $state): ?string => ($state['field'] ?? ''))
+                                                ->itemLabel(fn (array $state): ?string => ($state['field'] ?? ''))
                                                 ->schema([
                                                     Forms\Components\Select::make('field')
                                                         ->label(__('filament-signal::signal.model_integrations.fields.field_name'))
-                                                        ->options(fn(Get $get): array => static::getRelationFieldOptions($get))
+                                                        ->options(fn (Get $get): array => static::getRelationFieldOptions($get))
                                                         ->required()
                                                         ->live()
                                                         ->reactive()
@@ -185,7 +185,7 @@ class SignalModelIntegrationResource extends Resource
                                             Forms\Components\Select::make('expand')
                                                 ->label(__('filament-signal::signal.model_integrations.fields.expand_relations'))
                                                 ->multiple()
-                                                ->options(fn(Get $get): array => static::getRelationExpandOptions($get))
+                                                ->options(fn (Get $get): array => static::getRelationExpandOptions($get))
                                                 ->reactive()
                                                 ->searchable()
                                                 ->hidden()
@@ -245,7 +245,7 @@ class SignalModelIntegrationResource extends Resource
                     ->placeholder('—'),
                 Tables\Columns\TextColumn::make('eloquent_events')
                     ->label(__('filament-signal::signal.model_integrations.fields.eloquent_events'))
-                    ->formatStateUsing(fn($state) => collect($state ?? [])->map(fn($event) => self::eloquentEventOptions()[$event] ?? $event)->implode(', '))
+                    ->formatStateUsing(fn ($state) => collect($state ?? [])->map(fn ($event) => self::eloquentEventOptions()[$event] ?? $event)->implode(', '))
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('updated_at')
                     ->label(__('filament-signal::signal.fields.updated_at'))
@@ -360,7 +360,7 @@ class SignalModelIntegrationResource extends Resource
         $fieldOptions = collect($fields ?? [])
             ->merge(['id', 'created_at', 'updated_at'])
             ->unique()
-            ->mapWithKeys(fn($field) => [$field => Str::headline(str_replace('_', ' ', $field))])
+            ->mapWithKeys(fn ($field) => [$field => Str::headline(str_replace('_', ' ', $field))])
             ->toArray();
 
         $relations = [];
@@ -992,7 +992,7 @@ class SignalModelIntegrationResource extends Resource
                             $namespaceParts = [];
                             if ($relativePath) {
                                 $pathParts = explode('/', $relativePath);
-                                $namespaceParts = array_map(fn($part) => str_replace(' ', '', ucwords(str_replace('_', ' ', $part))), $pathParts);
+                                $namespaceParts = array_map(fn ($part) => str_replace(' ', '', ucwords(str_replace('_', ' ', $part))), $pathParts);
                             }
 
                             $modelName = ! empty($namespaceParts) ? end($namespaceParts) : '';
@@ -1033,7 +1033,7 @@ class SignalModelIntegrationResource extends Resource
                 $namespaceParts = explode('\\', $namespace);
 
                 // Rimuovi "Models" se presente
-                $namespaceParts = array_filter($namespaceParts, fn($part) => $part !== 'Models');
+                $namespaceParts = array_filter($namespaceParts, fn ($part) => $part !== 'Models');
 
                 // Prendi solo il nome del package (ultima parte significativa)
                 if (count($namespaceParts) >= 2) {
