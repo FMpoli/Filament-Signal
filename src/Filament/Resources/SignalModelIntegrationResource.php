@@ -11,6 +11,7 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Facades\Filament;
 use Filament\Forms;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Group;
@@ -23,12 +24,11 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Schema as DatabaseSchema;
 use Illuminate\Support\Str;
 use ReflectionClass;
 use ReflectionMethod;
-use Filament\Facades\Filament;
-use Illuminate\Support\Facades\File;
 
 class SignalModelIntegrationResource extends Resource
 {
@@ -67,9 +67,9 @@ class SignalModelIntegrationResource extends Resource
                                 ->unique(SignalModelIntegration::class, 'model_class', ignoreRecord: true)
                                 ->searchable()
                                 ->preload()
-                                ->options(fn() => static::getAvailableModelOptions())
-                                ->getSearchResultsUsing(fn(string $search): array => static::getAvailableModelOptions($search))
-                                ->getOptionLabelUsing(fn(?string $value): ?string => $value ? class_basename($value) : null)
+                                ->options(fn () => static::getAvailableModelOptions())
+                                ->getSearchResultsUsing(fn (string $search): array => static::getAvailableModelOptions($search))
+                                ->getOptionLabelUsing(fn (?string $value): ?string => $value ? class_basename($value) : null)
                                 ->live()
                                 ->afterStateUpdated(function ($state, callable $set, Get $get): void {
                                     $set('fields', [
@@ -867,7 +867,7 @@ class SignalModelIntegrationResource extends Resource
      * Ottiene tutti i modelli Eloquent disponibili nel sistema e dai plugin Filament registrati.
      *
      * @param  string|null  $search  Termine di ricerca opzionale
-     * @return array<string, string>  Array associativo [classe_completa => nome_visualizzato]
+     * @return array<string, string> Array associativo [classe_completa => nome_visualizzato]
      */
     protected static function getAvailableModelOptions(?string $search = null): array
     {
@@ -880,20 +880,20 @@ class SignalModelIntegrationResource extends Resource
             if ($panel) {
                 $resources = $panel->getResources();
                 foreach ($resources as $resourceClass) {
-                    if (!class_exists($resourceClass)) {
+                    if (! class_exists($resourceClass)) {
                         continue;
                     }
 
                     try {
                         $reflection = new ReflectionClass($resourceClass);
-                        if (!$reflection->hasProperty('model')) {
+                        if (! $reflection->hasProperty('model')) {
                             continue;
                         }
 
                         $modelProperty = $reflection->getStaticPropertyValue('model');
                         if ($modelProperty && is_string($modelProperty) && class_exists($modelProperty)) {
                             if (is_subclass_of($modelProperty, Model::class)) {
-                                if (!in_array($modelProperty, $excludedModels)) {
+                                if (! in_array($modelProperty, $excludedModels)) {
                                     $models[$modelProperty] = $modelProperty;
                                 }
                             }
@@ -914,7 +914,7 @@ class SignalModelIntegrationResource extends Resource
         ];
 
         foreach ($modelPaths as $path) {
-            if (!File::exists($path)) {
+            if (! File::exists($path)) {
                 continue;
             }
 
@@ -924,7 +924,7 @@ class SignalModelIntegrationResource extends Resource
                 $className = str_replace('App\\Models\\' . basename($path) . '\\', 'App\\Models\\', $className);
 
                 if (class_exists($className) && is_subclass_of($className, Model::class)) {
-                    if (!in_array($className, $excludedModels)) {
+                    if (! in_array($className, $excludedModels)) {
                         $models[$className] = $className;
                     }
                 }
@@ -953,6 +953,7 @@ class SignalModelIntegrationResource extends Resource
                                     foreach ($composer['autoload']['psr-4'] as $namespace => $path) {
                                         if (strpos($relativePath, $path) === 0 || $path === 'src/') {
                                             $className = rtrim($namespace, '\\') . '\\' . str_replace(['src/', '/'], ['', '\\'], $relativePath);
+
                                             break;
                                         }
                                     }
@@ -960,7 +961,7 @@ class SignalModelIntegrationResource extends Resource
                             }
 
                             if (class_exists($className) && is_subclass_of($className, Model::class)) {
-                                if (!in_array($className, $excludedModels)) {
+                                if (! in_array($className, $excludedModels)) {
                                     $models[$className] = $className;
                                 }
                             }
@@ -991,16 +992,16 @@ class SignalModelIntegrationResource extends Resource
                             $namespaceParts = [];
                             if ($relativePath) {
                                 $pathParts = explode('/', $relativePath);
-                                $namespaceParts = array_map(fn($part) => str_replace(' ', '', ucwords(str_replace('_', ' ', $part))), $pathParts);
+                                $namespaceParts = array_map(fn ($part) => str_replace(' ', '', ucwords(str_replace('_', ' ', $part))), $pathParts);
                             }
 
-                            $modelName = !empty($namespaceParts) ? end($namespaceParts) : '';
-                            $subNamespace = !empty($namespaceParts) ? '\\' . implode('\\', array_slice($namespaceParts, 0, -1)) : '';
+                            $modelName = ! empty($namespaceParts) ? end($namespaceParts) : '';
+                            $subNamespace = ! empty($namespaceParts) ? '\\' . implode('\\', array_slice($namespaceParts, 0, -1)) : '';
 
                             $className = "{$vendorName}\\{$packageName}\\Models{$subNamespace}\\{$modelName}";
 
                             if (class_exists($className) && is_subclass_of($className, Model::class)) {
-                                if (!in_array($className, $excludedModels)) {
+                                if (! in_array($className, $excludedModels)) {
                                     $models[$className] = $className;
                                 }
                             }
@@ -1032,7 +1033,7 @@ class SignalModelIntegrationResource extends Resource
                 $namespaceParts = explode('\\', $namespace);
 
                 // Rimuovi "Models" se presente
-                $namespaceParts = array_filter($namespaceParts, fn($part) => $part !== 'Models');
+                $namespaceParts = array_filter($namespaceParts, fn ($part) => $part !== 'Models');
 
                 // Prendi solo il nome del package (ultima parte significativa)
                 if (count($namespaceParts) >= 2) {
