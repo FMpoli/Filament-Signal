@@ -27,6 +27,8 @@ use Illuminate\Support\Facades\Schema as DatabaseSchema;
 use Illuminate\Support\Str;
 use ReflectionClass;
 use ReflectionMethod;
+use Filament\Facades\Filament;
+use Illuminate\Support\Facades\File;
 
 class SignalModelIntegrationResource extends Resource
 {
@@ -59,10 +61,15 @@ class SignalModelIntegrationResource extends Resource
                             Forms\Components\TextInput::make('name')
                                 ->label(__('filament-signal::signal.fields.name'))
                                 ->required(),
-                            Forms\Components\TextInput::make('model_class')
+                            Forms\Components\Select::make('model_class')
                                 ->label(__('filament-signal::signal.model_integrations.fields.model_class'))
                                 ->required()
                                 ->unique(SignalModelIntegration::class, 'model_class', ignoreRecord: true)
+                                ->searchable()
+                                ->preload()
+                                ->options(fn() => static::getAvailableModelOptions())
+                                ->getSearchResultsUsing(fn(string $search): array => static::getAvailableModelOptions($search))
+                                ->getOptionLabelUsing(fn(?string $value): ?string => $value ? class_basename($value) : null)
                                 ->live()
                                 ->afterStateUpdated(function ($state, callable $set, Get $get): void {
                                     $set('fields', [
@@ -854,5 +861,207 @@ class SignalModelIntegrationResource extends Resource
         }
 
         return null;
+    }
+
+    /**
+     * Ottiene tutti i modelli Eloquent disponibili nel sistema e dai plugin Filament registrati.
+     *
+     * @param  string|null  $search  Termine di ricerca opzionale
+     * @return array<string, string>  Array associativo [classe_completa => nome_visualizzato]
+     */
+    protected static function getAvailableModelOptions(?string $search = null): array
+    {
+        $excludedModels = config('signal.excluded_models', []);
+        $models = [];
+
+        // 1. Trova modelli dai Resource Filament registrati nel pannello corrente
+        try {
+            $panel = Filament::getCurrentPanel();
+            if ($panel) {
+                $resources = $panel->getResources();
+                foreach ($resources as $resourceClass) {
+                    if (!class_exists($resourceClass)) {
+                        continue;
+                    }
+
+                    try {
+                        $reflection = new ReflectionClass($resourceClass);
+                        if (!$reflection->hasProperty('model')) {
+                            continue;
+                        }
+
+                        $modelProperty = $reflection->getStaticPropertyValue('model');
+                        if ($modelProperty && is_string($modelProperty) && class_exists($modelProperty)) {
+                            if (is_subclass_of($modelProperty, Model::class)) {
+                                if (!in_array($modelProperty, $excludedModels)) {
+                                    $models[$modelProperty] = $modelProperty;
+                                }
+                            }
+                        }
+                    } catch (\Throwable $e) {
+                        // Ignora errori di reflection
+                        continue;
+                    }
+                }
+            }
+        } catch (\Throwable $e) {
+            // Se non c'è un pannello corrente, continua con altri metodi
+        }
+
+        // 2. Cerca modelli nelle directory standard di Laravel
+        $modelPaths = [
+            app_path('Models'),
+        ];
+
+        foreach ($modelPaths as $path) {
+            if (!File::exists($path)) {
+                continue;
+            }
+
+            $files = File::allFiles($path);
+            foreach ($files as $file) {
+                $className = 'App\\Models\\' . str_replace(['/', '.php'], ['\\', ''], $file->getRelativePathname());
+                $className = str_replace('App\\Models\\' . basename($path) . '\\', 'App\\Models\\', $className);
+
+                if (class_exists($className) && is_subclass_of($className, Model::class)) {
+                    if (!in_array($className, $excludedModels)) {
+                        $models[$className] = $className;
+                    }
+                }
+            }
+        }
+
+        // 3. Cerca modelli nei vendor/package (plugin Filament)
+        $vendorPath = base_path('vendor');
+        if (File::exists($vendorPath)) {
+            $vendorDirs = File::directories($vendorPath);
+            foreach ($vendorDirs as $vendorDir) {
+                $packageDirs = File::directories($vendorDir);
+                foreach ($packageDirs as $packageDir) {
+                    $modelsPath = $packageDir . '/src/Models';
+                    if (File::exists($modelsPath)) {
+                        $files = File::allFiles($modelsPath);
+                        foreach ($files as $file) {
+                            $relativePath = str_replace([$packageDir . '/src/', '.php'], ['', ''], $file->getPathname());
+                            $className = str_replace('/', '\\', $relativePath);
+
+                            // Prova a determinare il namespace dal composer.json o dalla struttura
+                            $composerPath = $packageDir . '/composer.json';
+                            if (File::exists($composerPath)) {
+                                $composer = json_decode(File::get($composerPath), true);
+                                if (isset($composer['autoload']['psr-4'])) {
+                                    foreach ($composer['autoload']['psr-4'] as $namespace => $path) {
+                                        if (strpos($relativePath, $path) === 0 || $path === 'src/') {
+                                            $className = rtrim($namespace, '\\') . '\\' . str_replace(['src/', '/'], ['', '\\'], $relativePath);
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+
+                            if (class_exists($className) && is_subclass_of($className, Model::class)) {
+                                if (!in_array($className, $excludedModels)) {
+                                    $models[$className] = $className;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // 4. Cerca modelli nei package locali (app/packages)
+        $packagesPath = app_path('packages');
+        if (File::exists($packagesPath)) {
+            $vendorDirs = File::directories($packagesPath);
+            foreach ($vendorDirs as $vendorDir) {
+                $packageDirs = File::directories($vendorDir);
+                foreach ($packageDirs as $packageDir) {
+                    $modelsPath = $packageDir . '/src/Models';
+                    if (File::exists($modelsPath)) {
+                        $files = File::allFiles($modelsPath);
+                        foreach ($files as $file) {
+                            $relativePath = str_replace([$packageDir . '/src/Models/', '.php'], ['', ''], $file->getRelativePathname());
+
+                            // Determina il namespace dalla struttura delle directory
+                            $vendorName = basename($vendorDir);
+                            $packageName = basename($packageDir);
+
+                            // Costruisci il namespace completo
+                            $namespaceParts = [];
+                            if ($relativePath) {
+                                $pathParts = explode('/', $relativePath);
+                                $namespaceParts = array_map(fn($part) => str_replace(' ', '', ucwords(str_replace('_', ' ', $part))), $pathParts);
+                            }
+
+                            $modelName = !empty($namespaceParts) ? end($namespaceParts) : '';
+                            $subNamespace = !empty($namespaceParts) ? '\\' . implode('\\', array_slice($namespaceParts, 0, -1)) : '';
+
+                            $className = "{$vendorName}\\{$packageName}\\Models{$subNamespace}\\{$modelName}";
+
+                            if (class_exists($className) && is_subclass_of($className, Model::class)) {
+                                if (!in_array($className, $excludedModels)) {
+                                    $models[$className] = $className;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // Filtra per ricerca se fornita
+        if ($search) {
+            $models = array_filter($models, function ($modelClass) use ($search) {
+                return stripos($modelClass, $search) !== false ||
+                    stripos(class_basename($modelClass), $search) !== false;
+            });
+        }
+
+        // Ordina e formatta per la visualizzazione
+        ksort($models);
+        $options = [];
+        foreach ($models as $modelClass) {
+            $basename = class_basename($modelClass);
+            $namespace = str_replace('\\' . $basename, '', $modelClass);
+
+            // Crea un'etichetta più leggibile
+            $label = $basename;
+            if ($namespace && $namespace !== 'App\\Models') {
+                // Estrai il nome del package/plugin dal namespace
+                $namespaceParts = explode('\\', $namespace);
+
+                // Rimuovi "Models" se presente
+                $namespaceParts = array_filter($namespaceParts, fn($part) => $part !== 'Models');
+
+                // Prendi solo il nome del package (ultima parte significativa)
+                if (count($namespaceParts) >= 2) {
+                    // Prendi solo il nome del package (es: FilamentSignal da Base33\FilamentSignal)
+                    $packageName = end($namespaceParts);
+
+                    // Rimuovi "Filament" se presente e capitalizza la prima lettera
+                    $packageName = str_replace('Filament', '', $packageName);
+                    $packageName = ucfirst($packageName);
+
+                    if ($packageName) {
+                        $label .= ' (' . $packageName . ')';
+                    }
+                } elseif (count($namespaceParts) > 0) {
+                    // Se c'è solo una parte, usala dopo aver rimosso "Filament"
+                    $lastPart = end($namespaceParts);
+                    if ($lastPart && $lastPart !== 'App') {
+                        $lastPart = str_replace('Filament', '', $lastPart);
+                        $lastPart = ucfirst($lastPart);
+                        if ($lastPart) {
+                            $label .= ' (' . $lastPart . ')';
+                        }
+                    }
+                }
+            }
+
+            $options[$modelClass] = $label;
+        }
+
+        return $options;
     }
 }

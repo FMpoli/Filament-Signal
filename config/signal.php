@@ -98,4 +98,13 @@ return [
         //     ],
         // ],
     ],
+
+    /*
+     * Lista di modelli da escludere dalla selezione automatica nella creazione di Model Integration.
+     * Utile per escludere modelli interni o modelli che non devono essere tracciati.
+     */
+    'excluded_models' => [
+        // \App\Models\InternalModel::class,
+        // \Base33\FilamentSignal\Models\SignalTrigger::class,
+    ],
 ];
