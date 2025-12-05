@@ -4,6 +4,7 @@ namespace Base33\FilamentSignal\Filament\Resources;
 
 use BackedEnum;
 use Base33\FilamentSignal\Filament\Infolists\Components\ActionsListEntry;
+use Base33\FilamentSignal\Filament\Infolists\Components\FiltersListEntry;
 use Base33\FilamentSignal\Filament\Resources\SignalTriggerResource\Pages;
 use Base33\FilamentSignal\FilamentSignal;
 use Base33\FilamentSignal\Models\SignalTrigger;
@@ -18,14 +19,7 @@ use Filament\Forms;
 use Filament\Forms\Components\Builder;
 use Filament\Forms\Components\Builder\Block;
 use Filament\Forms\Components\Repeater;
-use Base33\FilamentSignal\Filament\Infolists\Components\FiltersListEntry;
-use Filament\Infolists\Components\RepeatableEntry\TableColumn;
-use Filament\Infolists\Components\KeyValueEntry;
-use Filament\Infolists\Components\RepeatableEntry;
 use Filament\Infolists\Components\TextEntry;
-use Filament\Support\Enums\FontWeight;
-use Filament\Support\Enums\TextSize;
-
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Group;
@@ -81,7 +75,7 @@ class SignalTriggerResource extends Resource
                                 ->label(__('filament-signal::signal.fields.description'))
                                 ->hiddenLabel()
                                 ->placeholder('—')
-                                ->visible(fn(SignalTrigger $record) => !empty($record->description))
+                                ->visible(fn (SignalTrigger $record) => ! empty($record->description))
                                 ->columnSpanFull(),
                             TextEntry::make('event_display_name')
                                 ->label(__('filament-signal::signal.fields.event_source'))
@@ -114,7 +108,7 @@ class SignalTriggerResource extends Resource
                             ActionsListEntry::make('actions')
                                 ->label(__('filament-signal::signal.fields.actions'))
                                 ->hiddenLabel()
-                                ->state(fn(SignalTrigger $record) => $record->actions->toArray()),
+                                ->state(fn (SignalTrigger $record) => $record->actions->toArray()),
                         ]),
                 ])
                     ->columnSpan(8),
@@ -503,12 +497,12 @@ class SignalTriggerResource extends Resource
                                 '@md' => 2,
                                 '@xl' => 2,
                             ])
-                            ->visible(fn(Get $get): bool => $get('action_type') === 'webhook')
+                            ->visible(fn (Get $get): bool => $get('action_type') === 'webhook')
                             ->schema([
                                 Forms\Components\TextInput::make('configuration.url')
                                     ->label(__('filament-signal::signal.fields.endpoint_url'))
                                     ->url()
-                                    ->required(fn(Get $get): bool => $get('action_type') === 'webhook')
+                                    ->required(fn (Get $get): bool => $get('action_type') === 'webhook')
                                     ->columnSpanFull(),
                                 Forms\Components\Select::make('configuration.method')
                                     ->label(__('filament-signal::signal.fields.http_method'))
@@ -530,7 +524,7 @@ class SignalTriggerResource extends Resource
                                     ->label(__('filament-signal::signal.fields.signing_secret'))
                                     ->password()
                                     ->revealable()
-                                    ->default(fn() => config('signal.webhook.secret') ?: Str::random(40))
+                                    ->default(fn () => config('signal.webhook.secret') ?: Str::random(40))
                                     ->helperText(__('filament-signal::signal.helpers.signing_secret'))
                                     ->columnSpan(2),
                                 // Forms\Components\Toggle::make('configuration.verify_ssl')
@@ -620,7 +614,7 @@ class SignalTriggerResource extends Resource
                                 Text::make('log_info')
                                     ->content(__('filament-signal::signal.helpers.log_info')),
                             ])
-                            ->visible(fn(Get $get): bool => $get('action_type') === 'log')
+                            ->visible(fn (Get $get): bool => $get('action_type') === 'log')
                             ->columnSpanFull(),
                     ])->columnSpan(8),
                     Section::make(__('filament-signal::signal.sections.payload_configuration'))
@@ -808,7 +802,7 @@ class SignalTriggerResource extends Resource
 
                             return $components;
                         })
-                        ->visible(fn(Get $get): bool => filled($get('../../event_class'))),
+                        ->visible(fn (Get $get): bool => filled($get('../../event_class'))),
 
                     // Group::make([
                     //     Section::make()->heading('RIGHT 1')->schema([]),
@@ -959,10 +953,10 @@ class SignalTriggerResource extends Resource
             ])
             ->actions([
                 ViewAction::make()
-                    ->url(fn(SignalTrigger $record): string => static::getUrl('view', ['record' => $record]))
+                    ->url(fn (SignalTrigger $record): string => static::getUrl('view', ['record' => $record]))
                     ->openUrlInNewTab(false),
                 EditAction::make()
-                    ->url(fn(SignalTrigger $record): string => static::getUrl('edit', ['record' => $record]))
+                    ->url(fn (SignalTrigger $record): string => static::getUrl('edit', ['record' => $record]))
                     ->openUrlInNewTab(false),
                 Action::make('clone')
                     ->label(__('filament-signal::signal.actions.clone'))
