@@ -14,7 +14,7 @@ class ListSignalTriggers extends ListRecords
     {
         return [
             Action::make('create')
-                ->label(__('filament::resources/pages/list-records.actions.create.label'))
+                ->label(__('filament-signal::signal.actions.create'))
                 ->url(static::getResource()::getUrl('create'))
                 ->icon('heroicon-o-plus')
                 ->button(),

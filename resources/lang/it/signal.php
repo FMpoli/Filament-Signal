@@ -12,6 +12,7 @@ return [
         ],
     ],
     'actions' => [
+        'create' => 'Crea',
         'add_action' => 'Aggiungi azione',
         'add_filter' => 'Aggiungi filtro',
         'view_log' => 'Vedi log',
