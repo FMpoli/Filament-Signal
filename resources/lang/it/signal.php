@@ -32,6 +32,9 @@ return [
         'activate_action' => 'Attiva azione',
         'deactivate_action' => 'Disattiva azione',
         'clone_action' => 'Clona azione',
+        'flow_view' => 'Vista Flow',
+        'edit' => 'Modifica',
+        'view' => 'Visualizza',
     ],
     'action_types' => [
         'log' => 'Log',
@@ -84,6 +87,7 @@ return [
         'webhook_template' => 'Modello predefinito',
         'field' => 'Campo',
         'value' => 'Valore',
+        'flow_view' => 'Vista Flow',
         'endpoint_url' => 'URL Endpoint',
         'http_method' => 'Metodo HTTP',
         'payload_mode' => 'Modalità payload',
