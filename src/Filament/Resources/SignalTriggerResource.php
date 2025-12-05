@@ -236,6 +236,7 @@ class SignalTriggerResource extends Resource
                         ]),
                     Section::make(__('filament-signal::signal.sections.trigger_conditions'))
                         ->icon('heroicon-o-funnel')
+                        ->compact()
                         ->schema([
                             Forms\Components\Select::make('match_type')
                                 ->label(__('filament-signal::signal.fields.match_type'))
@@ -619,6 +620,7 @@ class SignalTriggerResource extends Resource
                     ])->columnSpan(8),
                     Section::make(__('filament-signal::signal.sections.payload_configuration'))
                         ->description(__('filament-signal::signal.helpers.payload_configuration'))
+                        ->compact()
                         ->icon('heroicon-o-circle-stack')
                         ->compact()
                         ->columnSpanFull()
