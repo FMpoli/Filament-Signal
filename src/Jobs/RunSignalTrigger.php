@@ -39,6 +39,15 @@ class RunSignalTrigger implements ShouldQueue
             return;
         }
 
+        // Controlla se il trigger passa i filtri configurati
+        if (!$trigger->passesFilters($this->payload)) {
+            \Illuminate\Support\Facades\Log::debug("Signal: Trigger [{$trigger->id}] did not pass filters in job", [
+                'trigger_id' => $trigger->id,
+                'event_class' => $this->eventClass,
+            ]);
+            return;
+        }
+
         foreach ($trigger->actions as $action) {
             $executor->execute($action, $this->payload, $this->eventClass);
         }

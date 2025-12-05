@@ -29,6 +29,8 @@ use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Schema as DatabaseSchema;
 use Illuminate\Support\Str;
 
 class SignalTriggerResource extends Resource
@@ -258,107 +260,157 @@ class SignalTriggerResource extends Resource
                                 ->live()
                                 ->blocks([
                                     Block::make('equals')
-                                        ->label(__('filament-signal::signal.options.filter_blocks.equals'))
+                                        ->label(static::getFilterBlockLabel('equals', __('filament-signal::signal.options.filter_blocks.equals')))
                                         ->schema([
-                                            Forms\Components\TextInput::make('field')
+                                            Forms\Components\Select::make('field')
                                                 ->label(__('filament-signal::signal.fields.field'))
-                                                ->required(),
+                                                ->options(fn(Get $get): array => static::getFilterFieldOptions($get))
+                                                ->searchable()
+                                                ->preload()
+                                                ->required()
+                                                ->live(),
                                             Forms\Components\TextInput::make('value')
                                                 ->label(__('filament-signal::signal.fields.value'))
-                                                ->required(),
-                                        ])->columns(2),
+                                                ->required()
+                                                ->live(),
+                                        ])->columns(1),
                                     Block::make('not_equals')
-                                        ->label(__('filament-signal::signal.options.filter_blocks.not_equals'))
+                                        ->label(static::getFilterBlockLabel('not_equals', __('filament-signal::signal.options.filter_blocks.not_equals')))
                                         ->schema([
-                                            Forms\Components\TextInput::make('field')
+                                            Forms\Components\Select::make('field')
                                                 ->label(__('filament-signal::signal.fields.field'))
-                                                ->required(),
+                                                ->options(fn(Get $get): array => static::getFilterFieldOptions($get))
+                                                ->searchable()
+                                                ->preload()
+                                                ->required()
+                                                ->live(),
                                             Forms\Components\TextInput::make('value')
                                                 ->label(__('filament-signal::signal.fields.value'))
-                                                ->required(),
-                                        ])->columns(2),
+                                                ->required()
+                                                ->live(),
+                                        ])->columns(1),
                                     Block::make('contains')
-                                        ->label(__('filament-signal::signal.options.filter_blocks.contains'))
+                                        ->label(static::getFilterBlockLabel('contains', __('filament-signal::signal.options.filter_blocks.contains')))
                                         ->schema([
-                                            Forms\Components\TextInput::make('field')
+                                            Forms\Components\Select::make('field')
                                                 ->label(__('filament-signal::signal.fields.field'))
-                                                ->required(),
+                                                ->options(fn(Get $get): array => static::getFilterFieldOptions($get))
+                                                ->searchable()
+                                                ->preload()
+                                                ->required()
+                                                ->live(),
                                             Forms\Components\TextInput::make('value')
                                                 ->label(__('filament-signal::signal.fields.value'))
-                                                ->required(),
-                                        ])->columns(2),
+                                                ->required()
+                                                ->live(),
+                                        ])->columns(1),
                                     Block::make('not_contains')
-                                        ->label(__('filament-signal::signal.options.filter_blocks.not_contains'))
+                                        ->label(static::getFilterBlockLabel('not_contains', __('filament-signal::signal.options.filter_blocks.not_contains')))
                                         ->schema([
-                                            Forms\Components\TextInput::make('field')
+                                            Forms\Components\Select::make('field')
                                                 ->label(__('filament-signal::signal.fields.field'))
-                                                ->required(),
+                                                ->options(fn(Get $get): array => static::getFilterFieldOptions($get))
+                                                ->searchable()
+                                                ->preload()
+                                                ->required()
+                                                ->live(),
                                             Forms\Components\TextInput::make('value')
                                                 ->label(__('filament-signal::signal.fields.value'))
-                                                ->required(),
-                                        ])->columns(2),
+                                                ->required()
+                                                ->live(),
+                                        ])->columns(1),
                                     Block::make('greater_than')
-                                        ->label(__('filament-signal::signal.options.filter_blocks.greater_than'))
+                                        ->label(static::getFilterBlockLabel('greater_than', __('filament-signal::signal.options.filter_blocks.greater_than')))
                                         ->schema([
-                                            Forms\Components\TextInput::make('field')
+                                            Forms\Components\Select::make('field')
                                                 ->label(__('filament-signal::signal.fields.field'))
-                                                ->required(),
+                                                ->options(fn(Get $get): array => static::getFilterFieldOptions($get))
+                                                ->searchable()
+                                                ->preload()
+                                                ->required()
+                                                ->live(),
                                             Forms\Components\TextInput::make('value')
                                                 ->label(__('filament-signal::signal.fields.value'))
-                                                ->required(),
-                                        ])->columns(2),
+                                                ->required()
+                                                ->live(),
+                                        ])->columns(1),
                                     Block::make('greater_than_or_equal')
-                                        ->label(__('filament-signal::signal.options.filter_blocks.greater_than_or_equal'))
+                                        ->label(static::getFilterBlockLabel('greater_than_or_equal', __('filament-signal::signal.options.filter_blocks.greater_than_or_equal')))
                                         ->schema([
-                                            Forms\Components\TextInput::make('field')
+                                            Forms\Components\Select::make('field')
                                                 ->label(__('filament-signal::signal.fields.field'))
-                                                ->required(),
+                                                ->options(fn(Get $get): array => static::getFilterFieldOptions($get))
+                                                ->searchable()
+                                                ->preload()
+                                                ->required()
+                                                ->live(),
                                             Forms\Components\TextInput::make('value')
                                                 ->label(__('filament-signal::signal.fields.value'))
-                                                ->required(),
-                                        ])->columns(2),
+                                                ->required()
+                                                ->live(),
+                                        ])->columns(1),
                                     Block::make('less_than')
-                                        ->label(__('filament-signal::signal.options.filter_blocks.less_than'))
+                                        ->label(static::getFilterBlockLabel('less_than', __('filament-signal::signal.options.filter_blocks.less_than')))
                                         ->schema([
-                                            Forms\Components\TextInput::make('field')
+                                            Forms\Components\Select::make('field')
                                                 ->label(__('filament-signal::signal.fields.field'))
-                                                ->required(),
+                                                ->options(fn(Get $get): array => static::getFilterFieldOptions($get))
+                                                ->searchable()
+                                                ->preload()
+                                                ->required()
+                                                ->live(),
                                             Forms\Components\TextInput::make('value')
                                                 ->label(__('filament-signal::signal.fields.value'))
-                                                ->required(),
-                                        ])->columns(2),
+                                                ->required()
+                                                ->live(),
+                                        ])->columns(1),
                                     Block::make('less_than_or_equal')
-                                        ->label(__('filament-signal::signal.options.filter_blocks.less_than_or_equal'))
+                                        ->label(static::getFilterBlockLabel('less_than_or_equal', __('filament-signal::signal.options.filter_blocks.less_than_or_equal')))
                                         ->schema([
-                                            Forms\Components\TextInput::make('field')
+                                            Forms\Components\Select::make('field')
                                                 ->label(__('filament-signal::signal.fields.field'))
-                                                ->required(),
+                                                ->options(fn(Get $get): array => static::getFilterFieldOptions($get))
+                                                ->searchable()
+                                                ->preload()
+                                                ->required()
+                                                ->live(),
                                             Forms\Components\TextInput::make('value')
                                                 ->label(__('filament-signal::signal.fields.value'))
-                                                ->required(),
-                                        ])->columns(2),
+                                                ->required()
+                                                ->live(),
+                                        ])->columns(1),
                                     Block::make('in')
-                                        ->label(__('filament-signal::signal.options.filter_blocks.in'))
+                                        ->label(static::getFilterBlockLabel('in', __('filament-signal::signal.options.filter_blocks.in')))
                                         ->schema([
-                                            Forms\Components\TextInput::make('field')
+                                            Forms\Components\Select::make('field')
                                                 ->label(__('filament-signal::signal.fields.field'))
-                                                ->required(),
+                                                ->options(fn(Get $get): array => static::getFilterFieldOptions($get))
+                                                ->searchable()
+                                                ->preload()
+                                                ->required()
+                                                ->live(),
                                             Forms\Components\Textarea::make('value')
                                                 ->label(__('filament-signal::signal.fields.value'))
                                                 ->helperText(__('filament-signal::signal.helpers.filter_in_value'))
-                                                ->required(),
-                                        ])->columns(2),
+                                                ->required()
+                                                ->live(),
+                                        ])->columns(1),
                                     Block::make('not_in')
-                                        ->label(__('filament-signal::signal.options.filter_blocks.not_in'))
+                                        ->label(static::getFilterBlockLabel('not_in', __('filament-signal::signal.options.filter_blocks.not_in')))
                                         ->schema([
-                                            Forms\Components\TextInput::make('field')
+                                            Forms\Components\Select::make('field')
                                                 ->label(__('filament-signal::signal.fields.field'))
-                                                ->required(),
+                                                ->options(fn(Get $get): array => static::getFilterFieldOptions($get))
+                                                ->searchable()
+                                                ->preload()
+                                                ->required()
+                                                ->live(),
                                             Forms\Components\Textarea::make('value')
                                                 ->label(__('filament-signal::signal.fields.value'))
                                                 ->helperText(__('filament-signal::signal.helpers.filter_in_value'))
-                                                ->required(),
-                                        ])->columns(2),
+                                                ->required()
+                                                ->live(),
+                                        ])->columns(1),
                                 ])
                                 ->collapsible(),
                         ]),
@@ -1103,5 +1155,532 @@ class SignalTriggerResource extends Resource
             'view' => Pages\ViewSignalTrigger::route('/{record}'),
             'edit' => Pages\EditSignalTrigger::route('/{record}/edit'),
         ];
+    }
+
+    /**
+     * Genera un label dinamico per i blocchi dei filtri che mostra un riassunto del contenuto
+     *
+     * @param  string  $type  Tipo di filtro (equals, contains, etc.)
+     * @param  string  $typeLabel  Label tradotto del tipo di filtro
+     * @return \Closure
+     */
+    protected static function getFilterBlockLabel(string $type, string $typeLabel): \Closure
+    {
+        return function (?array $state) use ($type, $typeLabel): string {
+            if ($state === null) {
+                return $typeLabel;
+            }
+
+            // Nei Builder blocks, i dati possono essere in $state['data'] o direttamente in $state
+            // Prova entrambi i percorsi
+            $data = $state['data'] ?? $state;
+            $field = $data['field'] ?? '';
+            $value = $data['value'] ?? '';
+
+            if (blank($field) && blank($value)) {
+                return $typeLabel;
+            }
+
+            // Ottieni il label formattato del campo dalle opzioni disponibili
+            // Usa sempre il label formattato invece del nome tecnico
+            $fieldLabel = $field;
+            try {
+                // Per ottenere le opzioni dei campi, dobbiamo accedere all'event_class dal form principale
+                // Prova prima dal request (modo create/edit)
+                $eventClass = null;
+                $requestData = request()->input('data');
+                if (is_array($requestData) && isset($requestData['event_class'])) {
+                    $eventClass = $requestData['event_class'];
+                }
+
+                // Se non trovato, prova a ottenere dal record corrente (modo edit)
+                if (!$eventClass) {
+                    try {
+                        $record = request()->route('record');
+                        if ($record && method_exists($record, 'getAttribute')) {
+                            $eventClass = $record->getAttribute('event_class');
+                        }
+                    } catch (\Throwable $e) {
+                        // Ignora errori
+                    }
+                }
+
+                if ($eventClass) {
+                    // Ottieni direttamente le opzioni dei campi usando una funzione helper
+                    $fieldOptions = static::getFilterFieldOptionsForEvent($eventClass);
+                    if (isset($fieldOptions[$field])) {
+                        $fieldLabel = $fieldOptions[$field];
+                    } else {
+                        // Fallback: formatta il campo manualmente se non trovato nelle opzioni
+                        // Questo può succedere se il campo è stato salvato con un nome diverso
+                        $parts = explode('.', $field);
+                        if (count($parts) >= 2) {
+                            $formattedParts = [];
+                            foreach ($parts as $part) {
+                                $trimmed = trim($part);
+                                // Rimuovi underscore e capitalizza
+                                $formatted = str_replace('_', ' ', $trimmed);
+                                $formattedParts[] = ucwords($formatted);
+                            }
+                            $fieldLabel = implode(' → ', $formattedParts);
+                        }
+                    }
+                } else {
+                    // Fallback: formatta il campo manualmente se event_class non disponibile
+                    $parts = explode('.', $field);
+                    if (count($parts) >= 2) {
+                        $formattedParts = [];
+                        foreach ($parts as $part) {
+                            $trimmed = trim($part);
+                            $formatted = str_replace('_', ' ', $trimmed);
+                            $formattedParts[] = ucwords($formatted);
+                        }
+                        $fieldLabel = implode(' → ', $formattedParts);
+                    }
+                }
+            } catch (\Throwable $e) {
+                // Fallback: formatta il campo manualmente in caso di errore
+                $parts = explode('.', $field);
+                if (count($parts) >= 2) {
+                    $formattedParts = [];
+                    foreach ($parts as $part) {
+                        $trimmed = trim($part);
+                        $formatted = str_replace('_', ' ', $trimmed);
+                        $formattedParts[] = ucwords($formatted);
+                    }
+                    $fieldLabel = implode(' → ', $formattedParts);
+                }
+            }
+
+            // Tronca il valore se troppo lungo
+            $displayValue = (string) $value;
+            if (strlen($displayValue) > 30) {
+                $displayValue = substr($displayValue, 0, 27) . '...';
+            }
+
+            if (blank($field)) {
+                return $typeLabel . ($value ? ': ' . $displayValue : '');
+            }
+
+            if (blank($value)) {
+                return $fieldLabel . ' ' . strtolower($typeLabel);
+            }
+
+            // Usa la traduzione del tipo di filtro (già passata come $typeLabel)
+            $typeDisplay = strtolower($typeLabel);
+
+            return $fieldLabel . ' ' . $typeDisplay . ' ' . $displayValue;
+        };
+    }
+
+    /**
+     * Ottiene le opzioni dei campi disponibili per un event_class specifico.
+     * Include sia i campi del modello principale che le relazioni.
+     *
+     * @param  string  $eventClass
+     * @return array<string, string>  Array associativo [campo => etichetta]
+     */
+    public static function getFilterFieldOptionsForEvent(string $eventClass): array
+    {
+        try {
+            $analyzer = app(SignalPayloadFieldAnalyzer::class);
+            $analysis = $analyzer->analyzeEvent($eventClass);
+
+            // Ottieni il modello per ottenere i nomi reali delle colonne
+            $modelClass = null;
+            $realColumnNames = [];
+            if (preg_match('/eloquent\.[a-z_]+:\s*(.+)$/i', $eventClass, $matches)) {
+                $modelClass = trim($matches[1]);
+                if (class_exists($modelClass) && is_subclass_of($modelClass, Model::class)) {
+                    try {
+                        $model = new $modelClass;
+                        $table = $model->getTable();
+                        if ($table && DatabaseSchema::hasTable($table)) {
+                            $realColumnNames = DatabaseSchema::getColumnListing($table);
+                        }
+                    } catch (\Throwable $e) {
+                        // Ignora errori
+                    }
+                }
+            }
+
+            $options = [];
+
+            // Mostra solo i campi essenziali del modello principale (stessa logica della payload configuration)
+            foreach ($analysis['fields'] as $field => $data) {
+                if (substr_count($field, '.') > 1) {
+                    continue;
+                }
+
+                $parts = explode('.', $field);
+                if (count($parts) === 2) {
+                    $fieldName = $parts[1];
+                    if (in_array($fieldName, ['created_at', 'updated_at', 'attachments'])) {
+                        continue;
+                    }
+                }
+
+                // Ottieni il nome reale del campo dal database se disponibile
+                $realFieldName = $field;
+                if (!empty($realColumnNames) && count($parts) === 2) {
+                    $theoreticalFieldName = $parts[1];
+                    foreach ($realColumnNames as $realColumn) {
+                        if (str_ends_with($theoreticalFieldName, '_id')) {
+                            if (str_ends_with($realColumn, '_id') && str_contains($realColumn, str_replace('_id', '', $theoreticalFieldName))) {
+                                $realFieldName = $parts[0] . '.' . $realColumn;
+                                break;
+                            }
+                        } elseif ($realColumn === $theoreticalFieldName) {
+                            $realFieldName = $field;
+                            break;
+                        }
+                    }
+                }
+
+                $label = $data['label'] ?? $field;
+                if (str_contains($label, '.')) {
+                    $parts = explode('.', $label);
+                    $formattedParts = [];
+                    foreach ($parts as $part) {
+                        $trimmed = trim($part);
+                        $formattedParts[] = ucfirst(strtolower($trimmed));
+                    }
+                    $label = implode(' → ', $formattedParts);
+                } elseif (str_contains($label, ' - ')) {
+                    $label = str_replace(' - ', ' → ', $label);
+                }
+
+                $options[$realFieldName] = $label;
+            }
+
+            // Aggiungi anche i campi delle relazioni
+            if (!empty($analysis['relations'])) {
+                foreach ($analysis['relations'] as $relation) {
+                    $fieldOptions = $relation['field_options'] ?? [];
+                    if (empty($fieldOptions)) {
+                        continue;
+                    }
+
+                    $alias = $relation['alias'] ?? 'relation';
+                    $parentProperty = $relation['parent_property'] ?? null;
+                    $relationName = $relation['relation_name'] ?? $alias;
+
+                    // Ottieni il nome reale della foreign key se disponibile
+                    $realForeignKeyName = null;
+                    if ($modelClass && class_exists($modelClass) && is_subclass_of($modelClass, Model::class)) {
+                        try {
+                            $model = new $modelClass;
+                            if (method_exists($model, $relationName)) {
+                                $relationInstance = $model->{$relationName}();
+                                if (method_exists($relationInstance, 'getForeignKeyName')) {
+                                    $realForeignKeyName = $relationInstance->getForeignKeyName();
+                                } elseif (method_exists($relationInstance, 'getForeignKey')) {
+                                    $key = $relationInstance->getForeignKey();
+                                    if (is_array($key)) {
+                                        $realForeignKeyName = $key[0] ?? null;
+                                    } else {
+                                        $realForeignKeyName = $key;
+                                    }
+                                }
+                            }
+                        } catch (\Throwable $e) {
+                            // Ignora errori
+                        }
+                    }
+
+                    foreach ($fieldOptions as $fieldKey => $fieldLabel) {
+                        $formattedLabel = $fieldLabel;
+                        if (str_contains($fieldLabel, '.')) {
+                            $parts = explode('.', $fieldLabel);
+                            $formattedParts = [];
+                            foreach ($parts as $part) {
+                                $trimmed = trim($part);
+                                $formattedParts[] = ucfirst(strtolower($trimmed));
+                            }
+                            $formattedLabel = implode(' → ', $formattedParts);
+                        } elseif (str_contains($fieldLabel, ' - ')) {
+                            $formattedLabel = str_replace(' - ', ' → ', $fieldLabel);
+                        }
+
+                        if ($parentProperty) {
+                            $fieldPath = "{$parentProperty}.{$relationName}.{$fieldKey}";
+                        } else {
+                            $fieldPath = "{$alias}.{$fieldKey}";
+                        }
+
+                        $relationLabel = $relation['label'] ?? $relationName;
+                        $options[$fieldPath] = "{$relationLabel} → {$formattedLabel}";
+                    }
+
+                    // Aggiungi anche il campo ID della relazione se disponibile
+                    if ($realForeignKeyName && $parentProperty) {
+                        $idFieldPath = "{$parentProperty}.{$realForeignKeyName}";
+                        $relationLabel = $relation['label'] ?? $relationName;
+                        if (!isset($options[$idFieldPath])) {
+                            $options[$idFieldPath] = "{$relationLabel} → ID";
+                        }
+                    } elseif (isset($relation['id_field']) && !isset($options[$relation['id_field']])) {
+                        $relationLabel = $relation['label'] ?? $alias;
+                        $options[$relation['id_field']] = "{$relationLabel} → ID";
+                    }
+                }
+            }
+
+            asort($options);
+            return $options;
+        } catch (\Throwable $e) {
+            return [];
+        }
+    }
+
+    /**
+     * Ottiene le opzioni dei campi disponibili per i filtri basati sull'event_class selezionato.
+     * Include sia i campi del modello principale che le relazioni.
+     *
+     * @return array<string, string>  Array associativo [campo => etichetta]
+     */
+    protected static function getFilterFieldOptions(Get $get): array
+    {
+        // Per i Builder blocks, il path per accedere ai campi del form principale è diverso
+        // Il Builder block è annidato dentro il form, quindi dobbiamo risalire di più livelli
+        // Struttura: form -> filters (Builder) -> block -> field
+        // Quindi per risalire al form principale: ../../../../event_class
+
+        $eventClass = null;
+
+        // Prova diversi path in ordine di probabilità
+        $paths = [
+            '../../../../event_class',  // Builder block: form -> filters -> block -> field -> event_class
+            '../../../event_class',     // Alternativa
+            '../../event_class',        // Alternativa
+            'event_class',              // Path diretto (improbabile)
+        ];
+
+        foreach ($paths as $path) {
+            try {
+                $value = $get($path);
+                if ($value && is_string($value) && !empty($value)) {
+                    $eventClass = $value;
+                    break;
+                }
+            } catch (\Throwable $e) {
+                // Continua con il prossimo path
+                continue;
+            }
+        }
+
+        // Se non trovato, prova a ottenere dal record corrente (modo edit)
+        if (!$eventClass) {
+            try {
+                $record = $get('record');
+                if ($record) {
+                    if (method_exists($record, 'getAttribute')) {
+                        $eventClass = $record->getAttribute('event_class');
+                    } elseif (isset($record->event_class)) {
+                        $eventClass = $record->event_class;
+                    } elseif (is_object($record) && property_exists($record, 'event_class')) {
+                        $eventClass = $record->event_class;
+                    }
+                }
+            } catch (\Throwable $e) {
+                // Ignora errori
+            }
+        }
+
+        // Se ancora non trovato, prova a ottenere dalla richiesta (modo create)
+        if (!$eventClass) {
+            try {
+                // Prova dal form state della richiesta
+                $requestData = request()->input('data');
+                if (is_array($requestData) && isset($requestData['event_class'])) {
+                    $eventClass = $requestData['event_class'];
+                }
+            } catch (\Throwable $e) {
+                // Ignora errori
+            }
+        }
+
+        if (!$eventClass) {
+            return [];
+        }
+
+        // Usa la funzione helper per ottenere le opzioni
+        return static::getFilterFieldOptionsForEvent($eventClass);
+    }
+
+    /**
+     * Helper method che replica la logica di getFilterFieldOptions ma senza Get
+     * Usato internamente da getFilterFieldOptions
+     */
+    protected static function getFilterFieldOptionsInternal(string $eventClass): array
+    {
+        try {
+            $analyzer = app(SignalPayloadFieldAnalyzer::class);
+            $analysis = $analyzer->analyzeEvent($eventClass);
+
+            // Ottieni il modello per ottenere i nomi reali delle colonne
+            $modelClass = null;
+            $realColumnNames = [];
+            if (preg_match('/eloquent\.[a-z_]+:\s*(.+)$/i', $eventClass, $matches)) {
+                $modelClass = trim($matches[1]);
+                if (class_exists($modelClass) && is_subclass_of($modelClass, Model::class)) {
+                    try {
+                        $model = new $modelClass;
+                        $table = $model->getTable();
+                        if ($table && DatabaseSchema::hasTable($table)) {
+                            $realColumnNames = DatabaseSchema::getColumnListing($table);
+                        }
+                    } catch (\Throwable $e) {
+                        // Ignora errori
+                    }
+                }
+            }
+
+            $options = [];
+
+            // Mostra solo i campi essenziali del modello principale (stessa logica della payload configuration)
+            // Escludi i campi delle relazioni annidate e i campi tecnici
+            foreach ($analysis['fields'] as $field => $data) {
+                // Mostra solo i campi del modello principale (es: model.id, model.status)
+                // Escludi i campi delle relazioni (es: model.relation.field)
+                if (substr_count($field, '.') > 1) {
+                    continue;
+                }
+
+                // Salta i campi tecnici meno usati (created_at, updated_at, attachments, etc.)
+                $parts = explode('.', $field);
+                if (count($parts) === 2) {
+                    $fieldName = $parts[1];
+                    if (in_array($fieldName, ['created_at', 'updated_at', 'attachments'])) {
+                        continue;
+                    }
+                }
+
+                // Ottieni il nome reale del campo dal database se disponibile
+                $realFieldName = $field;
+                if (!empty($realColumnNames) && count($parts) === 2) {
+                    $theoreticalFieldName = $parts[1];
+                    // Cerca il campo reale nel database (potrebbe essere diverso, es: author_id vs blog_author_id)
+                    foreach ($realColumnNames as $realColumn) {
+                        // Se il campo teorico termina con _id, cerca tutte le colonne che terminano con lo stesso suffisso
+                        if (str_ends_with($theoreticalFieldName, '_id')) {
+                            if (str_ends_with($realColumn, '_id') && str_contains($realColumn, str_replace('_id', '', $theoreticalFieldName))) {
+                                $realFieldName = $parts[0] . '.' . $realColumn;
+                                break;
+                            }
+                        } elseif ($realColumn === $theoreticalFieldName) {
+                            // Match esatto
+                            $realFieldName = $field; // Già corretto
+                            break;
+                        }
+                    }
+                }
+
+                $label = $data['label'] ?? $field;
+
+                // Formatta l'etichetta per renderla più leggibile (come nella payload configuration)
+                if (str_contains($label, '.')) {
+                    $parts = explode('.', $label);
+                    $formattedParts = [];
+                    foreach ($parts as $part) {
+                        $trimmed = trim($part);
+                        $formattedParts[] = ucfirst(strtolower($trimmed));
+                    }
+                    $label = implode(' → ', $formattedParts);
+                } elseif (str_contains($label, ' - ')) {
+                    $label = str_replace(' - ', ' → ', $label);
+                }
+
+                // Usa il nome reale del campo dal database
+                $options[$realFieldName] = $label;
+            }
+
+            // Aggiungi anche i campi delle relazioni (come nella payload configuration)
+            if (!empty($analysis['relations'])) {
+                foreach ($analysis['relations'] as $relation) {
+                    $fieldOptions = $relation['field_options'] ?? [];
+                    if (empty($fieldOptions)) {
+                        continue;
+                    }
+
+                    $alias = $relation['alias'] ?? 'relation';
+                    $parentProperty = $relation['parent_property'] ?? null;
+                    $relationName = $relation['relation_name'] ?? $alias;
+
+                    // Ottieni il nome reale della foreign key se disponibile
+                    $realForeignKeyName = null;
+                    if ($modelClass && class_exists($modelClass) && is_subclass_of($modelClass, Model::class)) {
+                        try {
+                            $model = new $modelClass;
+                            if (method_exists($model, $relationName)) {
+                                $relationInstance = $model->{$relationName}();
+                                if (method_exists($relationInstance, 'getForeignKeyName')) {
+                                    $realForeignKeyName = $relationInstance->getForeignKeyName();
+                                } elseif (method_exists($relationInstance, 'getForeignKey')) {
+                                    $key = $relationInstance->getForeignKey();
+                                    if (is_array($key)) {
+                                        $realForeignKeyName = $key[0] ?? null;
+                                    } else {
+                                        $realForeignKeyName = $key;
+                                    }
+                                }
+                            }
+                        } catch (\Throwable $e) {
+                            // Ignora errori
+                        }
+                    }
+
+                    foreach ($fieldOptions as $fieldKey => $fieldLabel) {
+                        // Formatta l'etichetta per renderla più leggibile
+                        $formattedLabel = $fieldLabel;
+
+                        if (str_contains($fieldLabel, '.')) {
+                            $parts = explode('.', $fieldLabel);
+                            $formattedParts = [];
+                            foreach ($parts as $part) {
+                                $trimmed = trim($part);
+                                $formattedParts[] = ucfirst(strtolower($trimmed));
+                            }
+                            $formattedLabel = implode(' → ', $formattedParts);
+                        } elseif (str_contains($fieldLabel, ' - ')) {
+                            $formattedLabel = str_replace(' - ', ' → ', $fieldLabel);
+                        }
+
+                        // Usa il formato corretto: "parent_property.relation_name.fieldKey"
+                        // Es: "blog post.author.name" invece di "author_payload.name"
+                        // Questo corrisponde esattamente alla struttura del payload
+                        if ($parentProperty) {
+                            $fieldPath = "{$parentProperty}.{$relationName}.{$fieldKey}";
+                        } else {
+                            // Fallback: usa alias se parent_property non è disponibile
+                            $fieldPath = "{$alias}.{$fieldKey}";
+                        }
+
+                        $relationLabel = $relation['label'] ?? $relationName;
+                        $options[$fieldPath] = "{$relationLabel} → {$formattedLabel}";
+                    }
+
+                    // Aggiungi anche il campo ID della relazione se disponibile
+                    // Usa il nome reale della foreign key se disponibile
+                    if ($realForeignKeyName && $parentProperty) {
+                        $idFieldPath = "{$parentProperty}.{$realForeignKeyName}";
+                        $relationLabel = $relation['label'] ?? $relationName;
+                        if (!isset($options[$idFieldPath])) {
+                            $options[$idFieldPath] = "{$relationLabel} → ID";
+                        }
+                    } elseif (isset($relation['id_field']) && !isset($options[$relation['id_field']])) {
+                        $relationLabel = $relation['label'] ?? $alias;
+                        $options[$relation['id_field']] = "{$relationLabel} → ID";
+                    }
+                }
+            }
+
+            // Ordina le opzioni per etichetta
+            asort($options);
+
+            return $options;
+        } catch (\Throwable $e) {
+            return [];
+        }
     }
 }

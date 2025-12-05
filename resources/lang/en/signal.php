@@ -137,7 +137,7 @@ return [
     'helpers' => [
         'webhook_template' => 'Select a predefined model/event to auto-fill the event class and defaults.',
         'event_class' => 'Select an event from the list or search by name. Events registered by plugins are shown with their full name.',
-        'filter_in_value' => 'Enter multiple values separated by commas or one per line.',
+        'filter_in_value' => 'Comma separated values or one per line.',
         'signing_secret' => 'Auto-generated if empty.',
         'essential_fields' => 'Select the essential fields to include.',
         'payload_configuration' => 'Select the fields to include in the payload and the relations to expand.',

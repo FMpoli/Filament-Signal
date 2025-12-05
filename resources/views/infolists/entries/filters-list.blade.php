@@ -40,8 +40,58 @@
                 @php
                     $type = $filter['type'] ?? 'equals';
                     $data = $filter['data'] ?? [];
-                    $field = $data['field'] ?? '—';
+                    $fieldKey = $data['field'] ?? '—';
                     $value = $data['value'] ?? '—';
+
+                    // Ottieni il label formattato del campo invece del nome tecnico
+                    // Usa la stessa funzione helper del form per garantire coerenza
+                    $field = $fieldKey;
+                    try {
+                        $eventClass = $record->event_class ?? null;
+                        if ($eventClass) {
+                            // Usa la stessa funzione helper del form per ottenere il label formattato
+                            $fieldOptions = \Base33\FilamentSignal\Filament\Resources\SignalTriggerResource::getFilterFieldOptionsForEvent($eventClass);
+                            if (isset($fieldOptions[$fieldKey])) {
+                                $field = $fieldOptions[$fieldKey];
+                            } else {
+                                // Fallback: formatta il campo manualmente se non trovato nelle opzioni
+                                $parts = explode('.', $fieldKey);
+                                if (count($parts) >= 2) {
+                                    $formattedParts = [];
+                                    foreach ($parts as $part) {
+                                        $trimmed = trim($part);
+                                        $formatted = str_replace('_', ' ', $trimmed);
+                                        $formattedParts[] = ucwords($formatted);
+                                    }
+                                    $field = implode(' → ', $formattedParts);
+                                }
+                            }
+                        } else {
+                            // Fallback: formatta il campo manualmente se event_class non disponibile
+                            $parts = explode('.', $fieldKey);
+                            if (count($parts) >= 2) {
+                                $formattedParts = [];
+                                foreach ($parts as $part) {
+                                    $trimmed = trim($part);
+                                    $formatted = str_replace('_', ' ', $trimmed);
+                                    $formattedParts[] = ucwords($formatted);
+                                }
+                                $field = implode(' → ', $formattedParts);
+                            }
+                        }
+                    } catch (\Throwable $e) {
+                        // Fallback: formatta il campo manualmente in caso di errore
+                        $parts = explode('.', $fieldKey);
+                        if (count($parts) >= 2) {
+                            $formattedParts = [];
+                            foreach ($parts as $part) {
+                                $trimmed = trim($part);
+                                $formatted = str_replace('_', ' ', $trimmed);
+                                $formattedParts[] = ucwords($formatted);
+                            }
+                            $field = implode(' → ', $formattedParts);
+                        }
+                    }
 
                     $typeLabels = [
                         'equals' => __('filament-signal::signal.options.filter_blocks.equals'),
@@ -55,7 +105,7 @@
                         'in' => __('filament-signal::signal.options.filter_blocks.in'),
                         'not_in' => __('filament-signal::signal.options.filter_blocks.not_in'),
                     ];
-                    $typeLabel = strtolower($typeLabels[$type] ?? ucfirst($type));
+                    $typeLabel = $typeLabels[$type] ?? ucfirst($type);
 
                     // Determina l'icona/simbolo in base al tipo
                     $icon = match($type) {

@@ -26,18 +26,49 @@ class SignalEventRegistrar
     {
         $events = $this->discoverEvents();
 
+        Log::info("Signal: Registering event listeners", [
+            'events_count' => $events->count(),
+            'events' => $events->toArray(),
+        ]);
+
         foreach ($events as $eventName) {
             // Rimuovi i listener esistenti per questo evento per evitare duplicati
             // Nota: questo rimuove TUTTI i listener per questo evento, non solo quelli di Signal
             // Ma è necessario per evitare listener duplicati quando si ricarica dopo aver salvato una Model Integration
             $this->dispatcher->forget($eventName);
 
+            Log::info("Signal: Registering listener for event", [
+                'event_name' => $eventName,
+            ]);
+
             $this->dispatcher->listen($eventName, function (...$payload) use ($eventName): void {
+                // Log diretto su file per debug
+                try {
+                    $logFile = base_path('storage/logs/signal-debug.log');
+                    $logMessage = date('Y-m-d H:i:s') . " - Event listener called - Event: {$eventName}, Payload count: " . count($payload) . "\n";
+                    @file_put_contents($logFile, $logMessage, FILE_APPEND);
+                } catch (\Throwable $e) {
+                    // Ignora errori di scrittura
+                }
+
+                Log::info("Signal: Event listener called", [
+                    'event_name' => $eventName,
+                    'payload_count' => count($payload),
+                ]);
+
                 $event = $this->wrapEventPayload($eventName, $payload);
 
                 if (! $event) {
+                    Log::info("Signal: Event wrapped to null, skipping", [
+                        'event_name' => $eventName,
+                    ]);
                     return;
                 }
+
+                Log::info("Signal: Calling processor", [
+                    'event_name' => $eventName,
+                    'event_class' => get_class($event),
+                ]);
 
                 $this->processor->handle($event);
             });
