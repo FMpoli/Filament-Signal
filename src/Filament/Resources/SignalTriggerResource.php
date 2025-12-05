@@ -18,10 +18,6 @@ use Filament\Forms;
 use Filament\Forms\Components\Builder;
 use Filament\Forms\Components\Builder\Block;
 use Filament\Forms\Components\Repeater;
-<<<<<<< HEAD
-use Filament\Infolists\Components\TextEntry;
-=======
-use Base33\FilamentSignal\Filament\Infolists\Components\ActionsListEntry;
 use Base33\FilamentSignal\Filament\Infolists\Components\FiltersListEntry;
 use Filament\Infolists\Components\RepeatableEntry\TableColumn;
 use Filament\Infolists\Components\KeyValueEntry;
@@ -30,7 +26,6 @@ use Filament\Infolists\Components\TextEntry;
 use Filament\Support\Enums\FontWeight;
 use Filament\Support\Enums\TextSize;
 
->>>>>>> 8b76a74 (feat: migliorata visualizzazione infolist con tabella filtri e pipeline azioni)
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Group;
@@ -62,7 +57,7 @@ class SignalTriggerResource extends Resource
                 Group::make([
                     Section::make()
                         ->icon('heroicon-o-bolt')
-
+                        ->compact()
                         ->heading(function (SignalTrigger $record): \Illuminate\Contracts\Support\Htmlable {
                             $statusColor = match ($record->status) {
                                 'active' => 'success',
@@ -113,10 +108,12 @@ class SignalTriggerResource extends Resource
                                 ->copyMessage(__('filament-signal::signal.fields.copied')),
                         ])
                         ->columns(2),
-                    Section::make(__('filament-signal::signal.sections.trigger_actions'))
+                    Section::make(__('filament-signal::signal.fields.execution_pipeline'))
+                        ->icon('heroicon-o-bolt')
                         ->schema([
                             ActionsListEntry::make('actions')
                                 ->label(__('filament-signal::signal.fields.actions'))
+                                ->hiddenLabel()
                                 ->state(fn(SignalTrigger $record) => $record->actions->toArray()),
                         ]),
                 ])
@@ -126,19 +123,9 @@ class SignalTriggerResource extends Resource
                         ->icon('heroicon-o-funnel')
                         ->compact()
                         ->schema([
-                            TextEntry::make('match_type_display')
-                                ->label(__('filament-signal::signal.fields.match_logic'))
-                                ->state(function (SignalTrigger $record): string {
-                                    $matchType = $record->match_type ?? 'all';
-                                    return $matchType === 'all'
-                                        ? __('filament-signal::signal.options.match_type.all')
-                                        : __('filament-signal::signal.options.match_type.any');
-                                })
-                                ->size(TextSize::Large)
-                                ->weight(FontWeight::Bold),
-                            RepeatableEntry::make('filters')
+                            FiltersListEntry::make('filters')
                                 ->label(__('filament-signal::signal.fields.filters'))
-
+                                ->hiddenLabel()
                                 ->state(function (SignalTrigger $record): array {
                                     $filters = $record->filters ?? [];
 
@@ -157,53 +144,8 @@ class SignalTriggerResource extends Resource
                                         }
                                     }
 
-                                    // Trasforma i filtri in formato semplice per RepeatableEntry
-                                    $formattedFilters = [];
-                                    foreach ($filters as $filter) {
-                                        if (!is_array($filter)) {
-                                            continue;
-                                        }
-
-                                        $type = $filter['type'] ?? 'equals';
-                                        $data = $filter['data'] ?? [];
-
-                                        if (!is_array($data)) {
-                                            $data = (array) $data;
-                                        }
-
-                                        $field = $data['field'] ?? '—';
-                                        $value = $data['value'] ?? '—';
-
-                                        $typeLabels = [
-                                            'equals' => __('filament-signal::signal.options.filter_blocks.equals'),
-                                            'contains' => __('filament-signal::signal.options.filter_blocks.contains'),
-                                        ];
-                                        $condition = $typeLabels[$type] ?? ucfirst($type);
-
-                                        $formattedFilters[] = [
-                                            'field' => $field,
-                                            'condition' => $condition,
-                                            'value' => $value,
-                                        ];
-                                    }
-
-                                    return $formattedFilters;
-                                })
-                                ->table([
-                                    TableColumn::make(__('field')),
-                                    TableColumn::make(__('condition')),
-                                    TableColumn::make(__('value')),
-                                ])
-                                ->schema([
-                                    TextEntry::make('field')
-                                        ->hiddenLabel(),
-                                    TextEntry::make('condition')
-                                        ->hiddenLabel(),
-                                    TextEntry::make('value')
-                                        ->hiddenLabel(),
-                                ])
-
-                                ->placeholder(__('filament-signal::signal.fields.no_filters_configured')),
+                                    return $filters;
+                                }),
 
                         ]),
                 ])
@@ -561,12 +503,12 @@ class SignalTriggerResource extends Resource
                                 '@md' => 2,
                                 '@xl' => 2,
                             ])
-                            ->visible(fn (Get $get): bool => $get('action_type') === 'webhook')
+                            ->visible(fn(Get $get): bool => $get('action_type') === 'webhook')
                             ->schema([
                                 Forms\Components\TextInput::make('configuration.url')
                                     ->label(__('filament-signal::signal.fields.endpoint_url'))
                                     ->url()
-                                    ->required(fn (Get $get): bool => $get('action_type') === 'webhook')
+                                    ->required(fn(Get $get): bool => $get('action_type') === 'webhook')
                                     ->columnSpanFull(),
                                 Forms\Components\Select::make('configuration.method')
                                     ->label(__('filament-signal::signal.fields.http_method'))
@@ -678,7 +620,7 @@ class SignalTriggerResource extends Resource
                                 Text::make('log_info')
                                     ->content(__('filament-signal::signal.helpers.log_info')),
                             ])
-                            ->visible(fn (Get $get): bool => $get('action_type') === 'log')
+                            ->visible(fn(Get $get): bool => $get('action_type') === 'log')
                             ->columnSpanFull(),
                     ])->columnSpan(8),
                     Section::make(__('filament-signal::signal.sections.payload_configuration'))
@@ -1017,10 +959,10 @@ class SignalTriggerResource extends Resource
             ])
             ->actions([
                 ViewAction::make()
-                    ->url(fn (SignalTrigger $record): string => static::getUrl('view', ['record' => $record]))
+                    ->url(fn(SignalTrigger $record): string => static::getUrl('view', ['record' => $record]))
                     ->openUrlInNewTab(false),
                 EditAction::make()
-                    ->url(fn (SignalTrigger $record): string => static::getUrl('edit', ['record' => $record]))
+                    ->url(fn(SignalTrigger $record): string => static::getUrl('edit', ['record' => $record]))
                     ->openUrlInNewTab(false),
                 Action::make('clone')
                     ->label(__('filament-signal::signal.actions.clone'))
