@@ -26,7 +26,7 @@ class SignalEventRegistrar
     {
         $events = $this->discoverEvents();
 
-        Log::info("Signal: Registering event listeners", [
+        Log::info('Signal: Registering event listeners', [
             'events_count' => $events->count(),
             'events' => $events->toArray(),
         ]);
@@ -37,7 +37,7 @@ class SignalEventRegistrar
             // Ma è necessario per evitare listener duplicati quando si ricarica dopo aver salvato una Model Integration
             $this->dispatcher->forget($eventName);
 
-            Log::info("Signal: Registering listener for event", [
+            Log::info('Signal: Registering listener for event', [
                 'event_name' => $eventName,
             ]);
 
@@ -51,7 +51,7 @@ class SignalEventRegistrar
                     // Ignora errori di scrittura
                 }
 
-                Log::info("Signal: Event listener called", [
+                Log::info('Signal: Event listener called', [
                     'event_name' => $eventName,
                     'payload_count' => count($payload),
                 ]);
@@ -59,13 +59,14 @@ class SignalEventRegistrar
                 $event = $this->wrapEventPayload($eventName, $payload);
 
                 if (! $event) {
-                    Log::info("Signal: Event wrapped to null, skipping", [
+                    Log::info('Signal: Event wrapped to null, skipping', [
                         'event_name' => $eventName,
                     ]);
+
                     return;
                 }
 
-                Log::info("Signal: Calling processor", [
+                Log::info('Signal: Calling processor', [
                     'event_name' => $eventName,
                     'event_class' => get_class($event),
                 ]);

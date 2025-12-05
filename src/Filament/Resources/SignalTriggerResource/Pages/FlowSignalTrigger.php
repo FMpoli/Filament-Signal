@@ -6,7 +6,6 @@ use Base33\FilamentSignal\Filament\Resources\SignalTriggerResource;
 use Filament\Actions\Action;
 use Filament\Resources\Pages\EditRecord;
 use Filament\Support\Enums\Width;
-use Filament\Notifications\Notification;
 
 class FlowSignalTrigger extends EditRecord
 {
@@ -29,7 +28,7 @@ class FlowSignalTrigger extends EditRecord
         return $this->record->name ?? __('filament-signal::signal.fields.flow_view');
     }
 
-    public function getMaxContentWidth(): Width|string|null
+    public function getMaxContentWidth(): Width | string | null
     {
         return Width::Full;
     }
@@ -39,11 +38,11 @@ class FlowSignalTrigger extends EditRecord
         return [
             Action::make('edit')
                 ->label(__('filament-signal::signal.actions.edit'))
-                ->url(fn() => static::getResource()::getUrl('edit', ['record' => $this->record]))
+                ->url(fn () => static::getResource()::getUrl('edit', ['record' => $this->record]))
                 ->icon('heroicon-o-pencil-square'),
             Action::make('view')
                 ->label(__('filament-signal::signal.actions.view'))
-                ->url(fn() => static::getResource()::getUrl('view', ['record' => $this->record]))
+                ->url(fn () => static::getResource()::getUrl('view', ['record' => $this->record]))
                 ->icon('heroicon-o-eye'),
         ];
     }
@@ -55,10 +54,9 @@ class FlowSignalTrigger extends EditRecord
     {
         $metadata = $this->record->metadata ?? [];
         $metadata['flow'] = $flowData;
-        
+
         $this->record->update([
             'metadata' => $metadata,
         ]);
     }
 }
-

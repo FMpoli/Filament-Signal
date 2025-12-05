@@ -61,39 +61,39 @@ class SignalTrigger extends Model
      * Verifica se il payload passa tutti i filtri configurati
      *
      * @param  array<string, mixed>  $payload
-     * @return bool
      */
     public function passesFilters(array $payload): bool
     {
         // Log diretto su file per debug
         try {
             $logFile = base_path('storage/logs/signal-debug.log');
-            $logMessage = date('Y-m-d H:i:s') . " - passesFilters called - Trigger ID: {$this->id}, Name: {$this->name}, Has filters: " . (!empty($this->filters) ? 'yes' : 'no') . "\n";
+            $logMessage = date('Y-m-d H:i:s') . " - passesFilters called - Trigger ID: {$this->id}, Name: {$this->name}, Has filters: " . (! empty($this->filters) ? 'yes' : 'no') . "\n";
             @file_put_contents($logFile, $logMessage, FILE_APPEND);
         } catch (\Throwable $e) {
             // Ignora errori di scrittura
         }
 
-        \Illuminate\Support\Facades\Log::info("Signal: passesFilters called", [
+        \Illuminate\Support\Facades\Log::info('Signal: passesFilters called', [
             'trigger_id' => $this->id,
             'trigger_name' => $this->name,
-            'has_filters' => !empty($this->filters),
+            'has_filters' => ! empty($this->filters),
         ]);
 
         $filters = $this->filters ?? [];
 
         // Se non ci sono filtri configurati, passa sempre
-        if (empty($filters) || !is_array($filters)) {
-            \Illuminate\Support\Facades\Log::info("Signal: No filters configured, passing", [
+        if (empty($filters) || ! is_array($filters)) {
+            \Illuminate\Support\Facades\Log::info('Signal: No filters configured, passing', [
                 'trigger_id' => $this->id,
             ]);
+
             return true;
         }
 
         $matchType = $this->match_type ?? self::MATCH_ALL;
         $results = [];
 
-        \Illuminate\Support\Facades\Log::info("Signal: Evaluating filters", [
+        \Illuminate\Support\Facades\Log::info('Signal: Evaluating filters', [
             'trigger_id' => $this->id,
             'filters_count' => count($filters),
             'match_type' => $matchType,
@@ -109,13 +109,14 @@ class SignalTrigger extends Model
             } catch (\Throwable $e) {
             }
 
-            if (!isset($filter['type']) || !isset($filter['data'])) {
+            if (! isset($filter['type']) || ! isset($filter['data'])) {
                 try {
                     $logFile = base_path('storage/logs/signal-debug.log');
                     $logMessage = date('Y-m-d H:i:s') . " - Filter {$index} skipped - missing type or data\n";
                     @file_put_contents($logFile, $logMessage, FILE_APPEND);
                 } catch (\Throwable $e) {
                 }
+
                 continue;
             }
 
@@ -131,13 +132,14 @@ class SignalTrigger extends Model
             } catch (\Throwable $e) {
             }
 
-            if (!$field || $value === null) {
+            if (! $field || $value === null) {
                 try {
                     $logFile = base_path('storage/logs/signal-debug.log');
                     $logMessage = date('Y-m-d H:i:s') . " - Filter {$index} skipped - missing field or value\n";
                     @file_put_contents($logFile, $logMessage, FILE_APPEND);
                 } catch (\Throwable $e) {
                 }
+
                 continue;
             }
 
@@ -151,7 +153,7 @@ class SignalTrigger extends Model
             } catch (\Throwable $e) {
             }
 
-            \Illuminate\Support\Facades\Log::info("Signal: Filter evaluation", [
+            \Illuminate\Support\Facades\Log::info('Signal: Filter evaluation', [
                 'trigger_id' => $this->id,
                 'filter_index' => $index,
                 'type' => $type,
@@ -176,21 +178,22 @@ class SignalTrigger extends Model
 
         // Se non ci sono risultati validi, passa sempre
         if (empty($results)) {
-            \Illuminate\Support\Facades\Log::info("Signal: No valid filter results, passing", [
+            \Illuminate\Support\Facades\Log::info('Signal: No valid filter results, passing', [
                 'trigger_id' => $this->id,
             ]);
+
             return true;
         }
 
         // Applica la logica match_type
         $finalResult = match ($matchType) {
             self::MATCH_ANY => in_array(true, $results, true),
-            default => !in_array(false, $results, true),
+            default => ! in_array(false, $results, true),
         };
 
         try {
             $logFile = base_path('storage/logs/signal-debug.log');
-            $logMessage = date('Y-m-d H:i:s') . " - Final result: " . ($finalResult ? 'PASS' : 'FAIL') . " (Match type: {$matchType}, Results: " . json_encode($results) . ")\n";
+            $logMessage = date('Y-m-d H:i:s') . ' - Final result: ' . ($finalResult ? 'PASS' : 'FAIL') . " (Match type: {$matchType}, Results: " . json_encode($results) . ")\n";
             @file_put_contents($logFile, $logMessage, FILE_APPEND);
         } catch (\Throwable $e) {
         }
@@ -230,14 +233,16 @@ class SignalTrigger extends Model
         $found = true;
 
         foreach ($parts as $part) {
-            if (!is_array($value)) {
+            if (! is_array($value)) {
                 $found = false;
+
                 break;
             }
 
             // Prova prima con la chiave esatta
             if (isset($value[$part])) {
                 $value = $value[$part];
+
                 continue;
             }
 
@@ -250,26 +255,30 @@ class SignalTrigger extends Model
 
                 if ($normalizedKey === $normalizedPart) {
                     $foundKey = $key;
+
                     break;
                 }
             }
 
             if ($foundKey !== null) {
                 $value = $value[$foundKey];
+
                 continue;
             }
 
             $found = false;
+
             break;
         }
 
         if ($found) {
             try {
                 $logFile = base_path('storage/logs/signal-debug.log');
-                $logMessage = date('Y-m-d H:i:s') . " - Field found via direct path: " . json_encode($value) . "\n";
+                $logMessage = date('Y-m-d H:i:s') . ' - Field found via direct path: ' . json_encode($value) . "\n";
                 @file_put_contents($logFile, $logMessage, FILE_APPEND);
             } catch (\Throwable $e) {
             }
+
             return $value;
         }
 
@@ -312,6 +321,7 @@ class SignalTrigger extends Model
                                         @file_put_contents($logFile, $logMessage, FILE_APPEND);
                                     } catch (\Throwable $e) {
                                     }
+
                                     return $payloadValue[$relationKey][$fieldName];
                                 }
 
@@ -326,6 +336,7 @@ class SignalTrigger extends Model
                                             @file_put_contents($logFile, $logMessage, FILE_APPEND);
                                         } catch (\Throwable $e) {
                                         }
+
                                         return $payloadValue[$relationKey][$relFieldKey];
                                     }
                                 }
@@ -376,6 +387,7 @@ class SignalTrigger extends Model
                                 @file_put_contents($logFile, $logMessage, FILE_APPEND);
                             } catch (\Throwable $e) {
                             }
+
                             return $payloadValue[$possibleFieldName];
                         }
                     }
@@ -392,6 +404,7 @@ class SignalTrigger extends Model
                                     @file_put_contents($logFile, $logMessage, FILE_APPEND);
                                 } catch (\Throwable $e) {
                                 }
+
                                 return $payloadValue[$modelFieldKey];
                             }
                         }
@@ -402,6 +415,7 @@ class SignalTrigger extends Model
                     // Questo è il modo più semplice e diretto: usa i campi effettivi del payload
                     if (str_ends_with($fieldName, '_id')) {
                         $suffix = $fieldName; // Es: author_id
+
                         try {
                             $logFile = base_path('storage/logs/signal-debug.log');
                             $logMessage = date('Y-m-d H:i:s') . " - Searching by suffix: {$suffix} in model: {$payloadKey}\n";
@@ -417,6 +431,7 @@ class SignalTrigger extends Model
                                     @file_put_contents($logFile, $logMessage, FILE_APPEND);
                                 } catch (\Throwable $e) {
                                 }
+
                                 return $payloadValue[$modelFieldKey];
                             }
                         }
@@ -431,7 +446,7 @@ class SignalTrigger extends Model
                 continue;
             }
 
-            if (!is_array($modelData)) {
+            if (! is_array($modelData)) {
                 continue;
             }
 
@@ -451,14 +466,16 @@ class SignalTrigger extends Model
             }
 
             foreach ($searchParts as $part) {
-                if (!is_array($value)) {
+                if (! is_array($value)) {
                     $found = false;
+
                     break;
                 }
 
                 // Prova prima con la chiave esatta
                 if (isset($value[$part])) {
                     $value = $value[$part];
+
                     continue;
                 }
 
@@ -470,16 +487,19 @@ class SignalTrigger extends Model
 
                     if ($normalizedValueKey === $normalizedPart) {
                         $foundKey = $valueKey;
+
                         break;
                     }
                 }
 
                 if ($foundKey !== null) {
                     $value = $value[$foundKey];
+
                     continue;
                 }
 
                 $found = false;
+
                 break;
             }
 
@@ -490,6 +510,7 @@ class SignalTrigger extends Model
                     @file_put_contents($logFile, $logMessage, FILE_APPEND);
                 } catch (\Throwable $e) {
                 }
+
                 return $value;
             }
         }
@@ -499,7 +520,7 @@ class SignalTrigger extends Model
 
         try {
             $logFile = base_path('storage/logs/signal-debug.log');
-            $logMessage = date('Y-m-d H:i:s') . " - Field search result: " . ($recursiveValue !== null ? json_encode($recursiveValue) : 'NOT FOUND') . "\n";
+            $logMessage = date('Y-m-d H:i:s') . ' - Field search result: ' . ($recursiveValue !== null ? json_encode($recursiveValue) : 'NOT FOUND') . "\n";
             @file_put_contents($logFile, $logMessage, FILE_APPEND);
         } catch (\Throwable $e) {
         }
@@ -512,7 +533,6 @@ class SignalTrigger extends Model
      *
      * @param  array<string, mixed>  $data
      * @param  array<int, string>  $parts
-     * @return mixed
      */
     protected function findValueRecursive(array $data, array $parts): mixed
     {
@@ -522,7 +542,7 @@ class SignalTrigger extends Model
 
         $firstPart = array_shift($parts);
 
-        if (!isset($data[$firstPart])) {
+        if (! isset($data[$firstPart])) {
             return null;
         }
 
@@ -532,7 +552,7 @@ class SignalTrigger extends Model
             return $value;
         }
 
-        if (!is_array($value)) {
+        if (! is_array($value)) {
             return null;
         }
 
@@ -542,10 +562,8 @@ class SignalTrigger extends Model
     /**
      * Valuta un singolo filtro
      *
-     * @param  string  $type
      * @param  mixed  $fieldValue
      * @param  mixed  $filterValue
-     * @return bool
      */
     protected function evaluateFilter(string $type, $fieldValue, $filterValue): bool
     {
@@ -558,13 +576,13 @@ class SignalTrigger extends Model
             'equals' => $this->compareValues($fieldValue, $filterValue) === 0,
             'not_equals' => $this->compareValues($fieldValue, $filterValue) !== 0,
             'contains' => $this->stringContains($fieldValue, $filterValue),
-            'not_contains' => !$this->stringContains($fieldValue, $filterValue),
+            'not_contains' => ! $this->stringContains($fieldValue, $filterValue),
             'greater_than' => $this->compareValues($fieldValue, $filterValue) > 0,
             'greater_than_or_equal' => $this->compareValues($fieldValue, $filterValue) >= 0,
             'less_than' => $this->compareValues($fieldValue, $filterValue) < 0,
             'less_than_or_equal' => $this->compareValues($fieldValue, $filterValue) <= 0,
             'in' => $this->isIn($fieldValue, $filterValue),
-            'not_in' => !$this->isIn($fieldValue, $filterValue),
+            'not_in' => ! $this->isIn($fieldValue, $filterValue),
             default => false,
         };
     }
@@ -574,7 +592,7 @@ class SignalTrigger extends Model
      *
      * @param  mixed  $a
      * @param  mixed  $b
-     * @return int  -1 se $a < $b, 0 se $a == $b, 1 se $a > $b
+     * @return int -1 se $a < $b, 0 se $a == $b, 1 se $a > $b
      */
     protected function compareValues($a, $b): int
     {
@@ -596,17 +614,16 @@ class SignalTrigger extends Model
      *
      * @param  mixed  $haystack
      * @param  mixed  $needle
-     * @return bool
      */
     protected function stringContains($haystack, $needle): bool
     {
         $needleString = (string) $needle;
-        
+
         // Se il valore contiene virgole, tratta come lista e verifica se il valore è nella lista
         if (str_contains($needleString, ',')) {
             return $this->isIn($haystack, $needleString);
         }
-        
+
         // Altrimenti, verifica se la stringa contiene la sottostringa
         return stripos((string) $haystack, $needleString) !== false;
     }
@@ -616,7 +633,6 @@ class SignalTrigger extends Model
      *
      * @param  mixed  $value
      * @param  string  $valuesString  Stringa separata da virgole o newline
-     * @return bool
      */
     protected function isIn($value, string $valuesString): bool
     {
