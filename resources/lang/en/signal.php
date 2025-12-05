@@ -137,6 +137,7 @@ return [
     'helpers' => [
         'webhook_template' => 'Select a predefined model/event to auto-fill the event class and defaults.',
         'event_class' => 'Select an event from the list or search by name. Events registered by plugins are shown with their full name.',
+        'filter_in_value' => 'Enter multiple values separated by commas or one per line.',
         'signing_secret' => 'Auto-generated if empty.',
         'essential_fields' => 'Select the essential fields to include.',
         'payload_configuration' => 'Select the fields to include in the payload and the relations to expand.',
@@ -174,7 +175,15 @@ return [
         ],
         'filter_blocks' => [
             'equals' => 'Equals',
+            'not_equals' => 'Not equals',
             'contains' => 'Contains',
+            'not_contains' => 'Not contains',
+            'greater_than' => 'Greater than',
+            'greater_than_or_equal' => 'Greater than or equal',
+            'less_than' => 'Less than',
+            'less_than_or_equal' => 'Less than or equal',
+            'in' => 'In',
+            'not_in' => 'Not in',
         ],
         'action_status' => [
             'pending' => 'Pending',

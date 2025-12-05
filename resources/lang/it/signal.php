@@ -137,6 +137,7 @@ return [
         'webhook_template' => 'Seleziona un modello preconfigurato per compilare automaticamente la classe evento.',
         'event_class' => 'Seleziona un evento dalla lista o cerca per nome. Gli eventi registrati dai plugin sono mostrati con il loro nome completo.',
         'signing_secret' => 'Generato automaticamente se vuoto. Utilizzato per generare la firma con spatie/laravel-webhook-server.',
+        'filter_in_value' => 'Inserisci più valori separati da virgola o uno per riga.',
         'essential_fields' => 'Seleziona i campi essenziali da includere.',
         'payload_configuration' => 'Seleziona i campi da includere nel payload e le relazioni da espandere.',
         'dispatch_sync' => 'Esegue la chiamata nella stessa richiesta invece che in coda.',
@@ -173,7 +174,15 @@ return [
         ],
         'filter_blocks' => [
             'equals' => 'Uguale a',
+            'not_equals' => 'Diverso da',
             'contains' => 'Contiene',
+            'not_contains' => 'Non contiene',
+            'greater_than' => 'Maggiore di',
+            'greater_than_or_equal' => 'Maggiore o uguale a',
+            'less_than' => 'Minore di',
+            'less_than_or_equal' => 'Minore o uguale a',
+            'in' => 'In',
+            'not_in' => 'Non in',
         ],
         'action_status' => [
             'pending' => 'In attesa',
