@@ -123,6 +123,8 @@ return [
         'copied' => 'Copied!',
         'event' => 'Event',
         'relations' => 'Relations',
+        'current_status' => 'Current status',
+        'previous_status' => 'Previous status',
     ],
     'sections' => [
         'template_content' => 'Template content',
@@ -148,6 +150,7 @@ return [
         'dispatch_sync' => 'Executes the call in the same request instead of queuing.',
         'log_configuration' => 'Use this action type to monitor and log specific events. All executions (both successful and failed) are logged for this action type.',
         'log_info' => 'Regardless of automation rules configuration, all error logs are tracked. If the action is of type "log", successful executions are also tracked. This is useful for testing before sending real webhooks and for tracking actions.',
+        'log_payload_mode' => 'Payload fields only or full envelope (event, timestamp, metadata) like webhooks.',
         'log_success' => 'If enabled, successful executions will be logged. Errors are always logged regardless of this setting.',
     ],
     'placeholders' => [

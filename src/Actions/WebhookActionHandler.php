@@ -55,17 +55,9 @@ class WebhookActionHandler implements SignalActionHandler
         // IMPORTANTE: Salva esattamente lo stesso payload che viene inviato al webhook
         // Il log viene passato da SignalActionExecutor, quindi dovrebbe essere sempre presente
         if ($log) {
-            // Se bodyMode è 'event', il payload inviato ha la struttura completa con 'data'
-            // ma nella UI mostriamo solo 'data', quindi salviamo quello per coerenza
-            // Se bodyMode è 'payload', il payload è direttamente quello che viene inviato
-            // In entrambi i casi, salva il payload configurato (che contiene le relazioni inverse)
-            $logPayload = $bodyMode === 'event' && isset($payloadForWebhook['data'])
-                ? $payloadForWebhook['data']
-                : $payloadForWebhook;
-
-            // Salva il payload configurato nel log
-            // IMPORTANTE: Usa update() per aggiornare solo il campo payload, preservando gli altri campi
-            $log->update(['payload' => $logPayload]);
+            // IMPORTANTE: Salva sempre l'intero payload inviato al webhook, non solo la parte 'data'
+            // Questo garantisce che il log contenga tutte le informazioni inviate, inclusi event, timestamp, metadata, ecc.
+            $log->update(['payload' => $payloadForWebhook]);
         }
 
         $webhookCall = WebhookCall::create()

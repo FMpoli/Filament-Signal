@@ -44,6 +44,22 @@ class SignalPayloadFieldAnalyzer
             $fields = [];
             $relations = [];
 
+            // Prima passata: trova il modello principale (la prima proprietà che è un Model)
+            $mainModelProperty = null;
+            $mainModelClass = null;
+            foreach ($properties as $property) {
+                $type = $property->getType();
+                if ($type && $type instanceof \ReflectionNamedType && ! $type->isBuiltin()) {
+                    $typeClass = $type->getName();
+                    if (is_subclass_of($typeClass, Model::class)) {
+                        $mainModelProperty = $property->getName();
+                        $mainModelClass = $typeClass;
+                        break;
+                    }
+                }
+            }
+
+            // Seconda passata: processa tutte le proprietà
             foreach ($properties as $property) {
                 $name = $property->getName();
                 $type = $property->getType();
@@ -65,8 +81,9 @@ class SignalPayloadFieldAnalyzer
                     } else {
                         // Non è un modello, è un campo semplice dell'evento (es: currentStatus, previousStatus)
                         // Questi campi appartengono all'evento stesso, non al modello
+                        // Aggiungi il prefisso del modello principale se disponibile
                         $fieldType = $this->getFieldType($type, $name);
-                        $label = $this->getTranslatedEventFieldLabel($name, $eventClass);
+                        $label = $this->getTranslatedEventFieldLabel($name, $eventClass, $mainModelProperty, $mainModelClass);
 
                         $fields[$name] = [
                             'label' => $label,
@@ -76,8 +93,9 @@ class SignalPayloadFieldAnalyzer
                     }
                 } else {
                     // Campo primitivo dell'evento (es: string, int, ecc.)
+                    // Aggiungi il prefisso del modello principale se disponibile
                     $fieldType = $this->getFieldType($type, $name);
-                    $label = $this->getTranslatedEventFieldLabel($name, $eventClass);
+                    $label = $this->getTranslatedEventFieldLabel($name, $eventClass, $mainModelProperty, $mainModelClass);
 
                     $fields[$name] = [
                         'label' => $label,
@@ -298,21 +316,42 @@ class SignalPayloadFieldAnalyzer
                 // Aggiungi i campi delle relazioni annidate (ricorsivamente)
                 // Solo se il modello implementa HasSignal (non da Model Integration)
                 // Per Model Integration, usiamo solo i campi esplicitamente configurati
-                if ($relatedModelClass) {
+                if ($relatedModelClass && ! empty($expand)) {
                     $isFromModelIntegration = $this->isModelFromIntegration($modelClass);
 
-                    // Se non è da Model Integration, aggiungi ricorsivamente tutti i campi disponibili
+                    // Se non è da Model Integration, aggiungi ricorsivamente i campi delle relazioni in expand
                     // Se è da Model Integration, usa solo i campi configurati (già in fieldOptions)
                     if (! $isFromModelIntegration) {
                         $relatedModelFields = $this->modelRegistry->getFields($relatedModelClass);
                         if ($relatedModelFields && isset($relatedModelFields['relations'])) {
-                            $this->collectNestedRelationFieldsForDirect(
-                                $relatedModelFields['relations'],
-                                $relatedModelClass,
-                                $relationName,
-                                $fieldOptions,
-                                ''
-                            );
+                            // Filtra solo le relazioni che sono in expand
+                            $nestedRelations = [];
+                            foreach ($expand as $nestedRelationName) {
+                                if (isset($relatedModelFields['relations'][$nestedRelationName])) {
+                                    $nestedRelations[$nestedRelationName] = $relatedModelFields['relations'][$nestedRelationName];
+                                } else {
+                                    // Se la relazione non è configurata, crea una entry di base per permettere la selezione
+                                    $nestedRelatedModelClass = $this->getRelatedModelClassFromRelation($relatedModelClass, $nestedRelationName);
+                                    if ($nestedRelatedModelClass) {
+                                        // Crea una configurazione di base con campi essenziali comuni
+                                        $nestedRelations[$nestedRelationName] = [
+                                            'fields' => ['id', 'name'], // Campi essenziali comuni
+                                            'expand' => [],
+                                        ];
+                                    }
+                                }
+                            }
+
+                            // Processa ricorsivamente solo le relazioni in expand
+                            if (! empty($nestedRelations)) {
+                                $this->collectNestedRelationFieldsForDirect(
+                                    $nestedRelations,
+                                    $relatedModelClass,
+                                    $relationName, // baseRelationName = "unit"
+                                    $fieldOptions,
+                                    $relationName // basePath = "unit" (non vuoto, così le relazioni annidate diventano "unit.model.name")
+                                );
+                            }
                         }
                     }
                 }
@@ -656,37 +695,56 @@ class SignalPayloadFieldAnalyzer
 
     /**
      * Ottiene un'etichetta tradotta per un campo dell'evento
+     *
+     * @param string $fieldKey Nome del campo evento (es: currentStatus, previousStatus)
+     * @param string $eventClass Classe dell'evento
+     * @param string|null $mainModelProperty Nome della proprietà del modello principale (es: "loan")
+     * @param string|null $mainModelClass Classe del modello principale (es: EquipmentLoan::class)
      */
-    protected function getTranslatedEventFieldLabel(string $fieldKey, string $eventClass): string
+    protected function getTranslatedEventFieldLabel(string $fieldKey, string $eventClass, ?string $mainModelProperty = null, ?string $mainModelClass = null): string
     {
-        // Mappa i nomi dei campi dell'evento alle traduzioni
+        // Prova prima con le traduzioni standard del package Signal
+        $translatedLabel = null;
         if ($fieldKey === 'currentStatus') {
-            return 'Stato corrente';
+            $translatedLabel = trans('filament-signal::signal.fields.current_status');
+        } elseif ($fieldKey === 'previousStatus') {
+            $translatedLabel = trans('filament-signal::signal.fields.previous_status');
         }
-        if ($fieldKey === 'previousStatus') {
-            return 'Stato precedente';
-        }
 
-        // Prova a trovare la traduzione nel namespace dell'evento
-        $eventNamespace = substr($eventClass, 0, strrpos($eventClass, '\\'));
-        $packageName = $this->getPackageNameFromNamespace($eventNamespace);
+        // Se non c'è traduzione standard, prova a trovare la traduzione nel namespace dell'evento
+        if (! $translatedLabel || $translatedLabel === "filament-signal::signal.fields.{$fieldKey}") {
+            $eventNamespace = substr($eventClass, 0, strrpos($eventClass, '\\'));
+            $packageName = $this->getPackageNameFromNamespace($eventNamespace);
 
-        if ($packageName) {
-            $keys = [
-                "filament-{$packageName}::{$packageName}.fields.{$fieldKey}",
-                "filament-{$packageName}::{$packageName}.fields.{$fieldKey}",
-            ];
+            if ($packageName) {
+                $keys = [
+                    "filament-{$packageName}::{$packageName}.fields.{$fieldKey}",
+                    "filament-{$packageName}::{$packageName}.fields.{$fieldKey}",
+                ];
 
-            foreach ($keys as $key) {
-                $translated = trans($key);
-                if ($translated !== $key) {
-                    return $translated;
+                foreach ($keys as $key) {
+                    $translated = trans($key);
+                    if ($translated !== $key) {
+                        $translatedLabel = $translated;
+                        break;
+                    }
                 }
             }
         }
 
         // Fallback: genera label automatico
-        return $this->getFieldLabel($fieldKey);
+        if (! $translatedLabel || str_starts_with($translatedLabel, 'filament-')) {
+            $translatedLabel = $this->getFieldLabel($fieldKey);
+        }
+
+        // Se c'è un modello principale, aggiungi il prefisso per consistenza con i campi del modello
+        // Es: "Current status" -> "Loan → Current status"
+        if ($mainModelProperty && $mainModelClass) {
+            $modelPrefix = $this->getTranslatedPropertyName($mainModelProperty, $mainModelClass);
+            return "{$modelPrefix} → {$translatedLabel}";
+        }
+
+        return $translatedLabel;
     }
 
     /**
@@ -923,7 +981,25 @@ class SignalPayloadFieldAnalyzer
             if (! empty($relationFields)) {
                 $nestedFieldOptions = $this->formatFieldOptions($relationFields, $relatedModelClass);
                 foreach ($nestedFieldOptions as $fieldKey => $fieldLabel) {
-                    $fullKey = "{$baseRelationName}.{$currentPath}.{$fieldKey}";
+                    // Costruisci il fullKey:
+                    // - Se basePath è vuoto: siamo al primo livello, quindi fullKey = "baseRelationName.fieldKey"
+                    //   (perché currentPath = relationName e baseRelationName = relationName al primo livello)
+                    // - Se basePath non è vuoto: siamo in una chiamata ricorsiva, quindi currentPath contiene già
+                    //   il path completo relativo a baseRelationName (es: "unit.model"), quindi fullKey = "currentPath.fieldKey"
+                    //   perché currentPath è già costruito come "basePath.relationName" dove basePath è il path precedente
+                    //   che contiene già baseRelationName
+                    if ($basePath === '') {
+                        // Primo livello: baseRelationName è il nome della relazione principale (es: "unit")
+                        // e relationName è lo stesso (es: "unit"), quindi fullKey = "unit.inventory_code"
+                        $fullKey = "{$baseRelationName}.{$fieldKey}";
+                    } else {
+                        // Chiamata ricorsiva: basePath contiene il path dalla chiamata precedente (es: "unit"),
+                        // quindi currentPath = "unit.model" e fullKey = "unit.model.name"
+                        // NOTA: basePath viene passato come currentPath dalla chiamata precedente, quindi
+                        // contiene già baseRelationName. Quindi currentPath contiene già tutto il path incluso baseRelationName.
+                        // Quindi usiamo solo currentPath + fieldKey
+                        $fullKey = "{$currentPath}.{$fieldKey}";
+                    }
                     // Formatta il path con frecce e nomi in minuscolo per leggibilità
                     $labelPath = str_replace('.', ' → ', strtolower($currentPath));
                     $fieldOptions[$fullKey] = "{$labelPath} → {$fieldLabel}";

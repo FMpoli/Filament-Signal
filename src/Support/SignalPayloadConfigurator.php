@@ -274,7 +274,7 @@ class SignalPayloadConfigurator
             // Filtra i campi delle relazioni annidate se sono stati selezionati
             // Ordina i path per lunghezza (prima i più corti) per processare correttamente le relazioni annidate
             $sortedPaths = array_keys($nestedFields);
-            usort($sortedPaths, fn ($a, $b) => substr_count($a, '.') <=> substr_count($b, '.'));
+            usort($sortedPaths, fn($a, $b) => substr_count($a, '.') <=> substr_count($b, '.'));
 
             foreach ($sortedPaths as $relationPath) {
                 $selectedFields = $nestedFields[$relationPath];
@@ -358,7 +358,7 @@ class SignalPayloadConfigurator
                 $query->with($expand);
             }
 
-            $records = $query->get()->map(fn ($model) => $model->toArray())->all();
+            $records = $query->get()->map(fn($model) => $model->toArray())->all();
 
             return $records;
         } catch (\Throwable $exception) {
@@ -637,6 +637,7 @@ class SignalPayloadConfigurator
 
                 // Filtra le relazioni annidate se necessario
                 foreach ($nestedFields as $nestedRelation => $nestedFieldKeys) {
+                    // Verifica se la relazione annidata è già presente nel payload
                     if (isset($relationData[$nestedRelation]) && is_array($relationData[$nestedRelation])) {
                         $nestedFiltered = [];
                         foreach ($nestedFieldKeys as $nestedFieldKey) {
@@ -648,7 +649,48 @@ class SignalPayloadConfigurator
                         if (! isset($nestedFiltered['id']) && isset($relationData[$nestedRelation]['id'])) {
                             $nestedFiltered['id'] = $relationData[$nestedRelation]['id'];
                         }
-                        $filtered[$nestedRelation] = $nestedFiltered;
+                        if (! empty($nestedFiltered)) {
+                            $filtered[$nestedRelation] = $nestedFiltered;
+                        }
+                    } elseif (isset($relationData[$nestedRelation . '_id']) && $relationData[$nestedRelation . '_id']) {
+                        // Se la relazione non è caricata ma c'è l'ID, prova a caricarla
+                        // Questo può accadere se le relazioni annidate non sono state espanse
+                        $nestedId = $relationData[$nestedRelation . '_id'];
+                        $relationModelClass = $meta['model_class'] ?? null;
+
+                        if ($relationModelClass && class_exists($relationModelClass)) {
+                            try {
+                                // Usa reflection per ottenere la classe del modello correlato dalla relazione
+                                $relationModel = new $relationModelClass;
+                                if (method_exists($relationModel, $nestedRelation)) {
+                                    $relation = $relationModel->{$nestedRelation}();
+                                    if (method_exists($relation, 'getRelated')) {
+                                        $nestedModelClass = get_class($relation->getRelated());
+
+                                        if ($nestedModelClass && class_exists($nestedModelClass)) {
+                                            $nestedModel = $nestedModelClass::find($nestedId);
+                                            if ($nestedModel) {
+                                                $nestedFiltered = [];
+                                                foreach ($nestedFieldKeys as $nestedFieldKey) {
+                                                    if ($nestedModel->offsetExists($nestedFieldKey)) {
+                                                        $nestedFiltered[$nestedFieldKey] = $nestedModel->{$nestedFieldKey};
+                                                    }
+                                                }
+                                                // Assicurati che 'id' sia sempre incluso
+                                                if (! isset($nestedFiltered['id'])) {
+                                                    $nestedFiltered['id'] = $nestedModel->id;
+                                                }
+                                                if (! empty($nestedFiltered)) {
+                                                    $filtered[$nestedRelation] = $nestedFiltered;
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            } catch (\Throwable $e) {
+                                // Ignora errori
+                            }
+                        }
                     }
                 }
 

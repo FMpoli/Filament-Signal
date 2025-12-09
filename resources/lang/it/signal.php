@@ -122,6 +122,8 @@ return [
         'copied' => 'Copiato!',
         'event' => 'Evento',
         'relations' => 'Relazioni',
+        'current_status' => 'Stato corrente',
+        'previous_status' => 'Stato precedente',
     ],
     'sections' => [
         'template_content' => 'Contenuto del template',
@@ -147,6 +149,7 @@ return [
         'dispatch_sync' => 'Esegue la chiamata nella stessa richiesta invece che in coda.',
         'log_configuration' => 'Usa questo tipo di azione per monitorare e registrare eventi specifici. Tutte le esecuzioni (sia riuscite che fallite) vengono registrate per questo tipo di azione.',
         'log_info' => 'Indipendentemente dalla configurazione delle automation rules, tutti i log di errore vengono tracciati. Se la action è di tipo "log", vengono tracciati anche i successi. È utile per fare test prima di mandare i webhook veri e per tenere traccia delle action qualora serva rendicontare in modo dettagliato.',
+        'log_payload_mode' => 'Solo campi payload o envelope completo (event, timestamp, metadata) come webhook.',
         'log_success' => 'Se abilitato, le esecuzioni riuscite verranno registrate. Gli errori vengono sempre registrati indipendentemente da questa impostazione.',
     ],
     'placeholders' => [
