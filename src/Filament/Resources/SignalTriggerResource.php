@@ -77,7 +77,7 @@ class SignalTriggerResource extends Resource
                                 ->label(__('filament-signal::signal.fields.description'))
                                 ->hiddenLabel()
                                 ->placeholder('—')
-                                ->visible(fn (SignalTrigger $record) => ! empty($record->description))
+                                ->visible(fn(SignalTrigger $record) => ! empty($record->description))
                                 ->columnSpanFull(),
                             TextEntry::make('event_display_name')
                                 ->label(__('filament-signal::signal.fields.event_source'))
@@ -110,7 +110,7 @@ class SignalTriggerResource extends Resource
                             ActionsListEntry::make('actions')
                                 ->label(__('filament-signal::signal.fields.actions'))
                                 ->hiddenLabel()
-                                ->state(fn (SignalTrigger $record) => $record->actions->toArray()),
+                                ->state(fn(SignalTrigger $record) => $record->actions->toArray()),
                         ]),
                 ])
                     ->columnSpan(8),
@@ -264,7 +264,7 @@ class SignalTriggerResource extends Resource
                                         ->schema([
                                             Forms\Components\Select::make('field')
                                                 ->label(__('filament-signal::signal.fields.field'))
-                                                ->options(fn (Get $get): array => static::getFilterFieldOptions($get))
+                                                ->options(fn(Get $get): array => static::getFilterFieldOptions($get))
                                                 ->searchable()
                                                 ->preload()
                                                 ->required()
@@ -279,7 +279,7 @@ class SignalTriggerResource extends Resource
                                         ->schema([
                                             Forms\Components\Select::make('field')
                                                 ->label(__('filament-signal::signal.fields.field'))
-                                                ->options(fn (Get $get): array => static::getFilterFieldOptions($get))
+                                                ->options(fn(Get $get): array => static::getFilterFieldOptions($get))
                                                 ->searchable()
                                                 ->preload()
                                                 ->required()
@@ -294,7 +294,7 @@ class SignalTriggerResource extends Resource
                                         ->schema([
                                             Forms\Components\Select::make('field')
                                                 ->label(__('filament-signal::signal.fields.field'))
-                                                ->options(fn (Get $get): array => static::getFilterFieldOptions($get))
+                                                ->options(fn(Get $get): array => static::getFilterFieldOptions($get))
                                                 ->searchable()
                                                 ->preload()
                                                 ->required()
@@ -309,7 +309,7 @@ class SignalTriggerResource extends Resource
                                         ->schema([
                                             Forms\Components\Select::make('field')
                                                 ->label(__('filament-signal::signal.fields.field'))
-                                                ->options(fn (Get $get): array => static::getFilterFieldOptions($get))
+                                                ->options(fn(Get $get): array => static::getFilterFieldOptions($get))
                                                 ->searchable()
                                                 ->preload()
                                                 ->required()
@@ -324,7 +324,7 @@ class SignalTriggerResource extends Resource
                                         ->schema([
                                             Forms\Components\Select::make('field')
                                                 ->label(__('filament-signal::signal.fields.field'))
-                                                ->options(fn (Get $get): array => static::getFilterFieldOptions($get))
+                                                ->options(fn(Get $get): array => static::getFilterFieldOptions($get))
                                                 ->searchable()
                                                 ->preload()
                                                 ->required()
@@ -339,7 +339,7 @@ class SignalTriggerResource extends Resource
                                         ->schema([
                                             Forms\Components\Select::make('field')
                                                 ->label(__('filament-signal::signal.fields.field'))
-                                                ->options(fn (Get $get): array => static::getFilterFieldOptions($get))
+                                                ->options(fn(Get $get): array => static::getFilterFieldOptions($get))
                                                 ->searchable()
                                                 ->preload()
                                                 ->required()
@@ -354,7 +354,7 @@ class SignalTriggerResource extends Resource
                                         ->schema([
                                             Forms\Components\Select::make('field')
                                                 ->label(__('filament-signal::signal.fields.field'))
-                                                ->options(fn (Get $get): array => static::getFilterFieldOptions($get))
+                                                ->options(fn(Get $get): array => static::getFilterFieldOptions($get))
                                                 ->searchable()
                                                 ->preload()
                                                 ->required()
@@ -369,7 +369,7 @@ class SignalTriggerResource extends Resource
                                         ->schema([
                                             Forms\Components\Select::make('field')
                                                 ->label(__('filament-signal::signal.fields.field'))
-                                                ->options(fn (Get $get): array => static::getFilterFieldOptions($get))
+                                                ->options(fn(Get $get): array => static::getFilterFieldOptions($get))
                                                 ->searchable()
                                                 ->preload()
                                                 ->required()
@@ -384,7 +384,7 @@ class SignalTriggerResource extends Resource
                                         ->schema([
                                             Forms\Components\Select::make('field')
                                                 ->label(__('filament-signal::signal.fields.field'))
-                                                ->options(fn (Get $get): array => static::getFilterFieldOptions($get))
+                                                ->options(fn(Get $get): array => static::getFilterFieldOptions($get))
                                                 ->searchable()
                                                 ->preload()
                                                 ->required()
@@ -400,7 +400,7 @@ class SignalTriggerResource extends Resource
                                         ->schema([
                                             Forms\Components\Select::make('field')
                                                 ->label(__('filament-signal::signal.fields.field'))
-                                                ->options(fn (Get $get): array => static::getFilterFieldOptions($get))
+                                                ->options(fn(Get $get): array => static::getFilterFieldOptions($get))
                                                 ->searchable()
                                                 ->preload()
                                                 ->required()
@@ -614,135 +614,6 @@ class SignalTriggerResource extends Resource
                 ->columns(12)
                 ->components([
                     Group::make(static::getBaseActionFields())->columnSpan(4),
-
-<<<<<<< HEAD
-                    Group::make([
-                        Grid::make()
-                            ->columns([
-                                'default' => 1,
-                                '@md' => 2,
-                                '@xl' => 2,
-                            ])
-                            ->visible(fn (Get $get): bool => $get('action_type') === 'webhook')
-                            ->schema([
-                                Forms\Components\TextInput::make('configuration.url')
-                                    ->label(__('filament-signal::signal.fields.endpoint_url'))
-                                    ->url()
-                                    ->required(fn (Get $get): bool => $get('action_type') === 'webhook')
-                                    ->columnSpanFull(),
-                                Forms\Components\Select::make('configuration.method')
-                                    ->label(__('filament-signal::signal.fields.http_method'))
-                                    ->options([
-                                        'POST' => __('filament-signal::signal.options.http_method.POST'),
-                                        'PUT' => __('filament-signal::signal.options.http_method.PUT'),
-                                        'PATCH' => __('filament-signal::signal.options.http_method.PATCH'),
-                                        'DELETE' => __('filament-signal::signal.options.http_method.DELETE'),
-                                    ])
-                                    ->default('POST'),
-                                Forms\Components\Select::make('configuration.body')
-                                    ->label(__('filament-signal::signal.fields.payload_mode'))
-                                    ->options([
-                                        'payload' => __('filament-signal::signal.options.payload_mode.payload'),
-                                        'event' => __('filament-signal::signal.options.payload_mode.event'),
-                                    ])
-                                    ->default('event'),
-                                Forms\Components\TextInput::make('configuration.secret')
-                                    ->label(__('filament-signal::signal.fields.signing_secret'))
-                                    ->password()
-                                    ->revealable()
-                                    ->default(fn () => config('signal.webhook.secret') ?: Str::random(40))
-                                    ->helperText(__('filament-signal::signal.helpers.signing_secret'))
-                                    ->columnSpan(2),
-                                // Forms\Components\Toggle::make('configuration.verify_ssl')
-                                //     ->label(__('filament-signal::signal.fields.verify_ssl'))
-                                //     ->default(true),
-                            ]),
-                        Section::make(__('filament-signal::signal.sections.webhook_configuration_advanced'))
-                            ->collapsible()
-                            ->collapsed()
-                            ->visible(false) // Temporaneamente nascosto - riattivare quando necessario
-                            ->schema([
-                                Grid::make()
-                                    ->columns([
-                                        'default' => 1,
-                                        '@md' => 2,
-                                        '@xl' => 3,
-                                    ])
-                                    ->schema([
-                                        Forms\Components\TextInput::make('configuration.queue')
-                                            ->label(__('filament-signal::signal.fields.queue'))
-                                            ->placeholder(__('filament-signal::signal.placeholders.default')),
-                                        Forms\Components\TextInput::make('configuration.connection')
-                                            ->label(__('filament-signal::signal.fields.queue_connection')),
-                                        Forms\Components\TextInput::make('configuration.timeout')
-                                            ->label(__('filament-signal::signal.fields.timeout_seconds'))
-                                            ->numeric()
-                                            ->minValue(1),
-                                        Forms\Components\TextInput::make('configuration.tries')
-                                            ->label(__('filament-signal::signal.fields.max_attempts'))
-                                            ->numeric()
-                                            ->minValue(1)
-                                            ->placeholder(__('filament-signal::signal.placeholders.max_attempts_example')),
-                                        Forms\Components\TextInput::make('configuration.backoff_strategy')
-                                            ->label(__('filament-signal::signal.fields.backoff_strategy_class')),
-                                        Forms\Components\Toggle::make('configuration.throw_exception_on_failure')
-                                            ->label(__('filament-signal::signal.fields.throw_on_failure'))
-                                            ->default(false),
-                                        Forms\Components\Toggle::make('configuration.dispatch_sync')
-                                            ->label(__('filament-signal::signal.fields.dispatch_synchronously'))
-                                            ->helperText(__('filament-signal::signal.helpers.dispatch_sync')),
-                                        Forms\Components\TagsInput::make('configuration.tags')
-                                            ->label(__('filament-signal::signal.fields.horizon_tags'))
-                                            ->placeholder(__('filament-signal::signal.placeholders.tag'))
-                                            ->columnSpan([
-                                                'default' => 1,
-                                                '@md' => 2,
-                                                '@xl' => 1,
-                                            ]),
-                                        Forms\Components\KeyValue::make('configuration.headers')
-                                            ->label(__('filament-signal::signal.fields.headers'))
-                                            ->keyLabel(__('filament-signal::signal.fields.header'))
-                                            ->valueLabel(__('filament-signal::signal.fields.value'))
-                                            ->addActionLabel(__('filament-signal::signal.fields.add_header'))
-                                            ->columnSpan([
-                                                'default' => 1,
-                                                '@md' => 2,
-                                                '@xl' => 2,
-                                            ]),
-                                        Forms\Components\KeyValue::make('configuration.meta')
-                                            ->label(__('filament-signal::signal.fields.meta'))
-                                            ->keyLabel(__('filament-signal::signal.fields.key'))
-                                            ->valueLabel(__('filament-signal::signal.fields.value'))
-                                            ->addActionLabel(__('filament-signal::signal.fields.add_meta'))
-                                            ->columnSpan([
-                                                'default' => 1,
-                                                '@md' => 2,
-                                                '@xl' => 3,
-                                            ]),
-                                        Forms\Components\TextInput::make('configuration.proxy')
-                                            ->label(__('filament-signal::signal.fields.proxy'))
-                                            ->placeholder(__('filament-signal::signal.placeholders.proxy'))
-                                            ->columnSpan([
-                                                'default' => 1,
-                                                '@md' => 2,
-                                                '@xl' => 3,
-                                            ]),
-                                        Forms\Components\TextInput::make('configuration.job')
-                                            ->label(__('filament-signal::signal.fields.custom_job_class')),
-                                        Forms\Components\TextInput::make('configuration.signer')
-                                            ->label(__('filament-signal::signal.fields.custom_signer_class')),
-                                    ]),
-                            ]),
-                        Section::make()
-                            ->heading('')
-                            ->label(__('filament-signal::signal.fields.log_info'))
-                            ->schema([
-                                Text::make('log_info')
-                                    ->content(__('filament-signal::signal.helpers.log_info')),
-                            ])
-                            ->visible(fn (Get $get): bool => $get('action_type') === 'log')
-                            ->columnSpanFull(),
-                    ])->columnSpan(8),
                     Group::make()
                         ->schema(function (Get $get): array {
                             $actionType = $get('action_type');
@@ -1243,107 +1114,12 @@ class SignalTriggerResource extends Resource
                                             $set("configuration.payload_config.relation_fields.{$formKey}", array_values($valid));
                                         }
                                     });
+                            }
+                        }
                     }
-                }
-            }
 
                     return $components;
-                })
-                ->visible(fn (Get $get): bool => filled($get('../../event_class'))),
-
-                    // Group::make([
-                    //     Section::make()->heading('RIGHT 1')->schema([]),
-
-                    //     Group::make([
-                    //         Section::make()->heading('RIGHT 2')->schema([]),
-
-                    //         Section::make()->heading('RIGHT 3')->schema([]),
-                    //     ])->columns(2),
-                    // ])
-                    //     ->columnSpan(8),
-
-                    // ->components([
-                    //     Group::make([
-                    //         Section::make(__('filament-signal::signal.sections.general'))
-                    //             ->compact()
-                    //             ->schema([
-                    //                 Forms\Components\TextInput::make('name')
-                    //                     ->label(__('filament-signal::signal.fields.name'))
-                    //                     ->required(),
-                    //                 Forms\Components\TextInput::make('execution_order')
-                    //                     ->label(__('filament-signal::signal.fields.execution_order'))
-                    //                     ->numeric()
-                    //                     ->default(1),
-                    //                 Forms\Components\Select::make('action_type')
-                    //                     ->label(__('filament-signal::signal.fields.action_type'))
-                    //                     ->options(self::getActionTypeOptions())
-                    //                     ->required()
-                    //                     ->live(),
-                    //                 Forms\Components\Toggle::make('is_active')
-                    //                     ->label(__('filament-signal::signal.fields.status'))
-                    //                     ->default(true),
-                    //                 Forms\Components\Select::make('template_id')
-                    //                     ->label(__('filament-signal::signal.fields.template'))
-                    //                     ->relationship('template', 'name')
-                    //                     ->searchable()
-                    //                     ->visible(fn(Get $get): bool => $get('action_type') === 'email')
-                    //                     ->required(fn(Get $get): bool => $get('action_type') === 'email'),
-                    //             ])
-                    //             ->columnSpan(4),
-                    //             Group::make([
-                    //                 Section::make()->heading('RIGHT 1')->schema([]),
-
-                    //                 Group::make([
-                    //                     Section::make()->heading('RIGHT 2')->schema([]),
-
-                    //                     Section::make()->heading('RIGHT 3')->schema([]),
-                    //                 ])->columns(2),
-                    //             ])
-                    //                 ->columnSpan(8),
-                    //         ])
-                    //     ]),
-
-                    //     Section::make(__('filament-signal::signal.sections.email_configuration'))
-                    //         ->secondary()
-                    //         ->visible(fn(Get $get): bool => $get('action_type') === 'email')
-                    //         ->columnSpan(1)
-                    //         ->schema([
-                    //             Grid::make()
-                    //                 ->columns([
-                    //                     'default' => 1,
-                    //                     '@md' => 2,
-                    //                 ])
-                    //                 ->schema([
-                    //                     Forms\Components\TextInput::make('configuration.subject_override')
-                    //                         ->label(__('filament-signal::signal.fields.subject'))
-                    //                         ->placeholder('Leave empty to use template subject')
-                    //                         ->columnSpanFull(),
-                    //                     Grid::make()
-                    //                         ->columns([
-                    //                             'default' => 1,
-                    //                             '@md' => 3,
-                    //                         ])
-                    //                         ->schema([
-                    //                             Forms\Components\KeyValue::make('configuration.recipients.to')
-                    //                                 ->label('To recipients')
-                    //                                 ->keyLabel('Email')
-                    //                                 ->valueLabel('Name')
-                    //                                 ->addActionLabel('Add recipient'),
-                    //                             Forms\Components\KeyValue::make('configuration.recipients.cc')
-                    //                                 ->label('CC recipients')
-                    //                                 ->keyLabel('Email')
-                    //                                 ->valueLabel('Name')
-                    //                                 ->addActionLabel('Add recipient'),
-                    //                             Forms\Components\KeyValue::make('configuration.recipients.bcc')
-                    //                                 ->label('BCC recipients')
-                    //                                 ->keyLabel('Email')
-                    //                                 ->valueLabel('Name')
-                    //                                 ->addActionLabel('Add recipient'),
-                    //                         ]),
-                    //                 ]),
-                    //         ]),
-
-                ]),
+                }),
         ];
     }
 
@@ -1400,18 +1176,11 @@ class SignalTriggerResource extends Resource
             ])
             ->actions([
                 ViewAction::make()
-                    ->url(fn (SignalTrigger $record): string => static::getUrl('view', ['record' => $record]))
+                    ->url(fn(SignalTrigger $record): string => static::getUrl('view', ['record' => $record]))
                     ->openUrlInNewTab(false),
                 EditAction::make()
-                    ->url(fn (SignalTrigger $record): string => static::getUrl('edit', ['record' => $record]))
+                    ->url(fn(SignalTrigger $record): string => static::getUrl('edit', ['record' => $record]))
                     ->openUrlInNewTab(false),
-                Action::make('flow')
-                    ->label(__('filament-signal::signal.actions.flow_view'))
-                    ->icon('heroicon-o-squares-2x2')
-                    ->color('info')
-                    ->url(fn (SignalTrigger $record): string => static::getUrl('flow', ['record' => $record]))
-                    ->openUrlInNewTab(false)
-                    ->extraAttributes(['wire:navigate' => false]),
                 Action::make('clone')
                     ->label(__('filament-signal::signal.actions.clone'))
                     ->icon('heroicon-o-document-duplicate')
@@ -1472,7 +1241,6 @@ class SignalTriggerResource extends Resource
             'create' => Pages\CreateSignalTrigger::route('/create'),
             'view' => Pages\ViewSignalTrigger::route('/{record}'),
             'edit' => Pages\EditSignalTrigger::route('/{record}/edit'),
-            'flow' => Pages\FlowSignalTrigger::route('/{record}/flow'),
         ];
     }
 
