@@ -1,3 +1,4 @@
 @import "../../../../../vendor/filament/filament/resources/css/theme.css";
+@import '../../node_modules/reactflow/dist/style.css';
 
 @source '../views/**/*.blade.php';

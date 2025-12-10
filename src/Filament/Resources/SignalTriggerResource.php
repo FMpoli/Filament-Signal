@@ -258,160 +258,8 @@ class SignalTriggerResource extends Resource
                                 })
                                 ->addActionLabel(__('filament-signal::signal.actions.add_filter'))
                                 ->live()
-                                ->blocks([
-                                    Block::make('equals')
-                                        ->label(static::getFilterBlockLabel('equals', __('filament-signal::signal.options.filter_blocks.equals')))
-                                        ->schema([
-                                            Forms\Components\Select::make('field')
-                                                ->label(__('filament-signal::signal.fields.field'))
-                                                ->options(fn(Get $get): array => static::getFilterFieldOptions($get))
-                                                ->searchable()
-                                                ->preload()
-                                                ->required()
-                                                ->live(),
-                                            Forms\Components\TextInput::make('value')
-                                                ->label(__('filament-signal::signal.fields.value'))
-                                                ->required()
-                                                ->live(),
-                                        ])->columns(1),
-                                    Block::make('not_equals')
-                                        ->label(static::getFilterBlockLabel('not_equals', __('filament-signal::signal.options.filter_blocks.not_equals')))
-                                        ->schema([
-                                            Forms\Components\Select::make('field')
-                                                ->label(__('filament-signal::signal.fields.field'))
-                                                ->options(fn(Get $get): array => static::getFilterFieldOptions($get))
-                                                ->searchable()
-                                                ->preload()
-                                                ->required()
-                                                ->live(),
-                                            Forms\Components\TextInput::make('value')
-                                                ->label(__('filament-signal::signal.fields.value'))
-                                                ->required()
-                                                ->live(),
-                                        ])->columns(1),
-                                    Block::make('contains')
-                                        ->label(static::getFilterBlockLabel('contains', __('filament-signal::signal.options.filter_blocks.contains')))
-                                        ->schema([
-                                            Forms\Components\Select::make('field')
-                                                ->label(__('filament-signal::signal.fields.field'))
-                                                ->options(fn(Get $get): array => static::getFilterFieldOptions($get))
-                                                ->searchable()
-                                                ->preload()
-                                                ->required()
-                                                ->live(),
-                                            Forms\Components\TextInput::make('value')
-                                                ->label(__('filament-signal::signal.fields.value'))
-                                                ->required()
-                                                ->live(),
-                                        ])->columns(1),
-                                    Block::make('not_contains')
-                                        ->label(static::getFilterBlockLabel('not_contains', __('filament-signal::signal.options.filter_blocks.not_contains')))
-                                        ->schema([
-                                            Forms\Components\Select::make('field')
-                                                ->label(__('filament-signal::signal.fields.field'))
-                                                ->options(fn(Get $get): array => static::getFilterFieldOptions($get))
-                                                ->searchable()
-                                                ->preload()
-                                                ->required()
-                                                ->live(),
-                                            Forms\Components\TextInput::make('value')
-                                                ->label(__('filament-signal::signal.fields.value'))
-                                                ->required()
-                                                ->live(),
-                                        ])->columns(1),
-                                    Block::make('greater_than')
-                                        ->label(static::getFilterBlockLabel('greater_than', __('filament-signal::signal.options.filter_blocks.greater_than')))
-                                        ->schema([
-                                            Forms\Components\Select::make('field')
-                                                ->label(__('filament-signal::signal.fields.field'))
-                                                ->options(fn(Get $get): array => static::getFilterFieldOptions($get))
-                                                ->searchable()
-                                                ->preload()
-                                                ->required()
-                                                ->live(),
-                                            Forms\Components\TextInput::make('value')
-                                                ->label(__('filament-signal::signal.fields.value'))
-                                                ->required()
-                                                ->live(),
-                                        ])->columns(1),
-                                    Block::make('greater_than_or_equal')
-                                        ->label(static::getFilterBlockLabel('greater_than_or_equal', __('filament-signal::signal.options.filter_blocks.greater_than_or_equal')))
-                                        ->schema([
-                                            Forms\Components\Select::make('field')
-                                                ->label(__('filament-signal::signal.fields.field'))
-                                                ->options(fn(Get $get): array => static::getFilterFieldOptions($get))
-                                                ->searchable()
-                                                ->preload()
-                                                ->required()
-                                                ->live(),
-                                            Forms\Components\TextInput::make('value')
-                                                ->label(__('filament-signal::signal.fields.value'))
-                                                ->required()
-                                                ->live(),
-                                        ])->columns(1),
-                                    Block::make('less_than')
-                                        ->label(static::getFilterBlockLabel('less_than', __('filament-signal::signal.options.filter_blocks.less_than')))
-                                        ->schema([
-                                            Forms\Components\Select::make('field')
-                                                ->label(__('filament-signal::signal.fields.field'))
-                                                ->options(fn(Get $get): array => static::getFilterFieldOptions($get))
-                                                ->searchable()
-                                                ->preload()
-                                                ->required()
-                                                ->live(),
-                                            Forms\Components\TextInput::make('value')
-                                                ->label(__('filament-signal::signal.fields.value'))
-                                                ->required()
-                                                ->live(),
-                                        ])->columns(1),
-                                    Block::make('less_than_or_equal')
-                                        ->label(static::getFilterBlockLabel('less_than_or_equal', __('filament-signal::signal.options.filter_blocks.less_than_or_equal')))
-                                        ->schema([
-                                            Forms\Components\Select::make('field')
-                                                ->label(__('filament-signal::signal.fields.field'))
-                                                ->options(fn(Get $get): array => static::getFilterFieldOptions($get))
-                                                ->searchable()
-                                                ->preload()
-                                                ->required()
-                                                ->live(),
-                                            Forms\Components\TextInput::make('value')
-                                                ->label(__('filament-signal::signal.fields.value'))
-                                                ->required()
-                                                ->live(),
-                                        ])->columns(1),
-                                    Block::make('in')
-                                        ->label(static::getFilterBlockLabel('in', __('filament-signal::signal.options.filter_blocks.in')))
-                                        ->schema([
-                                            Forms\Components\Select::make('field')
-                                                ->label(__('filament-signal::signal.fields.field'))
-                                                ->options(fn(Get $get): array => static::getFilterFieldOptions($get))
-                                                ->searchable()
-                                                ->preload()
-                                                ->required()
-                                                ->live(),
-                                            Forms\Components\Textarea::make('value')
-                                                ->label(__('filament-signal::signal.fields.value'))
-                                                ->helperText(__('filament-signal::signal.helpers.filter_in_value'))
-                                                ->required()
-                                                ->live(),
-                                        ])->columns(1),
-                                    Block::make('not_in')
-                                        ->label(static::getFilterBlockLabel('not_in', __('filament-signal::signal.options.filter_blocks.not_in')))
-                                        ->schema([
-                                            Forms\Components\Select::make('field')
-                                                ->label(__('filament-signal::signal.fields.field'))
-                                                ->options(fn(Get $get): array => static::getFilterFieldOptions($get))
-                                                ->searchable()
-                                                ->preload()
-                                                ->required()
-                                                ->live(),
-                                            Forms\Components\Textarea::make('value')
-                                                ->label(__('filament-signal::signal.fields.value'))
-                                                ->helperText(__('filament-signal::signal.helpers.filter_in_value'))
-                                                ->required()
-                                                ->live(),
-                                        ])->columns(1),
-                                ])
+                                ->blocks(static::getFilterBlocks())
+
                                 ->collapsible(),
                         ]),
                 ])->columnSpan(4),
@@ -530,7 +378,7 @@ class SignalTriggerResource extends Resource
     /**
      * @return array<string, string>
      */
-    protected static function getWebhookTemplateOptions(): array
+    public static function getWebhookTemplateOptions(): array
     {
         return app(SignalWebhookTemplateRegistry::class)->options();
     }
@@ -543,9 +391,11 @@ class SignalTriggerResource extends Resource
      *
      * @return array<string, string> Array con chiave = event class, valore = nome visualizzato
      */
-    protected static function getEventClassOptions(): array
+    public static function getEventClassOptions(): array
     {
-        $options = [];
+        $options = [
+             'TBD' => 'To Be Defined (Draft)',
+        ];
 
         // Eventi registrati dai plugin (con nome e gruppo)
         $registeredOptions = FilamentSignal::eventOptions();
@@ -588,7 +438,7 @@ class SignalTriggerResource extends Resource
         return $options;
     }
 
-    protected static function applyWebhookTemplate(?string $templateId, callable $set): void
+    public static function applyWebhookTemplate(?string $templateId, callable $set): void
     {
         $template = app(SignalWebhookTemplateRegistry::class)->find($templateId);
 
@@ -607,7 +457,7 @@ class SignalTriggerResource extends Resource
         }
     }
 
-    protected static function actionRepeaterSchema(): array
+    public static function actionRepeaterSchema(): array
     {
         return [
             Grid::make()
@@ -628,7 +478,7 @@ class SignalTriggerResource extends Resource
     /**
      * Campi base comuni a tutte le azioni
      */
-    protected static function getBaseActionFields(): array
+    public static function getBaseActionFields(): array
     {
         return [
             Forms\Components\TextInput::make('name')
@@ -654,7 +504,7 @@ class SignalTriggerResource extends Resource
     /**
      * Ottiene lo schema per un tipo di azione specifico (supporta plugin esterni)
      */
-    protected static function getActionTypeSchema(?string $actionType): array
+    public static function getActionTypeSchema(?string $actionType): array
     {
         if (!$actionType) {
             return [];
@@ -678,7 +528,7 @@ class SignalTriggerResource extends Resource
     /**
      * Permette a plugin esterni di registrare schemi custom tramite config
      */
-    protected static function getCustomActionSchema(string $actionType): ?array
+    public static function getCustomActionSchema(string $actionType): ?array
     {
         $customSchemas = config('signal.action_schemas', []);
         $schema = $customSchemas[$actionType] ?? null;
@@ -693,7 +543,7 @@ class SignalTriggerResource extends Resource
     /**
      * Schema per azioni di tipo webhook
      */
-    protected static function getWebhookActionSchema(): array
+    public static function getWebhookActionSchema(): array
     {
         return [
             Grid::make()
@@ -816,7 +666,7 @@ class SignalTriggerResource extends Resource
     /**
      * Schema per azioni di tipo log
      */
-    protected static function getLogActionSchema(): array
+    public static function getLogActionSchema(): array
     {
         return [
             Grid::make()
@@ -861,7 +711,7 @@ class SignalTriggerResource extends Resource
     /**
      * Reset della configurazione quando cambia il tipo di azione
      */
-    protected static function resetActionConfiguration(string $newType, callable $set): void
+    public static function resetActionConfiguration(string $newType, callable $set): void
     {
         // Pulisci la configurazione quando si cambia tipo
         // Mantieni solo i campi comuni (name, execution_order, is_active)
@@ -874,7 +724,7 @@ class SignalTriggerResource extends Resource
     /**
      * Imposta i default per un tipo di azione (supporta plugin esterni)
      */
-    protected static function setActionTypeDefaults(string $actionType, callable $set): void
+    public static function setActionTypeDefaults(string $actionType, callable $set): void
     {
         // Prima controlla se ci sono default custom registrati da plugin
         $customDefaults = config('signal.action_defaults', []);
@@ -895,7 +745,7 @@ class SignalTriggerResource extends Resource
     /**
      * Default per azioni webhook
      */
-    protected static function setWebhookDefaults(callable $set): void
+    public static function setWebhookDefaults(callable $set): void
     {
         $set('configuration.method', 'POST');
         $set('configuration.body', 'event');
@@ -907,7 +757,7 @@ class SignalTriggerResource extends Resource
     /**
      * Default per azioni log
      */
-    protected static function setLogDefaults(callable $set): void
+    public static function setLogDefaults(callable $set): void
     {
         $set('configuration.body', 'payload');
     }
@@ -915,7 +765,7 @@ class SignalTriggerResource extends Resource
     /**
      * Default per azioni email
      */
-    protected static function setEmailDefaults(callable $set): void
+    public static function setEmailDefaults(callable $set): void
     {
         // Nessun default specifico per email al momento
     }
@@ -923,7 +773,7 @@ class SignalTriggerResource extends Resource
     /**
      * Schema per Payload Configuration (isolato per ogni azione)
      */
-    protected static function getPayloadConfigurationSchema(): array
+    public static function getPayloadConfigurationSchema(): array
     {
         return [
             Section::make(__('filament-signal::signal.sections.payload_configuration'))
@@ -932,11 +782,28 @@ class SignalTriggerResource extends Resource
                 ->icon('heroicon-o-circle-stack')
                 ->columnSpanFull()
                 ->schema(function (Get $get): array {
+                    // Helper to find event_class with various nesting levels
+                    $findEventClass = function (Get $get) {
+                        $paths = [
+                            '../../../../event_class', // Nested in Repeater/Forms
+                            '../../../event_class',    // Deeply nested
+                            '../../event_class',       // Standard nesting
+                            '../event_class',          // Shallow nesting
+                            'event_class',             // Root level
+                        ];
+                        foreach ($paths as $path) {
+                            try {
+                                if ($val = $get($path)) return $val;
+                            } catch (\Throwable $e) {}
+                        }
+                        return null;
+                    };
+
                     $components = [
                         Forms\Components\CheckboxList::make('configuration.payload_config.include_fields')
                             ->label(__('filament-signal::signal.fields.essential_fields'))
-                            ->options(function (Get $get): array {
-                                $eventClass = $get('../../event_class');
+                            ->options(function (Get $get) use ($findEventClass): array {
+                                $eventClass = $findEventClass($get);
                                 if (! $eventClass) {
                                     return [];
                                 }
@@ -973,9 +840,9 @@ class SignalTriggerResource extends Resource
                             ->live(onBlur: false)
                             ->dehydrated()
                             ->rules([])
-                            ->afterStateHydrated(function ($state, callable $set, Get $get) {
+                            ->afterStateHydrated(function ($state, callable $set, Get $get) use ($findEventClass) {
                                 // Pulisci i valori non validi quando viene caricato lo stato
-                                $eventClass = $get('../../event_class');
+                                $eventClass = $findEventClass($get);
                                 if (! $eventClass || ! is_array($state)) {
                                     return;
                                 }
@@ -1004,9 +871,9 @@ class SignalTriggerResource extends Resource
                                     $set('configuration.payload_config.include_fields', array_values($filtered));
                                 }
                             })
-                            ->afterStateUpdated(function ($state, callable $set, Get $get) {
+                            ->afterStateUpdated(function ($state, callable $set, Get $get) use ($findEventClass) {
                                 // Pulisci i valori che non sono più nelle opzioni disponibili quando cambia l'evento
-                                $eventClass = $get('../../event_class');
+                                $eventClass = $findEventClass($get);
                                 if (! $eventClass || ! is_array($state)) {
                                     return;
                                 }
@@ -1038,7 +905,7 @@ class SignalTriggerResource extends Resource
                     ];
 
                     // Aggiungi le CheckboxList per le relazioni direttamente nella stessa sezione
-                    $eventClass = $get('../../event_class');
+                    $eventClass = $findEventClass($get);
                     if ($eventClass) {
                         $analyzer = app(SignalPayloadFieldAnalyzer::class);
                         $analysis = $analyzer->analyzeEvent($eventClass);
@@ -1181,6 +1048,12 @@ class SignalTriggerResource extends Resource
                 EditAction::make()
                     ->url(fn(SignalTrigger $record): string => static::getUrl('edit', ['record' => $record]))
                     ->openUrlInNewTab(false),
+                Action::make('flow')
+                    ->label(__('filament-signal::signal.actions.flow_view'))
+                    ->icon('heroicon-o-squares-2x2')
+                    ->color('info')
+                    ->url(fn(SignalTrigger $record): string => static::getUrl('flow', ['record' => $record]))
+                    ->openUrlInNewTab(false),
                 Action::make('clone')
                     ->label(__('filament-signal::signal.actions.clone'))
                     ->icon('heroicon-o-document-duplicate')
@@ -1234,6 +1107,167 @@ class SignalTriggerResource extends Resource
             ]);
     }
 
+    /**
+     * @return array<Block>
+     */
+    public static function getFilterBlocks(): array
+    {
+        return [
+            Block::make('equals')
+                ->label(static::getFilterBlockLabel('equals', __('filament-signal::signal.options.filter_blocks.equals')))
+                ->schema([
+                    Forms\Components\Select::make('field')
+                        ->label(__('filament-signal::signal.fields.field'))
+                        ->options(fn(Get $get): array => static::getFilterFieldOptions($get))
+                        ->searchable()
+                        ->preload()
+                        ->required()
+                        ->live(),
+                    Forms\Components\TextInput::make('value')
+                        ->label(__('filament-signal::signal.fields.value'))
+                        ->required()
+                        ->live(),
+                ])->columns(1),
+            Block::make('not_equals')
+                ->label(static::getFilterBlockLabel('not_equals', __('filament-signal::signal.options.filter_blocks.not_equals')))
+                ->schema([
+                    Forms\Components\Select::make('field')
+                        ->label(__('filament-signal::signal.fields.field'))
+                        ->options(fn(Get $get): array => static::getFilterFieldOptions($get))
+                        ->searchable()
+                        ->preload()
+                        ->required()
+                        ->live(),
+                    Forms\Components\TextInput::make('value')
+                        ->label(__('filament-signal::signal.fields.value'))
+                        ->required()
+                        ->live(),
+                ])->columns(1),
+            Block::make('contains')
+                ->label(static::getFilterBlockLabel('contains', __('filament-signal::signal.options.filter_blocks.contains')))
+                ->schema([
+                    Forms\Components\Select::make('field')
+                        ->label(__('filament-signal::signal.fields.field'))
+                        ->options(fn(Get $get): array => static::getFilterFieldOptions($get))
+                        ->searchable()
+                        ->preload()
+                        ->required()
+                        ->live(),
+                    Forms\Components\TextInput::make('value')
+                        ->label(__('filament-signal::signal.fields.value'))
+                        ->required()
+                        ->live(),
+                ])->columns(1),
+            Block::make('not_contains')
+                ->label(static::getFilterBlockLabel('not_contains', __('filament-signal::signal.options.filter_blocks.not_contains')))
+                ->schema([
+                    Forms\Components\Select::make('field')
+                        ->label(__('filament-signal::signal.fields.field'))
+                        ->options(fn(Get $get): array => static::getFilterFieldOptions($get))
+                        ->searchable()
+                        ->preload()
+                        ->required()
+                        ->live(),
+                    Forms\Components\TextInput::make('value')
+                        ->label(__('filament-signal::signal.fields.value'))
+                        ->required()
+                        ->live(),
+                ])->columns(1),
+            Block::make('greater_than')
+                ->label(static::getFilterBlockLabel('greater_than', __('filament-signal::signal.options.filter_blocks.greater_than')))
+                ->schema([
+                    Forms\Components\Select::make('field')
+                        ->label(__('filament-signal::signal.fields.field'))
+                        ->options(fn(Get $get): array => static::getFilterFieldOptions($get))
+                        ->searchable()
+                        ->preload()
+                        ->required()
+                        ->live(),
+                    Forms\Components\TextInput::make('value')
+                        ->label(__('filament-signal::signal.fields.value'))
+                        ->required()
+                        ->live(),
+                ])->columns(1),
+            Block::make('greater_than_or_equal')
+                ->label(static::getFilterBlockLabel('greater_than_or_equal', __('filament-signal::signal.options.filter_blocks.greater_than_or_equal')))
+                ->schema([
+                    Forms\Components\Select::make('field')
+                        ->label(__('filament-signal::signal.fields.field'))
+                        ->options(fn(Get $get): array => static::getFilterFieldOptions($get))
+                        ->searchable()
+                        ->preload()
+                        ->required()
+                        ->live(),
+                    Forms\Components\TextInput::make('value')
+                        ->label(__('filament-signal::signal.fields.value'))
+                        ->required()
+                        ->live(),
+                ])->columns(1),
+            Block::make('less_than')
+                ->label(static::getFilterBlockLabel('less_than', __('filament-signal::signal.options.filter_blocks.less_than')))
+                ->schema([
+                    Forms\Components\Select::make('field')
+                        ->label(__('filament-signal::signal.fields.field'))
+                        ->options(fn(Get $get): array => static::getFilterFieldOptions($get))
+                        ->searchable()
+                        ->preload()
+                        ->required()
+                        ->live(),
+                    Forms\Components\TextInput::make('value')
+                        ->label(__('filament-signal::signal.fields.value'))
+                        ->required()
+                        ->live(),
+                ])->columns(1),
+            Block::make('less_than_or_equal')
+                ->label(static::getFilterBlockLabel('less_than_or_equal', __('filament-signal::signal.options.filter_blocks.less_than_or_equal')))
+                ->schema([
+                    Forms\Components\Select::make('field')
+                        ->label(__('filament-signal::signal.fields.field'))
+                        ->options(fn(Get $get): array => static::getFilterFieldOptions($get))
+                        ->searchable()
+                        ->preload()
+                        ->required()
+                        ->live(),
+                    Forms\Components\TextInput::make('value')
+                        ->label(__('filament-signal::signal.fields.value'))
+                        ->required()
+                        ->live(),
+                ])->columns(1),
+            Block::make('in')
+                ->label(static::getFilterBlockLabel('in', __('filament-signal::signal.options.filter_blocks.in')))
+                ->schema([
+                    Forms\Components\Select::make('field')
+                        ->label(__('filament-signal::signal.fields.field'))
+                        ->options(fn(Get $get): array => static::getFilterFieldOptions($get))
+                        ->searchable()
+                        ->preload()
+                        ->required()
+                        ->live(),
+                    Forms\Components\Textarea::make('value')
+                        ->label(__('filament-signal::signal.fields.value'))
+                        ->helperText(__('filament-signal::signal.helpers.filter_in_value'))
+                        ->required()
+                        ->live(),
+                ])->columns(1),
+            Block::make('not_in')
+                ->label(static::getFilterBlockLabel('not_in', __('filament-signal::signal.options.filter_blocks.not_in')))
+                ->schema([
+                    Forms\Components\Select::make('field')
+                        ->label(__('filament-signal::signal.fields.field'))
+                        ->options(fn(Get $get): array => static::getFilterFieldOptions($get))
+                        ->searchable()
+                        ->preload()
+                        ->required()
+                        ->live(),
+                    Forms\Components\Textarea::make('value')
+                        ->label(__('filament-signal::signal.fields.value'))
+                        ->helperText(__('filament-signal::signal.helpers.filter_in_value'))
+                        ->required()
+                        ->live(),
+                ])->columns(1),
+        ];
+    }
+
     public static function getPages(): array
     {
         return [
@@ -1241,6 +1275,7 @@ class SignalTriggerResource extends Resource
             'create' => Pages\CreateSignalTrigger::route('/create'),
             'view' => Pages\ViewSignalTrigger::route('/{record}'),
             'edit' => Pages\EditSignalTrigger::route('/{record}/edit'),
+            'flow' => Pages\FlowSignalTrigger::route('/{record}/flow'),
         ];
     }
 
@@ -1250,7 +1285,7 @@ class SignalTriggerResource extends Resource
      * @param  string  $type  Tipo di filtro (equals, contains, etc.)
      * @param  string  $typeLabel  Label tradotto del tipo di filtro
      */
-    protected static function getFilterBlockLabel(string $type, string $typeLabel): \Closure
+    public static function getFilterBlockLabel(string $type, string $typeLabel): \Closure
     {
         return function (?array $state) use ($typeLabel): string {
             if ($state === null) {
@@ -1528,7 +1563,7 @@ class SignalTriggerResource extends Resource
      *
      * @return array<string, string> Array associativo [campo => etichetta]
      */
-    protected static function getFilterFieldOptions(Get $get): array
+    public static function getFilterFieldOptions(Get $get): array
     {
         // Per i Builder blocks, il path per accedere ai campi del form principale è diverso
         // Il Builder block è annidato dentro il form, quindi dobbiamo risalire di più livelli

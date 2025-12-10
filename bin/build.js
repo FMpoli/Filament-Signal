@@ -19,7 +19,7 @@ const defaultOptions = {
     },
     bundle: true,
     mainFields: ['module', 'main'],
-    platform: 'neutral',
+    platform: 'browser',
     sourcemap: isDev ? 'inline' : false,
     sourcesContent: isDev,
     treeShaking: true,
@@ -45,6 +45,6 @@ const defaultOptions = {
 
 compile({
     ...defaultOptions,
-    entryPoints: ['./resources/js/index.js'],
+    entryPoints: ['./resources/js/index.jsx'],
     outfile: './resources/dist/filament-signal.js',
 })

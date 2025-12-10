@@ -35,6 +35,8 @@ return [
         'flow_view' => 'Flow View',
         'edit' => 'Edit',
         'view' => 'View',
+        'edit_trigger' => 'Edit Trigger',
+        'edit_filters' => 'Edit Filters',
     ],
     'action_types' => [
         'log' => 'Log',

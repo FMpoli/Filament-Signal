@@ -234,6 +234,7 @@ class FilamentSignalServiceProvider extends PackageServiceProvider
     {
         return [
             'create_signal_table',
+            'add_metadata_to_signal_actions_table',
         ];
     }
 }

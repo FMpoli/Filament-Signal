@@ -21,11 +21,13 @@ class SignalAction extends Model
         'is_active',
         'execution_order',
         'configuration',
+        'metadata',
     ];
 
     protected $casts = [
         'is_active' => 'boolean',
         'configuration' => 'array',
+        'metadata' => 'array',
     ];
 
     protected static function booted(): void
