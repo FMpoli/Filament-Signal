@@ -54,6 +54,7 @@ class SignalPayloadFieldAnalyzer
                     if (is_subclass_of($typeClass, Model::class)) {
                         $mainModelProperty = $property->getName();
                         $mainModelClass = $typeClass;
+
                         break;
                     }
                 }
@@ -696,10 +697,10 @@ class SignalPayloadFieldAnalyzer
     /**
      * Ottiene un'etichetta tradotta per un campo dell'evento
      *
-     * @param string $fieldKey Nome del campo evento (es: currentStatus, previousStatus)
-     * @param string $eventClass Classe dell'evento
-     * @param string|null $mainModelProperty Nome della proprietà del modello principale (es: "loan")
-     * @param string|null $mainModelClass Classe del modello principale (es: EquipmentLoan::class)
+     * @param  string  $fieldKey  Nome del campo evento (es: currentStatus, previousStatus)
+     * @param  string  $eventClass  Classe dell'evento
+     * @param  string|null  $mainModelProperty  Nome della proprietà del modello principale (es: "loan")
+     * @param  string|null  $mainModelClass  Classe del modello principale (es: EquipmentLoan::class)
      */
     protected function getTranslatedEventFieldLabel(string $fieldKey, string $eventClass, ?string $mainModelProperty = null, ?string $mainModelClass = null): string
     {
@@ -726,6 +727,7 @@ class SignalPayloadFieldAnalyzer
                     $translated = trans($key);
                     if ($translated !== $key) {
                         $translatedLabel = $translated;
+
                         break;
                     }
                 }
@@ -741,6 +743,7 @@ class SignalPayloadFieldAnalyzer
         // Es: "Current status" -> "Loan → Current status"
         if ($mainModelProperty && $mainModelClass) {
             $modelPrefix = $this->getTranslatedPropertyName($mainModelProperty, $mainModelClass);
+
             return "{$modelPrefix} → {$translatedLabel}";
         }
 

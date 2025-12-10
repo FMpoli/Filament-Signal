@@ -6,9 +6,7 @@ use Base33\FilamentSignal\Filament\Resources\SignalTriggerResource;
 use Filament\Actions\Action;
 use Filament\Forms;
 use Filament\Forms\Components\Builder;
-use Filament\Forms\Components\Builder\Block;
 use Filament\Resources\Pages\EditRecord;
-use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Filament\Support\Enums\Width;
 
@@ -90,7 +88,7 @@ class FlowSignalTrigger extends EditRecord
                 Forms\Components\Select::make('match_type')
                     ->options([
                         'all' => 'All',
-                        'any' => 'Any'
+                        'any' => 'Any',
                     ])->default('all'),
                 Builder::make('filters')
                     ->blocks(SignalTriggerResource::getFilterBlocks())
@@ -101,6 +99,7 @@ class FlowSignalTrigger extends EditRecord
                 $this->redirect(static::getResource()::getUrl('flow', ['record' => $this->record]));
             });
     }
+
     public function createActionAction(): Action
     {
         return Action::make('createAction')
@@ -111,7 +110,7 @@ class FlowSignalTrigger extends EditRecord
                 return [
                     Forms\Components\Hidden::make('event_class')
                         ->default($this->record->event_class),
-                    ...SignalTriggerResource::actionRepeaterSchema()
+                    ...SignalTriggerResource::actionRepeaterSchema(),
                 ];
             })
             ->action(function (array $data) {
@@ -142,7 +141,7 @@ class FlowSignalTrigger extends EditRecord
                 return [
                     Forms\Components\Hidden::make('event_class')
                         ->default($this->record->event_class),
-                    ...SignalTriggerResource::actionRepeaterSchema()
+                    ...SignalTriggerResource::actionRepeaterSchema(),
                 ];
             })
             ->action(function (array $data, array $arguments) {

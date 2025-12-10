@@ -17,7 +17,7 @@ class ListSignalTriggers extends ListRecords
                 ->label('Create with Flow')
                 ->icon('heroicon-o-squares-2x2')
                 ->action(function () {
-                    $trigger = new \Base33\FilamentSignal\Models\SignalTrigger();
+                    $trigger = new \Base33\FilamentSignal\Models\SignalTrigger;
                     $trigger->name = 'New Automation Rule';
                     $trigger->event_class = 'TBD';
                     $trigger->status = \Base33\FilamentSignal\Models\SignalTrigger::STATUS_DRAFT;
