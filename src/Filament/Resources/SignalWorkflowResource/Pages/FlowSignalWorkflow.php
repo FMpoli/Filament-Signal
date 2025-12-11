@@ -3,22 +3,22 @@
 namespace Base33\FilamentSignal\Filament\Resources\SignalWorkflowResource\Pages;
 
 use Base33\FilamentSignal\Filament\Resources\SignalWorkflowResource;
-use Filament\Resources\Pages\Page;
-use Filament\Forms\Concerns\InteractsWithForms;
-use Filament\Forms\Contracts\HasForms;
+use Base33\FilamentSignal\Models\SignalWorkflow;
+use Filament\Actions\Action;
 use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\Contracts\HasActions;
-use Filament\Actions\Action;
-use Base33\FilamentSignal\Models\SignalWorkflow;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Concerns\InteractsWithForms;
+use Filament\Forms\Contracts\HasForms;
+use Filament\Resources\Pages\Page;
 use Illuminate\Support\Str;
 
-class FlowSignalWorkflow extends Page implements HasForms, HasActions
+class FlowSignalWorkflow extends Page implements HasActions, HasForms
 {
-    use InteractsWithForms;
     use InteractsWithActions;
+    use InteractsWithForms;
 
     protected static string $resource = SignalWorkflowResource::class;
 
@@ -95,26 +95,26 @@ class FlowSignalWorkflow extends Page implements HasForms, HasActions
 
     // Store current editing node
     public ?string $editingNodeId = null;
-    
+
     // Public method for JavaScript to call when editing existing trigger
     public function editExistingTrigger(string $nodeId): void
     {
         $this->editingNodeId = $nodeId;
         $this->mountAction('editTrigger');
     }
-    
+
     // Public method for JavaScript to call when creating new trigger
     public function createNewTrigger(): void
     {
         $this->editingNodeId = null;
         $this->mountAction('editTrigger');
     }
-    
+
     // Define Actions
     public function editTriggerAction(): Action
     {
         return Action::make('editTrigger')
-            ->modalHeading(fn() => $this->editingNodeId ? 'Edit Trigger' : 'Create Trigger')
+            ->modalHeading(fn () => $this->editingNodeId ? 'Edit Trigger' : 'Create Trigger')
             ->modalWidth('2xl')
             ->fillForm(function (): array {
                 // If editing existing node, load its data
@@ -122,12 +122,12 @@ class FlowSignalWorkflow extends Page implements HasForms, HasActions
                     $node = $this->record->nodes()->where('node_id', $this->editingNodeId)->first();
                     if ($node) {
                         $config = $node->config ?? [];
-                        
+
                         \Log::info('Loading trigger for editing', [
                             'node_id' => $node->node_id,
                             'config' => $config,
                         ]);
-                        
+
                         return [
                             'name' => $node->name ?? $this->record->name,
                             'description' => $config['description'] ?? '',
@@ -135,7 +135,7 @@ class FlowSignalWorkflow extends Page implements HasForms, HasActions
                         ];
                     }
                 }
-                
+
                 // Default values for new trigger
                 return [
                     'name' => $this->record->name,
@@ -175,7 +175,7 @@ class FlowSignalWorkflow extends Page implements HasForms, HasActions
                         return $results;
                     })
                     ->getOptionLabelUsing(function (?string $value): ?string {
-                        if (!$value) {
+                        if (! $value) {
                             return null;
                         }
 
@@ -203,7 +203,7 @@ class FlowSignalWorkflow extends Page implements HasForms, HasActions
                 } else {
                     // Create new trigger node
                     $triggerId = 'trigger-' . Str::uuid();
-                    
+
                     $this->record->nodes()->create([
                         'node_id' => $triggerId,
                         'type' => 'trigger',
@@ -245,7 +245,7 @@ class FlowSignalWorkflow extends Page implements HasForms, HasActions
             ->action(function (array $data): void {
                 // Create filter node
                 $filterId = 'filter-' . Str::uuid();
-                
+
                 $this->record->nodes()->create([
                     'node_id' => $filterId,
                     'type' => 'filter',
@@ -285,7 +285,7 @@ class FlowSignalWorkflow extends Page implements HasForms, HasActions
             ->action(function (array $data): void {
                 // Create action node
                 $actionId = 'action-' . Str::uuid();
-                
+
                 $this->record->nodes()->create([
                     'node_id' => $actionId,
                     'type' => 'action',

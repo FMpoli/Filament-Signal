@@ -2,9 +2,9 @@
 
 namespace Base33\FilamentSignal;
 
+use Base33\FilamentSignal\Filament\Resources\SignalExecutionResource;
 use Base33\FilamentSignal\Filament\Resources\SignalModelIntegrationResource;
 use Base33\FilamentSignal\Filament\Resources\SignalWorkflowResource;
-use Base33\FilamentSignal\Filament\Resources\SignalExecutionResource;
 use Filament\Contracts\Plugin;
 use Filament\Panel;
 

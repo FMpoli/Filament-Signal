@@ -113,7 +113,7 @@ class FilamentSignalServiceProvider extends PackageServiceProvider
                     $file->getRealPath() => base_path("stubs/filament-signal/{$file->getFilename()}"),
                 ], 'filament-signal-stubs');
             }
-            
+
             // Publish JavaScript assets
             $jsPath = __DIR__ . '/../resources/dist/filament-signal.js';
             if (file_exists($jsPath)) {

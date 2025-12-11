@@ -274,7 +274,7 @@ class SignalPayloadConfigurator
             // Filtra i campi delle relazioni annidate se sono stati selezionati
             // Ordina i path per lunghezza (prima i più corti) per processare correttamente le relazioni annidate
             $sortedPaths = array_keys($nestedFields);
-            usort($sortedPaths, fn($a, $b) => substr_count($a, '.') <=> substr_count($b, '.'));
+            usort($sortedPaths, fn ($a, $b) => substr_count($a, '.') <=> substr_count($b, '.'));
 
             foreach ($sortedPaths as $relationPath) {
                 $selectedFields = $nestedFields[$relationPath];
@@ -358,7 +358,7 @@ class SignalPayloadConfigurator
                 $query->with($expand);
             }
 
-            $records = $query->get()->map(fn($model) => $model->toArray())->all();
+            $records = $query->get()->map(fn ($model) => $model->toArray())->all();
 
             return $records;
         } catch (\Throwable $exception) {

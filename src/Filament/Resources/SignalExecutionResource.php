@@ -4,13 +4,13 @@ namespace Base33\FilamentSignal\Filament\Resources;
 
 use Base33\FilamentSignal\Filament\Resources\SignalExecutionResource\Pages;
 use Base33\FilamentSignal\Models\SignalExecution;
-use Filament\Schemas\Schema;
-use Filament\Forms;
-use Filament\Resources\Resource;
-use Filament\Tables;
-use Filament\Tables\Table;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
+use Filament\Forms;
+use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
+use Filament\Tables;
+use Filament\Tables\Table;
 
 class SignalExecutionResource extends Resource
 {
@@ -22,7 +22,7 @@ class SignalExecutionResource extends Resource
     {
         return __('filament-signal::signal.plugin.navigation.group');
     }
-    
+
     public static function getNavigationLabel(): string
     {
         return 'Execution Logs';
@@ -56,7 +56,7 @@ class SignalExecutionResource extends Resource
                 Tables\Columns\TextColumn::make('status')
                     ->badge()
                     ->colors([
-                        'warning' => 'pending', 
+                        'warning' => 'pending',
                         'info' => 'running',
                         'success' => 'completed',
                         'danger' => 'failed',

@@ -5,11 +5,11 @@ namespace Base33\FilamentSignal\Filament\Resources;
 use BackedEnum;
 use Base33\FilamentSignal\Filament\Resources\SignalWorkflowResource\Pages;
 use Base33\FilamentSignal\Models\SignalWorkflow;
-use Filament\Actions\Action; 
-use Filament\Actions\DeleteBulkAction; 
-use Filament\Actions\EditAction;     
-use Filament\Actions\ViewAction;
+use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
 use Filament\Forms;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Resource;
@@ -18,7 +18,6 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Support\Str;
 
 class SignalWorkflowResource extends Resource
 {
@@ -45,11 +44,11 @@ class SignalWorkflowResource extends Resource
                             TextEntry::make('description')
                                 ->label(__('filament-signal::signal.fields.description'))
                                 ->placeholder('—')
-                                ->visible(fn(SignalWorkflow $record) => ! empty($record->description))
+                                ->visible(fn (SignalWorkflow $record) => ! empty($record->description))
                                 ->columnSpanFull(),
                         ]),
                 ])
-                ->columnSpan(12),
+                    ->columnSpan(12),
             ]);
     }
 
@@ -115,7 +114,7 @@ class SignalWorkflowResource extends Resource
                 Action::make('flow')
                     ->label('Editor')
                     ->icon('heroicon-o-cpu-chip')
-                    ->url(fn(SignalWorkflow $record) => static::getUrl('flow', ['record' => $record])),
+                    ->url(fn (SignalWorkflow $record) => static::getUrl('flow', ['record' => $record])),
                 ViewAction::make(),
                 EditAction::make(),
             ])

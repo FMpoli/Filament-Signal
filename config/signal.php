@@ -2,11 +2,11 @@
 
 use Base33\FilamentSignal\Actions\LogActionHandler;
 use Base33\FilamentSignal\Actions\WebhookActionHandler;
-use Base33\FilamentSignal\Models\SignalWorkflow;
-use Base33\FilamentSignal\Models\SignalNode;
 use Base33\FilamentSignal\Models\SignalEdge;
 use Base33\FilamentSignal\Models\SignalExecution;
 use Base33\FilamentSignal\Models\SignalExecutionNode;
+use Base33\FilamentSignal\Models\SignalNode;
+use Base33\FilamentSignal\Models\SignalWorkflow;
 
 return [
     'auto_discover_events' => env('FILAMENT_SIGNAL_AUTO_DISCOVER_EVENTS', false),
