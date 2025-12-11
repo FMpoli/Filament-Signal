@@ -60,6 +60,7 @@
              data-nodes='{!! $nodesJson !!}'
              data-edges='{!! $edgesJson !!}'
              data-viewport='{!! $viewportJson !!}'
+             data-event-options='@json(\Base33\FilamentSignal\Filament\Resources\SignalTriggerResource::getEventClassOptions())'
              data-livewire-id="{{ $this->getId() }}"
              wire:ignore></div>
     </div>

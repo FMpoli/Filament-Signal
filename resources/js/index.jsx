@@ -14,16 +14,22 @@ window.mountSignalFlowEditor = (container) => {
     let nodes = [];
     let edges = [];
     let viewport = { x: 0, y: 0, zoom: 0.7 };
+    let eventOptions = {};
     try {
         const rawNodes = container.dataset.nodes;
         const rawEdges = container.dataset.edges;
         const rawViewport = container.dataset.viewport;
+        const rawEventOptions = container.dataset.eventOptions;
+
         console.log('[FlowEditor Debug] Raw Nodes:', rawNodes);
 
         nodes = JSON.parse(rawNodes || '[]');
         edges = JSON.parse(rawEdges || '[]');
         if (rawViewport) {
             viewport = JSON.parse(rawViewport);
+        }
+        if (rawEventOptions) {
+            eventOptions = JSON.parse(rawEventOptions);
         }
 
         console.log('[FlowEditor Debug] Parsed Nodes:', nodes);
@@ -41,7 +47,7 @@ window.mountSignalFlowEditor = (container) => {
     container._reactRoot = root; // Store root for cleanup
 
     root.render(
-        <FlowEditor nodes={nodes} edges={edges} viewport={viewport} livewireId={livewireId} />
+        <FlowEditor nodes={nodes} edges={edges} viewport={viewport} livewireId={livewireId} eventOptions={eventOptions} />
     );
 };
 

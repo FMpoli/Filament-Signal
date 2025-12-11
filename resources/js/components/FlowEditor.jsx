@@ -1,5 +1,5 @@
 
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useState, useRef } from 'react';
 import ReactFlow, {
     ReactFlowProvider,
     useNodesState,
@@ -14,25 +14,85 @@ import ReactFlow, {
 } from 'reactflow';
 
 // Custom Node Components
-const TriggerNode = ({ data }) => {
+const TriggerNode = ({ id, data }) => {
+    const [isExpanded, setIsExpanded] = useState(false);
+    const [formData, setFormData] = useState({
+        label: data.label || '',
+        description: data.description || '',
+        eventClass: data.eventClass || ''
+    });
+    const saveTimeoutRef = useRef(null);
+    const eventOptions = data.eventOptions || {};
+
     const isActive = data.status === 'active';
-    const statusColor = isActive ? '#22c55e' : '#94a3b8';
+
+    // Helper to perform the save
+    const saveTriggerConfig = useCallback(() => {
+        if (data.livewireId && window.Livewire) {
+            const livewire = window.Livewire.find(data.livewireId);
+            if (livewire) {
+                // Update the trigger configuration
+                livewire.call('updateTriggerConfig', {
+                    nodeId: id,
+                    label: formData.label,
+                    description: formData.description,
+                    eventClass: formData.eventClass
+                });
+            }
+        }
+    }, [formData, data.livewireId, id]);
+
+    // Auto-save when form data changes (Debounce)
+    useEffect(() => {
+        // Clear any pending timeout
+        if (saveTimeoutRef.current) {
+            clearTimeout(saveTimeoutRef.current);
+        }
+
+        // Set new timeout
+        saveTimeoutRef.current = setTimeout(() => {
+            saveTriggerConfig();
+        }, 1000); // Increased to 1s to allow more typing before auto-save
+
+        // Cleanup
+        return () => {
+            if (saveTimeoutRef.current) {
+                clearTimeout(saveTimeoutRef.current);
+            }
+        };
+    }, [formData, saveTriggerConfig]);
+
+    const handleFieldChange = (field, value) => {
+        setFormData(prev => ({ ...prev, [field]: value }));
+    };
+
+    const handleBlur = (e) => {
+        // Reset border color
+        e.target.style.borderColor = '#334155';
+
+        // Force immediate save and clear pending debounce
+        if (saveTimeoutRef.current) {
+            clearTimeout(saveTimeoutRef.current);
+        }
+        saveTriggerConfig();
+    };
 
     return (
         <div style={{
-            background: '#0F172A', // Slate 900
-            border: `1px solid ${isActive ? '#F97316' : '#1E293B'}`, // Orange border if active
+            background: '#0F172A',
+            border: `1px solid ${isActive ? '#F97316' : '#1E293B'}`,
             borderRadius: '12px',
-            color: '#E2E8F0', // Slate 200
+            color: '#E2E8F0',
             padding: '0',
             minWidth: '280px',
-            maxWidth: '320px',
+            maxWidth: isExpanded ? '400px' : '320px',
             boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.3)',
             overflow: 'hidden',
+            transition: 'max-width 0.3s ease'
         }}>
             {/* Header */}
             <div style={{
-                background: 'linear-gradient(to right, #EA580C, #C2410C)', // Orange 600 -> 700
+                background: 'linear-gradient(to right, #EA580C, #C2410C)',
                 padding: '10px 16px',
                 display: 'flex',
                 alignItems: 'center',
@@ -58,6 +118,12 @@ const TriggerNode = ({ data }) => {
                             {data.status}
                         </div>
                     )}
+                    {/* Expand/Collapse Button */}
+                    <div className="nodrag" onClick={() => setIsExpanded(!isExpanded)} style={{ cursor: 'pointer', color: 'rgba(255,255,255,0.8)', display: 'flex' }} title={isExpanded ? "Collapse" : "Expand to edit"}>
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" style={{ width: '14px', height: '14px', transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.3s ease' }}>
+                            <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                        </svg>
+                    </div>
                     <div className="nodrag" onClick={(e) => {
                         e.stopPropagation();
                         if (confirm('Are you sure you want to delete the trigger? This will also remove all filters and actions.')) {
@@ -75,39 +141,132 @@ const TriggerNode = ({ data }) => {
 
             {/* Body */}
             <div style={{ padding: '16px' }}>
-                <div style={{ fontSize: '16px', fontWeight: '600', color: '#F8FAFC', marginBottom: '8px' }}>
-                    {data.label || 'Trigger'}
-                </div>
+                {!isExpanded ? (
+                    // Collapsed view - show summary
+                    <>
+                        <div style={{ fontSize: '16px', fontWeight: '600', color: '#F8FAFC', marginBottom: '8px' }}>
+                            {formData.label || 'Trigger'}
+                        </div>
 
-                {data.eventClass && (
-                    <div style={{
-                        fontSize: '11px',
-                        color: '#94A3B8',
-                        marginBottom: '12px',
-                        fontFamily: 'monospace',
-                        background: '#1E293B',
-                        padding: '4px 8px',
-                        borderRadius: '4px',
-                        border: '1px solid #334155',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        whiteSpace: 'nowrap'
-                    }}>
-                        {data.eventClass}
-                    </div>
-                )}
+                        {formData.eventClass && (
+                            <div style={{
+                                fontSize: '11px',
+                                color: '#94A3B8',
+                                marginBottom: '12px',
+                                fontFamily: 'monospace',
+                                background: '#1E293B',
+                                padding: '4px 8px',
+                                borderRadius: '4px',
+                                border: '1px solid #334155',
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                                whiteSpace: 'nowrap'
+                            }}>
+                                {eventOptions[formData.eventClass] || formData.eventClass}
+                            </div>
+                        )}
 
-                {data.description && (
-                    <div style={{
-                        fontSize: '12px',
-                        color: '#64748B',
-                        lineHeight: '1.4',
-                        display: '-webkit-box',
-                        WebkitLineClamp: 2,
-                        WebkitBoxOrient: 'vertical',
-                        overflow: 'hidden'
-                    }}>
-                        {data.description}
+                        {formData.description && (
+                            <div style={{
+                                fontSize: '12px',
+                                color: '#64748B',
+                                lineHeight: '1.4',
+                                display: '-webkit-box',
+                                WebkitLineClamp: 2,
+                                WebkitBoxOrient: 'vertical',
+                                overflow: 'hidden'
+                            }}>
+                                {formData.description}
+                            </div>
+                        )}
+                    </>
+                ) : (
+                    // Expanded view - show form
+                    <div className="nodrag" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                        {/* Trigger Name */}
+                        <div>
+                            <label style={{ fontSize: '11px', color: '#94A3B8', fontWeight: '600', marginBottom: '4px', display: 'block', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                                Trigger Name
+                            </label>
+                            <input
+                                type="text"
+                                value={formData.label}
+                                onChange={(e) => handleFieldChange('label', e.target.value)}
+                                placeholder="Enter trigger name"
+                                style={{
+                                    width: '100%',
+                                    background: '#1E293B',
+                                    border: '1px solid #334155',
+                                    borderRadius: '6px',
+                                    padding: '8px 12px',
+                                    color: '#F8FAFC',
+                                    fontSize: '14px',
+                                    outline: 'none'
+                                }}
+                                onFocus={(e) => e.target.style.borderColor = '#F97316'}
+                                onBlur={handleBlur}
+                            />
+                        </div>
+
+                        {/* Description */}
+                        <div>
+                            <label style={{ fontSize: '11px', color: '#94A3B8', fontWeight: '600', marginBottom: '4px', display: 'block', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                                Description
+                            </label>
+                            <textarea
+                                value={formData.description}
+                                onChange={(e) => handleFieldChange('description', e.target.value)}
+                                placeholder="Describe this trigger"
+                                rows={2}
+                                style={{
+                                    width: '100%',
+                                    background: '#1E293B',
+                                    border: '1px solid #334155',
+                                    borderRadius: '6px',
+                                    padding: '8px 12px',
+                                    color: '#F8FAFC',
+                                    fontSize: '13px',
+                                    outline: 'none',
+                                    resize: 'vertical',
+                                    fontFamily: 'inherit'
+                                }}
+                                onFocus={(e) => e.target.style.borderColor = '#F97316'}
+                                onBlur={handleBlur}
+                            />
+                        </div>
+
+                        {/* Event Class - Select */}
+                        <div>
+                            <label style={{ fontSize: '11px', color: '#94A3B8', fontWeight: '600', marginBottom: '4px', display: 'block', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                                Event Class
+                            </label>
+                            <select
+                                value={formData.eventClass}
+                                onChange={(e) => handleFieldChange('eventClass', e.target.value)}
+                                style={{
+                                    width: '100%',
+                                    background: '#1E293B',
+                                    border: '1px solid #334155',
+                                    borderRadius: '6px',
+                                    padding: '8px 12px',
+                                    color: '#F8FAFC',
+                                    fontSize: '13px',
+                                    outline: 'none',
+                                    appearance: 'none', // Remove default arrow if needed, but standard select is safer
+                                    cursor: 'pointer'
+                                }}
+                                onFocus={(e) => e.target.style.borderColor = '#F97316'}
+                                onBlur={handleBlur}
+                            >
+                                <option value="" disabled>Select an event...</option>
+                                {Object.entries(eventOptions).map(([value, label]) => (
+                                    <option key={value} value={value}>{label}</option>
+                                ))}
+                            </select>
+                            <div style={{ fontSize: '10px', color: '#64748B', marginTop: '4px' }}>
+                                Select the event to listen for
+                            </div>
+                        </div>
                     </div>
                 )}
             </div>
@@ -299,10 +458,10 @@ const nodeTypes = {
     action: ActionNode,
 };
 
-function FlowCanvas({ initialNodes, initialEdges, initialViewport, livewireId }) {
+function FlowCanvas({ initialNodes, initialEdges, initialViewport, livewireId, eventOptions }) {
     const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes.map(n => ({
         ...n,
-        data: { ...n.data, livewireId }
+        data: { ...n.data, livewireId, eventOptions }
     })));
     const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
     const { getViewport } = useReactFlow();
@@ -316,9 +475,7 @@ function FlowCanvas({ initialNodes, initialEdges, initialViewport, livewireId })
         const component = window.Livewire.find(livewireId);
         if (!component) return;
 
-        if (node.type === 'trigger') {
-            component.call('editExistingTrigger', node.id);
-        } else if (node.type === 'filter') {
+        if (node.type === 'filter') {
             component.call('mountAction', 'editFilters', { nodeId: node.id, nodeData: node.data });
         } else if (node.type === 'action') {
             component.call('mountAction', 'editAction', { nodeId: node.id, nodeData: node.data });
@@ -519,10 +676,16 @@ function FlowCanvas({ initialNodes, initialEdges, initialViewport, livewireId })
     );
 }
 
-export default function FlowEditor({ nodes, edges, viewport, livewireId }) {
+export default function FlowEditor({ nodes, edges, viewport, livewireId, eventOptions }) {
     return (
         <ReactFlowProvider>
-            <FlowCanvas initialNodes={nodes} initialEdges={edges} initialViewport={viewport} livewireId={livewireId} />
+            <FlowCanvas
+                initialNodes={nodes}
+                initialEdges={edges}
+                initialViewport={viewport}
+                livewireId={livewireId}
+                eventOptions={eventOptions}
+            />
         </ReactFlowProvider>
     );
 }

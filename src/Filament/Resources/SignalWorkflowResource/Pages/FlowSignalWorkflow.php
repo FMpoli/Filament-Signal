@@ -102,6 +102,28 @@ class FlowSignalWorkflow extends Page implements HasActions, HasForms
         $this->dispatch('flow-refresh');
     }
 
+    public function updateTriggerConfig(array $data): void
+    {
+        $nodeId = $data['nodeId'] ?? null;
+        if (! $nodeId) {
+            return;
+        }
+
+        $node = $this->record->nodes()->where('node_id', $nodeId)->first();
+
+        if ($node) {
+            $config = $node->config ?? [];
+            $config['label'] = $data['label'] ?? $node->name;
+            $config['description'] = $data['description'] ?? ($config['description'] ?? '');
+            $config['eventClass'] = $data['eventClass'] ?? ($config['eventClass'] ?? null);
+
+            $node->update([
+                'name' => $config['label'],
+                'config' => $config,
+            ]);
+        }
+    }
+
     // Store current editing node
     public ?string $editingNodeId = null;
 
