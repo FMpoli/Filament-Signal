@@ -113,6 +113,14 @@ class FilamentSignalServiceProvider extends PackageServiceProvider
                     $file->getRealPath() => base_path("stubs/filament-signal/{$file->getFilename()}"),
                 ], 'filament-signal-stubs');
             }
+            
+            // Publish JavaScript assets
+            $jsPath = __DIR__ . '/../resources/dist/filament-signal.js';
+            if (file_exists($jsPath)) {
+                $this->publishes([
+                    $jsPath => public_path('js/base33/filament-signal/filament-signal-scripts.js'),
+                ], 'filament-signal-assets');
+            }
         }
 
         // Testing
@@ -234,7 +242,6 @@ class FilamentSignalServiceProvider extends PackageServiceProvider
     {
         return [
             'create_signal_table',
-            'add_metadata_to_signal_actions_table',
         ];
     }
 }

@@ -8,83 +8,92 @@ return new class extends Migration
 {
     public function up(): void
     {
-        $templatesTable = config('signal.table_names.templates', 'signal_templates');
-        $triggersTable = config('signal.table_names.triggers', 'signal_triggers');
-        $actionsTable = config('signal.table_names.actions', 'signal_actions');
-        $logsTable = config('signal.table_names.action_logs', 'signal_action_logs');
+        $workflowsTable = config('signal.table_names.workflows', 'signal_workflows');
+        $nodesTable = config('signal.table_names.nodes', 'signal_nodes');
+        $edgesTable = config('signal.table_names.edges', 'signal_edges');
+        $executionsTable = config('signal.table_names.executions', 'signal_executions');
+        $executionNodesTable = config('signal.table_names.execution_nodes', 'signal_execution_nodes');
         $modelIntegrationsTable = config('signal.table_names.model_integrations', 'signal_model_integrations');
 
-        Schema::create($templatesTable, function (Blueprint $table): void {
+        // Main Workflow Container
+        Schema::create($workflowsTable, function (Blueprint $table): void {
             $table->id();
             $table->string('name');
-            $table->string('slug')->unique();
-            $table->string('type')->default('email');
-            $table->string('subject')->nullable();
-            $table->longText('content_html');
-            $table->longText('content_text')->nullable();
-            $table->json('data_schema')->nullable();
-            $table->json('meta')->nullable();
-            $table->boolean('is_active')->default(true);
-            $table->timestamps();
-        });
-
-        Schema::create($triggersTable, function (Blueprint $table): void {
-            $table->id();
-            $table->string('name');
-            $table->string('event_class');
             $table->text('description')->nullable();
-            $table->enum('status', ['draft', 'active', 'disabled'])->default('draft');
-            $table->enum('match_type', ['all', 'any'])->default('all');
-            $table->json('filters')->nullable();
-            $table->json('metadata')->nullable();
-            $table->timestamp('activated_at')->nullable();
+            $table->string('status')->default('draft'); // draft, active, disabled
+            $table->json('metadata')->nullable(); // Store viewport, flow settings, etc.
             $table->timestamps();
-
-            $table->index('event_class');
-            $table->index('status');
         });
 
-        Schema::create($actionsTable, function (Blueprint $table) use ($triggersTable, $templatesTable): void {
+        // Graph Nodes (Triggers, Actions, Conditions, etc.)
+        Schema::create($nodesTable, function (Blueprint $table) use ($workflowsTable): void {
             $table->id();
-            $table->foreignId('trigger_id')
-                ->constrained($triggersTable)
-                ->cascadeOnDelete();
-            $table->foreignId('template_id')
-                ->nullable()
-                ->constrained($templatesTable)
-                ->nullOnDelete();
-            $table->string('name');
-            $table->string('action_type');
-            $table->boolean('is_active')->default(true);
-            $table->unsignedInteger('execution_order')->default(1);
-            $table->json('configuration')->nullable();
+            $table->foreignId('workflow_id')->constrained($workflowsTable)->cascadeOnDelete();
+            
+            // ReactFlow Node ID (string UUID usually) or internal reference
+            $table->string('node_id')->index(); 
+            
+            $table->string('type'); // 'trigger', 'action', 'condition', etc.
+            $table->string('name')->nullable();
+            
+            // Configuration for the node (e.g., webhook URL, email subject, condition logic)
+            $table->json('config')->nullable();
+            
+            // UI Position (x, y)
+            $table->json('position')->nullable();
+            
             $table->timestamps();
 
-            $table->index(['trigger_id', 'execution_order']);
+            // Ensure unique node_id per workflow
+            $table->unique(['workflow_id', 'node_id']);
         });
 
-        Schema::create($logsTable, function (Blueprint $table) use ($triggersTable, $actionsTable): void {
+        // Graph Edges (Connections)
+        Schema::create($edgesTable, function (Blueprint $table) use ($workflowsTable): void {
             $table->id();
-            $table->foreignId('trigger_id')
-                ->constrained($triggersTable)
-                ->cascadeOnDelete();
-            $table->foreignId('action_id')
-                ->nullable()
-                ->constrained($actionsTable)
-                ->nullOnDelete();
-            $table->string('event_class');
+            $table->foreignId('workflow_id')->constrained($workflowsTable)->cascadeOnDelete();
+            
+            $table->string('edge_id')->index();
+            $table->string('source_node_id');
+            $table->string('target_node_id');
+            $table->string('source_handle')->nullable();
+            $table->string('target_handle')->nullable();
+            
+            $table->timestamps();
+        });
+
+        // Executions (Workflow Runs)
+        Schema::create($executionsTable, function (Blueprint $table) use ($workflowsTable): void {
+            $table->id();
+            $table->foreignId('workflow_id')->constrained($workflowsTable)->cascadeOnDelete();
+            
+            $table->string('status')->default('pending'); // pending, running, completed, failed
+            $table->timestamp('started_at')->nullable();
+            $table->timestamp('finished_at')->nullable();
+            
+            // Optional: Store initial payload or context
+            $table->json('input_context')->nullable();
+            
+            $table->timestamps();
+        });
+
+        // Execution Step Logs (Per Node)
+        Schema::create($executionNodesTable, function (Blueprint $table) use ($executionsTable): void {
+            $table->id();
+            $table->foreignId('execution_id')->constrained($executionsTable)->cascadeOnDelete();
+            
+            $table->string('node_id'); // Reference to node_id string
             $table->string('status')->default('pending');
-            $table->unsignedInteger('attempt')->default(1);
-            $table->json('payload')->nullable();
-            $table->json('response')->nullable();
-            $table->text('message')->nullable();
-            $table->timestamp('executed_at')->nullable();
+            $table->json('input')->nullable();
+            $table->json('output')->nullable();
+            $table->text('error')->nullable();
+            
+            $table->timestamp('started_at')->nullable();
+            $table->timestamp('finished_at')->nullable();
             $table->timestamps();
-
-            $table->index(['status', 'executed_at']);
-            $table->index('event_class');
         });
 
+        // Model Integrations (Shared Config)
         Schema::create($modelIntegrationsTable, function (Blueprint $table): void {
             $table->id();
             $table->string('name');
@@ -100,18 +109,18 @@ return new class extends Migration
 
     public function down(): void
     {
-        $templatesTable = config('signal.table_names.templates', 'signal_templates');
-        $triggersTable = config('signal.table_names.triggers', 'signal_triggers');
-        $actionsTable = config('signal.table_names.actions', 'signal_actions');
-        $logsTable = config('signal.table_names.action_logs', 'signal_action_logs');
+        $workflowsTable = config('signal.table_names.workflows', 'signal_workflows');
+        $nodesTable = config('signal.table_names.nodes', 'signal_nodes');
+        $edgesTable = config('signal.table_names.edges', 'signal_edges');
+        $executionsTable = config('signal.table_names.executions', 'signal_executions');
+        $executionNodesTable = config('signal.table_names.execution_nodes', 'signal_execution_nodes');
         $modelIntegrationsTable = config('signal.table_names.model_integrations', 'signal_model_integrations');
 
         Schema::dropIfExists($modelIntegrationsTable);
-        Schema::dropIfExists($logsTable);
-        Schema::dropIfExists($actionsTable);
-        Schema::dropIfExists($triggersTable);
-        Schema::dropIfExists($templatesTable);
+        Schema::dropIfExists($executionNodesTable);
+        Schema::dropIfExists($executionsTable);
+        Schema::dropIfExists($edgesTable);
+        Schema::dropIfExists($nodesTable);
+        Schema::dropIfExists($workflowsTable);
     }
 };
-
-

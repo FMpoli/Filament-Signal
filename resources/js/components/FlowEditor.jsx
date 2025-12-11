@@ -44,19 +44,33 @@ const TriggerNode = ({ data }) => {
                     </svg>
                     <div style={{ fontSize: '12px', fontWeight: 'bold', color: 'white', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Trigger</div>
                 </div>
-                {data.status && (
-                    <div style={{
-                        fontSize: '10px',
-                        background: 'rgba(255,255,255,0.2)',
-                        padding: '2px 6px',
-                        borderRadius: '4px',
-                        color: 'white',
-                        fontWeight: 600,
-                        textTransform: 'uppercase'
-                    }}>
-                        {data.status}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    {data.status && (
+                        <div style={{
+                            fontSize: '10px',
+                            background: 'rgba(255,255,255,0.2)',
+                            padding: '2px 6px',
+                            borderRadius: '4px',
+                            color: 'white',
+                            fontWeight: 600,
+                            textTransform: 'uppercase'
+                        }}>
+                            {data.status}
+                        </div>
+                    )}
+                    <div className="nodrag" onClick={(e) => {
+                        e.stopPropagation();
+                        if (confirm('Are you sure you want to delete the trigger? This will also remove all filters and actions.')) {
+                            if (data.livewireId && window.Livewire) {
+                                window.Livewire.find(data.livewireId).call('deleteTrigger');
+                            }
+                        }
+                    }} style={{ cursor: 'pointer', color: 'rgba(255,255,255,0.8)', display: 'flex' }} title="Delete Trigger">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" style={{ width: '14px', height: '14px' }}>
+                            <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
+                        </svg>
                     </div>
-                )}
+                </div>
             </div>
 
             {/* Body */}
@@ -210,7 +224,7 @@ const FilterNode = ({ data }) => {
     );
 };
 
-const ActionNode = ({ data }) => {
+const ActionNode = ({ id, data }) => {
     // Determine color based on action type
     const isWebhook = data.actionType === 'webhook';
     // Blue for Webhook, Gray/Purple for others
@@ -257,7 +271,7 @@ const ActionNode = ({ data }) => {
                     e.stopPropagation();
                     if (confirm('Are you sure you want to delete this action?')) {
                         if (data.livewireId && window.Livewire) {
-                            window.Livewire.find(data.livewireId).call('deleteAction', data.actionId);
+                            window.Livewire.find(data.livewireId).call('deleteAction', id);
                         }
                     }
                 }} style={{ cursor: 'pointer', color: 'rgba(255,255,255,0.8)', display: 'flex' }} title="Delete Action">
@@ -303,11 +317,11 @@ function FlowCanvas({ initialNodes, initialEdges, initialViewport, livewireId })
         if (!component) return;
 
         if (node.type === 'trigger') {
-            component.call('mountAction', 'editTrigger');
+            component.call('editExistingTrigger', node.id);
         } else if (node.type === 'filter') {
-            component.call('mountAction', 'editFilters');
+            component.call('mountAction', 'editFilters', { nodeId: node.id, nodeData: node.data });
         } else if (node.type === 'action') {
-            component.call('mountAction', 'editAction', { actionId: node.data.actionId });
+            component.call('mountAction', 'editAction', { nodeId: node.id, nodeData: node.data });
         }
     }, [livewireId]);
 
@@ -323,7 +337,7 @@ function FlowCanvas({ initialNodes, initialEdges, initialViewport, livewireId })
         if (!window.Livewire || !livewireId) return;
         const component = window.Livewire.find(livewireId);
         if (component) {
-            component.call('mountAction', 'editTrigger');
+            component.call('createNewTrigger');
         }
     }, [livewireId]);
 

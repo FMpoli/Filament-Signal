@@ -8,7 +8,8 @@
         "build:scripts": "node bin/build.js",
         "purge": "filament-purge -i resources/dist/filament-signal.css -o resources/dist/filament-signal.css -v 3.x",
         "dev": "npm-run-all --parallel dev:*",
-        "build": "npm-run-all build:*"
+        "build": "npm-run-all build:*",
+        "postbuild": "mkdir -p ../../public/js/base33/filament-signal && cp resources/dist/filament-signal.js ../../public/js/base33/filament-signal/filament-signal-scripts.js && echo 'JavaScript copied to public directory'"
     },
     "devDependencies": {
         "@awcodes/filament-plugin-purge": "^1.1.1",

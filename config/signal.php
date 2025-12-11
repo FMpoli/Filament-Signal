@@ -2,10 +2,11 @@
 
 use Base33\FilamentSignal\Actions\LogActionHandler;
 use Base33\FilamentSignal\Actions\WebhookActionHandler;
-use Base33\FilamentSignal\Models\SignalAction;
-use Base33\FilamentSignal\Models\SignalActionLog;
-use Base33\FilamentSignal\Models\SignalTemplate;
-use Base33\FilamentSignal\Models\SignalTrigger;
+use Base33\FilamentSignal\Models\SignalWorkflow;
+use Base33\FilamentSignal\Models\SignalNode;
+use Base33\FilamentSignal\Models\SignalEdge;
+use Base33\FilamentSignal\Models\SignalExecution;
+use Base33\FilamentSignal\Models\SignalExecutionNode;
 
 return [
     'auto_discover_events' => env('FILAMENT_SIGNAL_AUTO_DISCOVER_EVENTS', false),
@@ -24,17 +25,19 @@ return [
     ],
 
     'models' => [
-        'trigger' => SignalTrigger::class,
-        'action' => SignalAction::class,
-        'action_log' => SignalActionLog::class,
-        'template' => SignalTemplate::class,
+        'workflow' => SignalWorkflow::class,
+        'node' => SignalNode::class,
+        'edge' => SignalEdge::class,
+        'execution' => SignalExecution::class,
+        'execution_node' => SignalExecutionNode::class,
     ],
 
     'table_names' => [
-        'triggers' => 'signal_triggers',
-        'actions' => 'signal_actions',
-        'action_logs' => 'signal_action_logs',
-        'templates' => 'signal_templates',
+        'workflows' => 'signal_workflows',
+        'nodes' => 'signal_nodes',
+        'edges' => 'signal_edges',
+        'executions' => 'signal_executions',
+        'execution_nodes' => 'signal_execution_nodes',
         'model_integrations' => 'signal_model_integrations',
     ],
 
@@ -105,6 +108,5 @@ return [
      */
     'excluded_models' => [
         // \App\Models\InternalModel::class,
-        // \Base33\FilamentSignal\Models\SignalTrigger::class,
     ],
 ];

@@ -1018,8 +1018,9 @@ class SignalTriggerResource extends Resource
                     ->label(__('filament-signal::signal.fields.event_class'))
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\BadgeColumn::make('status')
+                Tables\Columns\TextColumn::make('status')
                     ->label(__('filament-signal::signal.fields.status'))
+                    ->badge()
                     ->colors([
                         'secondary' => SignalTrigger::STATUS_DRAFT,
                         'success' => SignalTrigger::STATUS_ACTIVE,
