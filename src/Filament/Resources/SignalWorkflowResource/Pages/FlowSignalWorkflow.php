@@ -58,6 +58,15 @@ class FlowSignalWorkflow extends Page implements HasActions, HasForms
                 'target_handle' => $edgeData['targetHandle'] ?? null,
             ]);
         }
+        
+        // Save viewport to metadata
+        if (isset($data['viewport'])) {
+            $this->record->update([
+                'metadata' => [
+                    'viewport' => $data['viewport']
+                ]
+            ]);
+        }
     }
 
     public function deleteTrigger(): void

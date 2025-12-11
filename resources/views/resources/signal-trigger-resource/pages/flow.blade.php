@@ -33,7 +33,10 @@
         // If no nodes exist, start with empty canvas
         $nodesJson = json_encode($initialNodes, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE);
         $edgesJson = json_encode($initialEdges, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE);
-        $viewportJson = json_encode(['x' => 0, 'y' => 0, 'zoom' => 1], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE);
+        
+        // Load viewport from metadata or use default
+        $viewport = $record->metadata['viewport'] ?? ['x' => 0, 'y' => 0, 'zoom' => 0.7];
+        $viewportJson = json_encode($viewport, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE);
     @endphp
 
     <div class="fi-section-content-ctn rounded-xl bg-white p-6 shadow-sm ring-1 ring-gray-950/5 dark:bg-gray-900 dark:ring-white/10"

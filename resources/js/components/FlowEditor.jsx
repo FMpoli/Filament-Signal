@@ -349,6 +349,35 @@ function FlowCanvas({ initialNodes, initialEdges, initialViewport, livewireId })
         }
     }, [livewireId]);
 
+    // Save viewport when user finishes panning or zooming
+    const onMoveEnd = useCallback(() => {
+        const timer = setTimeout(() => {
+            const flowData = {
+                nodes: nodes.map(node => ({
+                    id: node.id,
+                    type: node.type,
+                    position: node.position,
+                    data: node.data,
+                })),
+                edges: edges.map(edge => ({
+                    id: edge.id,
+                    source: edge.source,
+                    target: edge.target,
+                })),
+                viewport: getViewport(),
+            };
+
+            if (window.Livewire && livewireId) {
+                const component = window.Livewire.find(livewireId);
+                if (component) {
+                    component.call('saveFlowData', flowData);
+                }
+            }
+        }, 500); // Debounce 500ms for viewport changes
+
+        return () => clearTimeout(timer);
+    }, [nodes, edges, livewireId, getViewport]);
+
     // Livewire Refresh Listener
     useEffect(() => {
         const handleRefresh = () => {
@@ -406,6 +435,7 @@ function FlowCanvas({ initialNodes, initialEdges, initialViewport, livewireId })
                 onEdgesChange={onEdgesChange}
                 onConnect={onConnect}
                 onNodeDoubleClick={onNodeDoubleClick}
+                onMoveEnd={onMoveEnd}
                 defaultViewport={initialViewport}
                 fitView={!initialViewport || (initialViewport.x === 0 && initialViewport.y === 0 && initialViewport.zoom === 1)}
             >
