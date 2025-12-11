@@ -121,6 +121,14 @@ class FilamentSignalServiceProvider extends PackageServiceProvider
                     $jsPath => public_path('js/base33/filament-signal/filament-signal-scripts.js'),
                 ], 'filament-signal-assets');
             }
+
+            // Publish CSS assets
+            $cssPath = __DIR__ . '/../resources/dist/filament-signal.css';
+            if (file_exists($cssPath)) {
+                $this->publishes([
+                    $cssPath => public_path('css/base33/filament-signal/filament-signal-styles.css'),
+                ], 'filament-signal-assets');
+            }
         }
 
         // Testing
@@ -184,14 +192,10 @@ class FilamentSignalServiceProvider extends PackageServiceProvider
     {
         $assets = [];
 
-        // Vite risolve il symlink e registra il percorso reale nel manifest
-        // In sviluppo con symlink: packages/Base33/...
-        // In produzione: vendor/base33/...
-        $cssPath = is_link(base_path('vendor/base33/filament-signal'))
-            ? 'packages/Base33/Filament-Signal/resources/css/theme.css'
-            : 'vendor/base33/filament-signal/resources/css/theme.css';
-
-        $assets[] = Css::make('filament-signal-styles', Vite::asset($cssPath));
+        $cssPath = __DIR__ . '/../resources/dist/filament-signal.css';
+        if (file_exists($cssPath)) {
+            $assets[] = Css::make('filament-signal-styles', $cssPath);
+        }
 
         $jsPath = __DIR__ . '/../resources/dist/filament-signal.js';
         if (file_exists($jsPath)) {

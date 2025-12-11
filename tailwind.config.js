@@ -7,5 +7,6 @@ module.exports = {
         './resources/views/filament/**/*.blade.php',
         './resources/views/infolists/**/*.blade.php',
         './vendor/filament/**/*.blade.php',
+        './resources/js/components/**/*.jsx',
     ],
 }
