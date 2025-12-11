@@ -4,7 +4,7 @@
     "scripts": {
         "dev:styles": "npx tailwindcss -i resources/css/index.css -o resources/dist/filament-signal.css --postcss --watch",
         "dev:scripts": "node bin/build.js --dev",
-        "build:styles": "npx tailwindcss -i resources/css/index.css -o resources/dist/filament-signal.css --postcss --minify && npm run purge",
+        "build:styles": "npx tailwindcss -i resources/css/index.css -o resources/dist/filament-signal.css --postcss --minify",
         "build:scripts": "node bin/build.js",
         "purge": "filament-purge -i resources/dist/filament-signal.css -o resources/dist/filament-signal.css -v 3.x",
         "dev": "npm-run-all --parallel dev:*",
@@ -25,6 +25,7 @@
         "tailwindcss": "^3.3.3"
     },
     "dependencies": {
+        "clsx": "^2.1.1",
         "react": "^19.2.1",
         "react-dom": "^19.2.1",
         "reactflow": "^11.11.4"
