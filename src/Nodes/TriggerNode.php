@@ -17,7 +17,7 @@ class TriggerNode implements NodeInterface
      */
     public static function type(): string
     {
-        return 'trigger';
+        return 'base33_trigger';
     }
 
     /**

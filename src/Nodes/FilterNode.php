@@ -17,7 +17,7 @@ class FilterNode implements NodeInterface
      */
     public static function type(): string
     {
-        return 'filter';
+        return 'base33_filter';
     }
 
     /**

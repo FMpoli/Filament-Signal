@@ -19,7 +19,7 @@ class FilterProNode implements NodeInterface
      */
     public static function type(): string
     {
-        return 'filter_pro';
+        return 'base33_filter_pro';
     }
 
     /**

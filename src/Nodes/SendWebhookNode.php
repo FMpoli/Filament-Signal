@@ -19,7 +19,7 @@ class SendWebhookNode implements NodeInterface
      */
     public static function type(): string
     {
-        return 'action';
+        return 'base33_send_webhook';
     }
 
     /**

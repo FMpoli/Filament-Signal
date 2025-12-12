@@ -22,11 +22,17 @@ import EmptyCanvasState from './EmptyCanvasState';
 import ContextMenu from './ContextMenu';
 
 const nodeTypes = {
+    // Legacy support
     trigger: TriggerNode,
     filter: FilterNode,
     filter_pro: FilterProNode,
-    // action: ActionNode, // Removed as file is deleted
     sendWebhook: SendWebhookNode,
+
+    // Namespaced types (Best Practice)
+    base33_trigger: TriggerNode,
+    base33_filter: FilterNode,
+    base33_filter_pro: FilterProNode,
+    base33_send_webhook: SendWebhookNode,
 };
 
 function FlowCanvas({ initialNodes, initialEdges, initialViewport, livewireId, eventOptions, filterFieldsMap, availableNodesMap }) {

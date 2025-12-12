@@ -130,6 +130,9 @@ class MakeSignalNodeCommand extends Command
             $this->nodeTypes[$type]['description']
         );
 
+        // Get vendor namespace
+        $vendor = $this->option('vendor') ?? $this->ask('Vendor namespace (e.g. app, base33)', 'base33');
+
         // Summary
         $this->info('');
         $this->info('📋 Node Configuration:');
@@ -137,21 +140,23 @@ class MakeSignalNodeCommand extends Command
             ['Property', 'Value'],
             [
                 ['Name', $name],
-                ['Type', $type],
+                ['Vendor', $vendor],
+                ['Category', $type],
+                ['Type ID', strtolower($vendor) . '_' . \Illuminate\Support\Str::snake($name)],
+                ['Description', $description],
                 ['Color', $color],
                 ['Icon', $icon],
-                ['Description', $description],
             ]
         );
 
-        if (! $this->confirm('Generate this node?', true)) {
-            $this->info('Cancelled.');
+        if (! $this->confirm('Do you wish to continue?', true)) {
             return 0;
         }
 
         // Generate files
+        $nodeTypeId = strtolower($vendor) . '_' . \Illuminate\Support\Str::snake($name);
         $this->generateReactComponent($name, $type, $color, $icon, $description);
-        $this->generatePhpHandler($name, $type, $description, $color, $icon);
+        $this->generatePhpHandler($name, $type, $nodeTypeId, $description, $color, $icon);
         $this->updateNodeRegistry($name, $type);
 
         $this->info('');
@@ -217,7 +222,7 @@ class MakeSignalNodeCommand extends Command
     /**
      * Generate PHP handler class
      */
-    protected function generatePhpHandler(string $name, string $type, string $description, string $color, string $icon): void
+    protected function generatePhpHandler(string $name, string $type, string $nodeTypeId, string $description, string $color, string $icon): void
     {
         $stub = $this->getPhpStub();
         $nodeConfig = $this->nodeTypes[$type];
@@ -233,7 +238,7 @@ class MakeSignalNodeCommand extends Command
             '{{HAS_OUTPUT}}',
         ], [
             $name,
-            $type,
+            $nodeTypeId,
             $description,
             $color,
             'heroicon-o-' . $icon, // Prefix with heroicon-o- as convention
