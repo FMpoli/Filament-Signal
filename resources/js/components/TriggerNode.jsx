@@ -80,7 +80,9 @@ const TriggerNode = ({ id, data }) => {
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4 text-white">
                             <path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clipRule="evenodd" />
                         </svg>
-                        <span className="text-xs font-bold text-white uppercase tracking-wider">Trigger</span>
+                        <span className="text-xs font-bold text-white uppercase tracking-wider">
+                            {formData.label || 'Trigger'}
+                        </span>
                     </div>
 
                     <div className="flex items-center gap-2">
@@ -119,19 +121,24 @@ const TriggerNode = ({ id, data }) => {
                     {!isExpanded ? (
                         /* Collapsed View */
                         <div>
-                            {/* Description at top - same style as FilterNode */}
+                            {/* Description */}
                             {formData.description && (
                                 <div className="text-slate-500 dark:text-slate-400 text-xs italic mb-2">
                                     {formData.description}
                                 </div>
                             )}
 
-                            <div className="text-base font-semibold text-slate-800 dark:text-slate-100 mb-1">
-                                {formData.label || 'Untitled Trigger'}
-                            </div>
+                            {/* Event Class info */}
                             {formData.eventClass && (
                                 <div className="text-xs text-slate-500 dark:text-slate-400 font-mono bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded truncate">
                                     {eventOptions[formData.eventClass] || formData.eventClass}
+                                </div>
+                            )}
+
+                            {/* Show placeholder if no description and no event */}
+                            {!formData.description && !formData.eventClass && (
+                                <div className="text-slate-400 dark:text-slate-500 text-sm italic">
+                                    Click to configure...
                                 </div>
                             )}
                         </div>

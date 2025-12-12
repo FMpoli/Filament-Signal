@@ -61,7 +61,7 @@ const ActionNode = ({ id, data }) => {
                             </svg>
                         )}
                         <div className="text-xs font-bold text-white uppercase tracking-wider">
-                            {data.actionType || 'Action'}
+                            {data.label || 'Action'}
                         </div>
                     </div>
 
@@ -78,8 +78,16 @@ const ActionNode = ({ id, data }) => {
 
                 {/* Body */}
                 <div className="p-3 px-4">
-                    <div className="text-[15px] font-medium text-slate-800 dark:text-slate-200 leading-snug">
-                        {data.label || 'Action'}
+                    {/* Description */}
+                    {data.description && (
+                        <div className="text-slate-500 dark:text-slate-400 text-xs italic mb-2">
+                            {data.description}
+                        </div>
+                    )}
+
+                    {/* Action Type Badge */}
+                    <div className="text-xs text-slate-500 dark:text-slate-400 font-mono bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded inline-block">
+                        {data.actionType || 'action'}
                     </div>
                 </div>
 
