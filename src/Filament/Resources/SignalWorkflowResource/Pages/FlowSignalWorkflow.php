@@ -31,6 +31,75 @@ class FlowSignalWorkflow extends Page implements HasActions, HasForms
         $this->record = $record;
     }
 
+    /**
+     * Get available nodes for the frontend
+     */
+    public function getAvailableNodesProperty(): array
+    {
+        return \Base33\FilamentSignal\Nodes\NodeRegistry::getMetadataMap();
+    }
+
+    /**
+     * Generic create node method
+     */
+    public function getFilterFieldsMapProperty(): array
+    {
+        $map = [];
+        $events = \Base33\FilamentSignal\Filament\Resources\SignalTriggerResource::getEventClassOptions();
+
+        foreach (array_keys($events) as $eventClass) {
+            $map[$eventClass] = \Base33\FilamentSignal\Filament\Resources\SignalTriggerResource::getFilterFieldOptionsWithTypesForEvent($eventClass);
+        }
+        
+        return $map;
+    }
+
+    public function createGenericNode(array $data): void
+    {
+        $type = $data['type'] ?? null;
+        $class = \Base33\FilamentSignal\Nodes\NodeRegistry::get($type);
+
+        if (!$class) {
+            return;
+        }
+
+        $sourceNodeId = $data['sourceNodeId'] ?? null;
+        $sourceHandle = $data['sourceHandle'] ?? null;
+        
+        $nodeId = $type . '-' . \Illuminate\Support\Str::uuid();
+        $position = $this->calculateNewNodePosition($sourceNodeId, $sourceHandle);
+
+        $defaultConfig = $class::defaultConfig();
+        // Merge provided config if any
+        $config = array_merge($defaultConfig, $data['config'] ?? []);
+        // Set isNew flag
+        $config['isNew'] = true;
+
+        // Add special options if needed
+        if ($type === 'trigger' || $class::type() === 'trigger') {
+            $config['eventOptions'] = \Base33\FilamentSignal\Filament\Resources\SignalTriggerResource::getEventClassOptions();
+        }
+
+        $this->record->nodes()->create([
+            'node_id' => $nodeId,
+            'type' => $class::type(),
+            'name' => $config['label'] ?? $class::name(),
+            'config' => $config,
+            'position' => $position,
+        ]);
+
+        $this->dispatch('node-added', [
+            'id' => $nodeId,
+            'type' => $class::type(),
+            'position' => $position,
+            'data' => array_merge($config, ['livewireId' => $this->getId()]),
+        ]);
+
+        if ($sourceNodeId) {
+            $this->createEdge($sourceNodeId, $nodeId, $sourceHandle);
+        }
+    }
+
     public function saveFlowData(array $data): void
     {
         // Save flow data to nodes and edges
@@ -42,7 +111,7 @@ class FlowSignalWorkflow extends Page implements HasActions, HasForms
             $config = $nodeData['data'] ?? [];
 
             // Remove transient data that shouldn't be saved to DB
-            unset($config['eventOptions'], $config['livewireId'], $config['filterFieldsMap']);
+            unset($config['eventOptions'], $config['livewireId'], $config['filterFieldsMap'], $config['availableNodes']);
 
             $this->record->nodes()->create([
                 'node_id' => $nodeData['id'],
@@ -74,8 +143,15 @@ class FlowSignalWorkflow extends Page implements HasActions, HasForms
         }
     }
 
-    public function deleteTrigger(): void
+    public function deleteTrigger(?string $nodeId = null): void
     {
+        // If nodeId is provided, delete only that node (and connected edges)
+        if ($nodeId) {
+            $this->deleteNode($nodeId);
+            return;
+        }
+
+        // Legacy behavior: Delete all trigger nodes and everything else
         // Get all node IDs before deleting (for frontend notification)
         $nodeIds = $this->record->nodes()->pluck('node_id')->toArray();
 
@@ -132,7 +208,33 @@ class FlowSignalWorkflow extends Page implements HasActions, HasForms
         $this->dispatch('node-removed', $nodeId);
     }
 
+    // Generic delete for custom nodes (like SendWebhook)
+    public function deleteNode(string $nodeId): void
+    {
+        // Delete specific node by node_id
+        $this->record->nodes()->where('node_id', $nodeId)->delete();
+
+        // Also delete edges connected to this node
+        $this->record->edges()
+            ->where('source_node_id', $nodeId)
+            ->orWhere('target_node_id', $nodeId)
+            ->delete();
+
+        // Notify frontend
+        $this->dispatch('node-removed', $nodeId);
+    }
+
     public function updateTriggerConfig(array $data): void
+    {
+        // Wrapper for BC or specific logic, but delegates to generic if possible
+        // Or keep separate. Let's redirect to generic one as TriggerNode now calls generic
+        $this->updateNodeConfig($data);
+    }
+
+    /**
+     * Generic method to update any node config
+     */
+    public function updateNodeConfig(array $data): void
     {
         $nodeId = $data['nodeId'] ?? null;
         if (! $nodeId) {
@@ -143,16 +245,19 @@ class FlowSignalWorkflow extends Page implements HasActions, HasForms
 
         if ($node) {
             $config = $node->config ?? [];
-            $config['label'] = $data['label'] ?? $node->name;
-            $config['description'] = $data['description'] ?? ($config['description'] ?? '');
-            $config['eventClass'] = $data['eventClass'] ?? ($config['eventClass'] ?? null);
-            $config['status'] = $data['status'] ?? ($config['status'] ?? 'draft');
+            
+            // Merge all provided data into config, excluding nodeId
+            foreach ($data as $key => $value) {
+                if ($key !== 'nodeId') {
+                    $config[$key] = $value;
+                }
+            }
 
             // Ensure transient data is not saved
-            unset($config['eventOptions'], $config['livewireId']);
+            unset($config['eventOptions'], $config['livewireId'], $config['availableNodes'], $config['filterFieldsMap']);
 
             $node->update([
-                'name' => $config['label'],
+                'name' => $config['label'] ?? $node->name,
                 'config' => $config,
             ]);
         }
@@ -184,26 +289,64 @@ class FlowSignalWorkflow extends Page implements HasActions, HasForms
         }
     }
 
+
+
     // Store current editing node
     public ?string $editingNodeId = null;
 
-    // Public method for JavaScript to call when editing existing trigger
-    public function editExistingTrigger(string $nodeId): void
+    // Helper to calculate position based on source node and handle
+    private function calculateNewNodePosition(?string $sourceNodeId, ?string $sourceHandle = null): array
     {
-        $this->editingNodeId = $nodeId;
-        $this->mountAction('editTrigger');
+        if (!$sourceNodeId) {
+            return ['x' => 400, 'y' => 100]; // Default fallback
+        }
+
+        $sourceNode = $this->record->nodes()->where('node_id', $sourceNodeId)->first();
+        if (!$sourceNode || empty($sourceNode->position)) {
+            return ['x' => 400, 'y' => 100];
+        }
+
+        $sourcePos = $sourceNode->position;
+        $offsetX = 400;
+        $offsetY = 0;
+
+        // If branching from an 'error' handle, shift down to branch out visually
+        if ($sourceHandle === 'error') {
+            $offsetY = 150;
+        }
+
+        return [
+            'x' => ($sourcePos['x'] ?? 0) + $offsetX,
+            'y' => ($sourcePos['y'] ?? 0) + $offsetY,
+        ];
     }
 
-    // Public method for JavaScript to call when creating new trigger
-    public function createNewTrigger(): void
+    // Helper to create edge
+    private function createEdge(string $sourceNodeId, string $targetNodeId, ?string $sourceHandle = null): void
     {
-        $this->editingNodeId = null;
-        $this->mountAction('editTrigger');
+        $edgeId = 'e' . $sourceNodeId . ($sourceHandle ? '-' . $sourceHandle : '') . '-' . $targetNodeId;
+        
+        $this->record->edges()->create([
+            'edge_id' => $edgeId,
+            'source_node_id' => $sourceNodeId,
+            'target_node_id' => $targetNodeId,
+            'source_handle' => $sourceHandle,
+        ]);
+
+        // Notify frontend to add edge
+        $this->dispatch('edge-added', [
+            'id' => $edgeId,
+            'source' => $sourceNodeId,
+            'target' => $targetNodeId,
+            'sourceHandle' => $sourceHandle,
+        ]);
     }
 
-    // Public method for JavaScript to call when creating new filter (no modal)
-    public function createNewFilter(): void
+    // Public method for JavaScript to call when creating new filter
+    public function createNewFilter(array $data = []): void
     {
+        $sourceNodeId = $data['sourceNodeId'] ?? null;
+        $sourceHandle = $data['sourceHandle'] ?? null;
         $filterId = 'filter-' . \Illuminate\Support\Str::uuid();
 
         // Calculate position - offset each new filter by 150px vertically
@@ -213,8 +356,9 @@ class FlowSignalWorkflow extends Page implements HasActions, HasForms
         $config = [
             'matchType' => 'all',
             'filters' => [],
-            'label' => 'Filter ' . ($existingFilters + 1),
+            'label' => 'Filter',
             'description' => '',
+            'isNew' => true,
         ];
 
         $this->record->nodes()->create([
@@ -225,13 +369,119 @@ class FlowSignalWorkflow extends Page implements HasActions, HasForms
             'position' => $position,
         ]);
 
-        // Send new node data to frontend without page reload
         $this->dispatch('node-added', [
             'id' => $filterId,
             'type' => 'filter',
             'position' => $position,
-            'data' => $config,
+            'data' => array_merge($config, ['livewireId' => $this->getId()]),
         ]);
+
+        if ($sourceNodeId) {
+            $this->createEdge($sourceNodeId, $filterId, $sourceHandle);
+        }
+    }
+
+    // Public method for JavaScript to call when creating new Trigger
+    public function createNewTrigger(): void
+    {
+        $triggerId = 'trigger-' . Str::uuid();
+
+        // Default config for new trigger
+        $config = [
+            'label' => 'New Trigger',
+            'description' => '',
+            'eventClass' => null,
+            'status' => 'draft',
+            'isNew' => true, 
+            'eventOptions' => \Base33\FilamentSignal\Filament\Resources\SignalTriggerResource::getEventClassOptions(),
+        ];
+
+        $this->record->nodes()->create([
+            'node_id' => $triggerId,
+            'type' => 'trigger',
+            'name' => $config['label'],
+            'config' => $config,
+            'position' => ['x' => 100, 'y' => 200],
+        ]);
+
+        $this->dispatch('node-added', [
+            'id' => $triggerId,
+            'type' => 'trigger',
+            'position' => ['x' => 100, 'y' => 200],
+            'data' => array_merge($config, ['livewireId' => $this->getId()]),
+        ]);
+    }
+
+    // Public method for JavaScript to call when creating new Action node (generic)
+    public function createActionNode(array $data = []): void
+    {
+        $sourceNodeId = $data['sourceNodeId'] ?? null;
+        $sourceHandle = $data['sourceHandle'] ?? null;
+        $actionType = $data['actionType'] ?? 'log'; 
+        
+        $nodeId = 'action-' . Str::uuid();
+        $position = $this->calculateNewNodePosition($sourceNodeId, $sourceHandle);
+        
+        $config = [
+            'label' => ucfirst($actionType) . ' Action',
+            'actionType' => $actionType,
+            'description' => '',
+            'isNew' => true,
+        ];
+
+        $this->record->nodes()->create([
+            'node_id' => $nodeId,
+            'type' => 'action',
+            'name' => $config['label'],
+            'config' => $config,
+            'position' => $position,
+        ]);
+
+        $this->dispatch('node-added', [
+            'id' => $nodeId,
+            'type' => 'action',
+            'position' => $position,
+            'data' => array_merge($config, ['livewireId' => $this->getId()]),
+        ]);
+
+        if ($sourceNodeId) {
+            $this->createEdge($sourceNodeId, $nodeId, $sourceHandle);
+        }
+    }
+
+    // Public method for JavaScript to call when creating new SendWebhook node
+    public function createSendWebhookNode(array $data = []): void
+    {
+        $sourceNodeId = $data['sourceNodeId'] ?? null;
+        $sourceHandle = $data['sourceHandle'] ?? null;
+        $nodeId = 'sendwebhook-' . \Illuminate\Support\Str::uuid();
+        
+        $position = $this->calculateNewNodePosition($sourceNodeId, $sourceHandle);
+        
+        $config = [
+            'label' => 'Send Webhook',
+            'description' => '',
+            'isNew' => true,
+        ];
+
+        $this->record->nodes()->create([
+            'node_id' => $nodeId,
+            'type' => 'sendWebhook',
+            'name' => $config['label'],
+            'config' => $config,
+            'position' => $position,
+        ]);
+
+        $this->dispatch('node-added', [
+            'id' => $nodeId,
+            'type' => 'sendWebhook',
+            'position' => $position,
+            'data' => array_merge($config, ['livewireId' => $this->getId()]),
+        ]);
+
+        if ($sourceNodeId) {
+            $this->createEdge($sourceNodeId, $nodeId, $sourceHandle);
+        }
     }
 
     // Define Actions

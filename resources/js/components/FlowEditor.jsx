@@ -17,22 +17,47 @@ import ReactFlow, {
 import TriggerNode from './TriggerNode';
 import FilterNode from './FilterNode';
 import ActionNode from './ActionNode';
+import SendWebhookNode from './SendWebhookNode';
+import EmptyCanvasState from './EmptyCanvasState';
 
 const nodeTypes = {
     trigger: TriggerNode,
     filter: FilterNode,
     action: ActionNode,
+    sendWebhook: SendWebhookNode,
 };
 
-function FlowCanvas({ initialNodes, initialEdges, initialViewport, livewireId, eventOptions, filterFieldsMap }) {
+function FlowCanvas({ initialNodes, initialEdges, initialViewport, livewireId, eventOptions, filterFieldsMap, availableNodesMap }) {
+
+    // Transform map to list for UI
+    const availableNodesList = useMemo(() => {
+        if (!availableNodesMap) return [];
+        return Object.values(availableNodesMap)
+            .filter(node => node.metadata?.positioning?.input === true)
+            .map(node => ({
+                type: node.type,
+                label: node.metadata?.label || node.name,
+                icon: node.metadata?.icon || 'circle',
+                color: node.metadata?.color || 'gray',
+                group: node.metadata?.group || 'Custom',
+                positioning: node.metadata?.positioning || {}
+            }));
+    }, [availableNodesMap]);
+
     const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes.map(n => {
-        const baseData = { ...n.data, livewireId, eventOptions };
+        const baseData = {
+            ...n.data,
+            livewireId,
+            eventOptions,
+            availableNodes: availableNodesList
+        };
         // Pass filterFieldsMap to filter nodes for dynamic field lookup
         if (n.type === 'filter') {
             baseData.filterFieldsMap = filterFieldsMap;
         }
         return { ...n, data: baseData };
     }));
+
     const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
     const { getViewport } = useReactFlow();
 
@@ -41,21 +66,14 @@ function FlowCanvas({ initialNodes, initialEdges, initialViewport, livewireId, e
     }, [setEdges]);
 
     const onNodeDoubleClick = useCallback((event, node) => {
-        if (!window.Livewire || !livewireId) return;
-        const component = window.Livewire.find(livewireId);
-        if (!component) return;
-
-        // Only action nodes open modal on double-click
-        if (node.type === 'action') {
-            component.call('mountAction', 'editAction', { nodeId: node.id, nodeData: node.data });
-        }
-    }, [livewireId]);
+        // Double click logic is now handled internally by nodes (expanding)
+    }, []);
 
     const handleAddAction = useCallback(() => {
         if (!window.Livewire || !livewireId) return;
         const component = window.Livewire.find(livewireId);
         if (component) {
-            component.call('mountAction', 'createAction');
+            component.call('createActionNode', { actionType: 'log' });
         }
     }, [livewireId]);
 
@@ -89,6 +107,8 @@ function FlowCanvas({ initialNodes, initialEdges, initialViewport, livewireId, e
                     id: edge.id,
                     source: edge.source,
                     target: edge.target,
+                    sourceHandle: edge.sourceHandle || null,
+                    targetHandle: edge.targetHandle || null,
                 })),
                 viewport: getViewport(),
             };
@@ -123,6 +143,7 @@ function FlowCanvas({ initialNodes, initialEdges, initialViewport, livewireId, e
                         livewireId,
                         eventOptions,
                         filterFieldsMap,
+                        availableNodes: availableNodesList
                     }
                 };
                 console.log('[FlowEditor] Adding new node:', newNode);
@@ -130,11 +151,9 @@ function FlowCanvas({ initialNodes, initialEdges, initialViewport, livewireId, e
             }
         };
 
-        // Handle node removed - Livewire 3 passes data directly
+        // Handle node removed
         const handleNodeRemoved = (nodeId) => {
             console.log('[FlowEditor] Node removed event received:', nodeId);
-
-            // Handle array format from Livewire
             const id = Array.isArray(nodeId) ? nodeId[0] : nodeId;
 
             if (id) {
@@ -144,16 +163,35 @@ function FlowCanvas({ initialNodes, initialEdges, initialViewport, livewireId, e
             }
         };
 
-        // Handle full refresh (fallback)
+        // Handle full refresh
         const handleRefresh = () => {
             console.log('Flow refresh received, reloading...');
             window.location.reload();
+        };
+
+        // Handle edge added event from backend
+        const handleEdgeAdded = (edgeData) => {
+            console.log('[FlowEditor] Edge added event received:', edgeData);
+            const data = Array.isArray(edgeData) ? edgeData[0] : edgeData;
+
+            if (data && data.id) {
+                const newEdge = {
+                    id: data.id,
+                    source: data.source,
+                    target: data.target,
+                    sourceHandle: data.sourceHandle || null,
+                    targetHandle: data.targetHandle || null,
+                    type: 'default', // Use default or smoothstep
+                };
+                setEdges((eds) => addEdge(newEdge, eds));
+            }
         };
 
         // Register Livewire listeners
         if (window.Livewire && window.Livewire.on) {
             window.Livewire.on('node-added', handleNodeAdded);
             window.Livewire.on('node-removed', handleNodeRemoved);
+            window.Livewire.on('edge-added', handleEdgeAdded);
             window.Livewire.on('flow-refresh', handleRefresh);
         }
 
@@ -163,9 +201,9 @@ function FlowCanvas({ initialNodes, initialEdges, initialViewport, livewireId, e
         return () => {
             window.removeEventListener('flow-refresh', handleRefresh);
         };
-    }, [livewireId, eventOptions, filterFieldsMap, setNodes, setEdges]);
+    }, [livewireId, eventOptions, filterFieldsMap, availableNodesList, setNodes, setEdges]);
 
-    // Sync with Livewire (existing code...)
+    // Sync with Livewire (debounced save)
     useEffect(() => {
         const timer = setTimeout(() => {
             const flowData = {
@@ -179,25 +217,35 @@ function FlowCanvas({ initialNodes, initialEdges, initialViewport, livewireId, e
                     id: edge.id,
                     source: edge.source,
                     target: edge.target,
+                    sourceHandle: edge.sourceHandle || null,
+                    targetHandle: edge.targetHandle || null,
                 })),
                 viewport: getViewport(),
             };
 
             if (window.Livewire && livewireId) {
                 const component = window.Livewire.find(livewireId);
-                if (component) {
-                    component.call('saveFlowData', flowData);
-                }
+                component?.call('saveFlowData', flowData);
             }
-        }, 1000); // Debounce 1s
+        }, 1000); // 1s debounce
 
         return () => clearTimeout(timer);
-    }, [nodes, edges, livewireId]); // getViewport is stable, can emit
+    }, [nodes, edges, livewireId]);
 
     const hasTrigger = nodes.some(n => n.type === 'trigger');
+    const isEmpty = nodes.length === 0;
 
     return (
         <div style={{ width: '100%', height: '100%', position: 'relative' }}>
+            {/* Empty State */}
+            {isEmpty && (
+                <EmptyCanvasState
+                    onAddTrigger={handleAddTrigger}
+                    onAddAction={handleAddAction}
+                    onAddFilter={handleAddFilter}
+                />
+            )}
+
             <ReactFlow
                 nodes={nodes}
                 edges={edges}
@@ -214,82 +262,11 @@ function FlowCanvas({ initialNodes, initialEdges, initialViewport, livewireId, e
                 <Controls />
                 <MiniMap />
             </ReactFlow>
-
-            {/* Toolbar */}
-            <div style={{
-                position: 'absolute',
-                top: '20px',
-                right: '20px',
-                zIndex: 5,
-                display: 'flex',
-                gap: '10px',
-            }}>
-                <button
-                    onClick={handleAddTrigger}
-                    disabled={hasTrigger}
-                    style={{
-                        background: hasTrigger ? '#64748B' : '#EA580C',
-                        color: 'white',
-                        border: 'none',
-                        padding: '8px 16px',
-                        borderRadius: '6px',
-                        fontWeight: '600',
-                        cursor: hasTrigger ? 'not-allowed' : 'pointer',
-                        boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
-                        display: 'flex', alignItems: 'center', gap: '6px', opacity: hasTrigger ? 0.7 : 1
-                    }}
-                >
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" style={{ width: '16px', height: '16px' }}>
-                        <path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clipRule="evenodd" />
-                    </svg>
-                    Add Trigger
-                </button>
-                <button
-                    onClick={handleAddFilter}
-                    style={{
-                        background: '#9333EA',
-                        color: 'white',
-                        border: 'none',
-                        padding: '8px 16px',
-                        borderRadius: '6px',
-                        fontWeight: '600',
-                        cursor: 'pointer',
-                        boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
-                        display: 'flex', alignItems: 'center', gap: '6px'
-                    }}
-                >
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" style={{ width: '16px', height: '16px' }}>
-                        <path fillRule="evenodd" d="M3 3a1 1 0 011-1h12a1 1 0 011 1v3a1 1 0 01-.293.707L12 11.414V15a1 1 0 01-.293.707l-2 2A1 1 0 018 17v-5.586L3.293 6.707A1 1 0 013 6V3z" clipRule="evenodd" />
-                    </svg>
-                    Add Filter
-                </button>
-                <button
-                    onClick={handleAddAction}
-                    style={{
-                        background: '#2563EB',
-                        color: 'white',
-                        border: 'none',
-                        padding: '8px 16px',
-                        borderRadius: '6px',
-                        fontWeight: '600',
-                        cursor: 'pointer',
-                        boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '6px',
-                    }}
-                >
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" style={{ width: '16px', height: '16px' }}>
-                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clipRule="evenodd" />
-                    </svg>
-                    Add Action
-                </button>
-            </div>
         </div>
     );
 }
 
-export default function FlowEditor({ nodes, edges, viewport, livewireId, eventOptions, filterFieldsMap }) {
+export default function FlowEditor({ nodes, edges, viewport, livewireId, eventOptions, filterFieldsMap, availableNodesMap }) {
     return (
         <ReactFlowProvider>
             <FlowCanvas
@@ -299,6 +276,7 @@ export default function FlowEditor({ nodes, edges, viewport, livewireId, eventOp
                 livewireId={livewireId}
                 eventOptions={eventOptions}
                 filterFieldsMap={filterFieldsMap || {}}
+                availableNodesMap={availableNodesMap || {}}
             />
         </ReactFlowProvider>
     );

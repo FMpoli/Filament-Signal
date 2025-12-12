@@ -1,9 +1,15 @@
-import React, { useState } from 'react';
-import { Handle, Position } from 'reactflow';
+import React, { useState, useEffect } from 'react';
+import { Handle, Position, useStore, useReactFlow } from 'reactflow';
 import ConfirmModal from './ConfirmModal';
+import AddNodeButton from './AddNodeButton';
 
-const TriggerNode = ({ id, data }) => {
-    const [isExpanded, setIsExpanded] = useState(false);
+const TriggerNode = ({ id, data, selected }) => {
+    const { setNodes } = useReactFlow();
+
+    // Check for outgoing connections
+    const edges = useStore((s) => s.edges);
+    const isConnected = edges.some(edge => edge.source === id);
+    const [isExpanded, setIsExpanded] = useState(data.isNew || false);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [formData, setFormData] = useState({
         label: data.label || '',
@@ -14,27 +20,60 @@ const TriggerNode = ({ id, data }) => {
 
     const eventOptions = data.eventOptions || {};
 
-    // Simple save function - called immediately on change
+    // Save function
     const save = (newData) => {
-        if (data.livewireId && window.Livewire) {
+        if (!data.livewireId) {
+            console.warn(`[TriggerNode] Missing livewireId for node ${id}`);
+            return;
+        }
+
+        if (window.Livewire) {
             const component = window.Livewire.find(data.livewireId);
             if (component) {
-                component.call('updateTriggerConfig', {
+                console.log(`[TriggerNode] Saving config for ${id}`, newData);
+                // Use generic updateNodeConfig standard method
+                component.call('updateNodeConfig', {
                     nodeId: id,
                     label: newData.label,
                     description: newData.description,
                     eventClass: newData.eventClass,
                     status: newData.status
+                    // implementation will merge these into config
                 });
+            } else {
+                console.error(`[TriggerNode] Livewire component ${data.livewireId} not found`);
             }
         }
     };
 
+    // Debounced save effect
+    useEffect(() => {
+        const timeoutId = setTimeout(() => {
+            // Only save if data is different from props (optional optimization, but good for now just save)
+            save(formData);
+        }, 600); // 600ms debounce
+
+        return () => clearTimeout(timeoutId);
+    }, [formData]);
+
     // Single handler for all field changes
     const handleChange = (field, value) => {
-        const updated = { ...formData, [field]: value };
-        setFormData(updated);
-        save(updated);
+        setFormData(prev => ({ ...prev, [field]: value }));
+
+        // Immediately update ReactFlow store so connected nodes (like FilterNode) 
+        // can access the new data (e.g. eventClass) without a reload
+        setNodes((nds) => nds.map((node) => {
+            if (node.id === id) {
+                return {
+                    ...node,
+                    data: {
+                        ...node.data,
+                        [field]: value
+                    }
+                };
+            }
+            return node;
+        }));
     };
 
     const handleDelete = () => {
@@ -44,7 +83,7 @@ const TriggerNode = ({ id, data }) => {
     const confirmDelete = () => {
         setShowDeleteModal(false);
         if (data.livewireId && window.Livewire) {
-            window.Livewire.find(data.livewireId)?.call('deleteTrigger');
+            window.Livewire.find(data.livewireId)?.call('deleteTrigger', id);
         }
     };
 
@@ -56,44 +95,94 @@ const TriggerNode = ({ id, data }) => {
 
     const isActive = formData.status === 'active';
 
+    // Handle collapse and update isNew
+    const handleCollapse = () => {
+        setIsExpanded(false);
+        if (data.isNew) {
+            setNodes((nds) => nds.map((node) => {
+                if (node.id === id) {
+                    return {
+                        ...node,
+                        data: {
+                            ...node.data,
+                            isNew: false
+                        }
+                    };
+                }
+                return node;
+            }));
+        }
+    };
+
+    // Handle toggle expansion
+    const toggleExpansion = () => {
+        if (isExpanded) {
+            handleCollapse();
+        } else {
+            setIsExpanded(true);
+        }
+    };
+
+    // Handle adding a connected node
+    const handleAddConnectedNode = (nodeType, sourceNodeId) => {
+        if (!data.livewireId || !window.Livewire) return;
+        const component = window.Livewire.find(data.livewireId);
+        if (!component) return;
+
+        // Use generic create node
+        component.call('createGenericNode', {
+            type: nodeType,
+            sourceNodeId: sourceNodeId
+        });
+
+        // Collapse this node
+        handleCollapse();
+    };
+
     return (
         <>
             <ConfirmModal
                 isOpen={showDeleteModal}
                 title="Delete Trigger"
-                message="Are you sure you want to delete this trigger? This will also remove all connected filters and actions."
+                message={`Are you sure you want to delete "${formData.label}"? This action cannot be undone.`}
                 onConfirm={confirmDelete}
                 onCancel={() => setShowDeleteModal(false)}
-                confirmColor="orange"
             />
 
             <div className={`
-            bg-white dark:bg-slate-900
-            border-2 rounded-xl
-            ${isActive ? 'border-orange-500' : 'border-slate-200 dark:border-slate-700'}
-            shadow-lg min-w-[280px] max-w-[380px]
-            transition-all duration-200
-        `}>
+                relative
+                bg-white dark:bg-slate-900
+                border-2 border-solid rounded-xl
+                ${selected ? 'border-orange-500 shadow-lg' : 'border-slate-200 dark:border-slate-700'}
+                text-slate-700 dark:text-slate-200
+                min-w-[350px]
+                transition-all duration-200
+                hover:shadow-md
+            `}>
                 {/* Header */}
-                <div className="bg-orange-500 px-4 py-2.5 flex items-center justify-between rounded-t-lg">
+                <div className="bg-gradient-to-r from-orange-500 to-orange-600 px-4 py-3 flex items-center justify-between box-border rounded-t-lg">
                     <div className="flex items-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4 text-white">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5 text-white">
                             <path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clipRule="evenodd" />
                         </svg>
-                        <span className="text-xs font-bold text-white uppercase tracking-wider">
+                        <div className="text-sm font-bold text-white uppercase tracking-wider">
                             {formData.label || 'Trigger'}
-                        </span>
+                        </div>
                     </div>
 
                     <div className="flex items-center gap-2">
-                        {/* Status Badge */}
-                        <span className={`text-[10px] px-2 py-0.5 rounded font-bold uppercase text-white ${statusColors[formData.status]}`}>
-                            {formData.status}
-                        </span>
+                        {formData.status && (
+                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase ${formData.status === 'active'
+                                ? 'bg-green-500/20 text-white border border-green-500/30'
+                                : 'bg-white/20 text-white'
+                                }`}>
+                                {formData.status}
+                            </span>
+                        )}
 
                         {/* Expand/Collapse */}
                         <button
-                            onClick={() => setIsExpanded(!isExpanded)}
+                            onClick={toggleExpansion}
                             className="nodrag text-white/80 hover:text-white transition-colors"
                             title={isExpanded ? "Collapse" : "Expand"}
                         >
@@ -103,13 +192,12 @@ const TriggerNode = ({ id, data }) => {
                             </svg>
                         </button>
 
-                        {/* Delete */}
                         <button
                             onClick={handleDelete}
-                            className="nodrag text-white/80 hover:text-white transition-colors"
+                            className="nodrag cursor-pointer text-white/80 hover:text-white transition-colors"
                             title="Delete Trigger"
                         >
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3.5 h-3.5">
                                 <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
                             </svg>
                         </button>
@@ -117,28 +205,23 @@ const TriggerNode = ({ id, data }) => {
                 </div>
 
                 {/* Body */}
-                <div className="p-4">
+                <div className="p-4 bg-white dark:bg-slate-900 rounded-b-lg">
                     {!isExpanded ? (
                         /* Collapsed View */
                         <div>
-                            {/* Description */}
                             {formData.description && (
                                 <div className="text-slate-500 dark:text-slate-400 text-xs italic mb-2">
                                     {formData.description}
                                 </div>
                             )}
-
-                            {/* Event Class info */}
                             {formData.eventClass && (
-                                <div className="text-xs text-slate-500 dark:text-slate-400 font-mono bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded truncate">
-                                    {eventOptions[formData.eventClass] || formData.eventClass}
+                                <div className="text-xs text-slate-500 dark:text-slate-400 font-mono bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded inline-block">
+                                    {eventOptions[formData.eventClass] || formData.eventClass.split('\\').pop()}
                                 </div>
                             )}
-
-                            {/* Show placeholder if no description and no event */}
                             {!formData.description && !formData.eventClass && (
-                                <div className="text-slate-400 dark:text-slate-500 text-sm italic">
-                                    Click to configure...
+                                <div className="text-slate-400 dark:text-slate-500 text-sm italic mt-2">
+                                    Click arrow to configure...
                                 </div>
                             )}
                         </div>
@@ -217,11 +300,28 @@ const TriggerNode = ({ id, data }) => {
                     )}
                 </div>
 
+                {/* Output Handle */}
                 <Handle
                     type="source"
                     position={Position.Right}
-                    className="!bg-orange-500 !w-3 !h-3 !border-2 !border-white"
+                    className={`!w-3 !h-3 !border-2 !border-white !bg-orange-500
+                        ${!isConnected ? 'opacity-0' : 'opacity-100'}
+                    `}
+                    style={{ right: '-6px', top: '50%' }}
                 />
+
+                {/* Add Button */}
+                {!isConnected && (
+                    <div className="absolute right-0 top-1/2 translate-x-1/2 -translate-y-1/2 z-10">
+                        <AddNodeButton
+                            onAddNode={handleAddConnectedNode}
+                            sourceNodeId={id}
+                            livewireId={data.livewireId}
+                            availableNodes={data.availableNodes}
+                            color="orange"
+                        />
+                    </div>
+                )}
             </div>
         </>
     );

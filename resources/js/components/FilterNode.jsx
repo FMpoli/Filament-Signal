@@ -1,36 +1,104 @@
 import React, { useState, useMemo } from 'react';
-import { Handle, Position, useEdges, useNodes } from 'reactflow';
+import { Handle, Position, useStore, useReactFlow, useNodes, useEdges } from 'reactflow';
 import ConfirmModal from './ConfirmModal';
+import AddNodeButton from './AddNodeButton';
 
 const FilterNode = ({ id, data }) => {
+    const { setNodes } = useReactFlow();
     const edges = useEdges();
     const allNodes = useNodes();
-    const [isExpanded, setIsExpanded] = useState(false);
+
+    console.log(`[FilterNode ${id}] All Nodes:`, allNodes.length, allNodes.map(n => n.id));
+
+    const [isExpanded, setIsExpanded] = useState(data.isNew || false);
     const [filters, setFilters] = useState(Array.isArray(data.filters) ? data.filters : []);
     const [matchType, setMatchType] = useState(data.matchType || 'all');
     const [label, setLabel] = useState(data.label || 'Filter');
     const [description, setDescription] = useState(data.description || '');
     const [showDeleteModal, setShowDeleteModal] = useState(false);
 
+    // ... (rest of component state)
+
+    // Handle collapse and update isNew
+    const handleCollapse = () => {
+        setIsExpanded(false);
+        if (data.isNew) {
+            setNodes((nds) => nds.map((node) => {
+                if (node.id === id) {
+                    return {
+                        ...node,
+                        data: {
+                            ...node.data,
+                            isNew: false
+                        }
+                    };
+                }
+                return node;
+            }));
+        }
+    };
+
+    // Handle toggle expansion
+    const toggleExpansion = () => {
+        if (isExpanded) {
+            handleCollapse();
+        } else {
+            setIsExpanded(true);
+        }
+    };
+
+    // ... (rest of code)
+
+    // Handle adding a connected node
+    const handleAddConnectedNode = (nodeType, sourceNodeId) => {
+        if (!data.livewireId || !window.Livewire) return;
+        const component = window.Livewire.find(data.livewireId);
+        if (!component) return;
+
+        // Use generic create node
+        component.call('createGenericNode', {
+            type: nodeType,
+            sourceNodeId: sourceNodeId
+        });
+
+        // Collapse this node
+        handleCollapse();
+    };
+
     // Check if this filter node is connected to a trigger or another filter
     const isConnected = edges.some(edge => edge.target === id);
+    const isOutputConnected = edges.some(edge => edge.source === id);
 
     // Dynamically get available fields from connected source (trigger or filter)
     const availableFields = useMemo(() => {
         // Find the edge that connects to this filter
         const incomingEdge = edges.find(edge => edge.target === id);
-        if (!incomingEdge) return {};
+        if (!incomingEdge) {
+            console.log(`[FilterNode ${id}] No incoming edge`);
+            return {};
+        }
 
         // Find the source node
         const sourceNode = allNodes.find(n => n.id === incomingEdge.source);
-        if (!sourceNode) return {};
+        if (!sourceNode) {
+            console.log(`[FilterNode ${id}] Source node not found for edge`, incomingEdge);
+            return {};
+        }
+
+        console.log(`[FilterNode ${id}] Source node found:`, sourceNode.type, sourceNode.id);
 
         // If source is trigger, get eventClass and look up fields
         if (sourceNode.type === 'trigger') {
             const eventClass = sourceNode.data?.eventClass;
-            if (!eventClass) return {};
             const filterFieldsMap = data.filterFieldsMap || {};
-            return filterFieldsMap[eventClass] || {};
+
+            console.log(`[FilterNode ${id}] Trigger EventClass:`, eventClass);
+            console.log(`[FilterNode ${id}] FilterFieldsMap keys:`, Object.keys(filterFieldsMap));
+
+            if (!eventClass) return {};
+            const fields = filterFieldsMap[eventClass] || {};
+            console.log(`[FilterNode ${id}] Found fields:`, Object.keys(fields).length);
+            return fields;
         }
 
         // If source is another filter, propagate its available fields
@@ -54,8 +122,11 @@ const FilterNode = ({ id, data }) => {
             };
 
             const eventClass = findTriggerEventClass(sourceNode.id);
-            if (!eventClass) return {};
             const filterFieldsMap = data.filterFieldsMap || {};
+
+            console.log(`[FilterNode ${id}] Recursive EventClass:`, eventClass);
+
+            if (!eventClass) return {};
             return filterFieldsMap[eventClass] || {};
         }
 
@@ -197,6 +268,8 @@ const FilterNode = ({ id, data }) => {
         }
     };
 
+
+
     return (
         <>
             <ConfirmModal
@@ -208,6 +281,7 @@ const FilterNode = ({ id, data }) => {
             />
 
             <div className={`
+                relative
                 bg-white dark:bg-slate-900
                 border-2 rounded-xl
                 ${isConnected ? 'border-purple-500' : 'border-slate-300 dark:border-slate-600'}
@@ -332,14 +406,14 @@ const FilterNode = ({ id, data }) => {
                                 <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">
                                     Description
                                 </label>
-                                <input
-                                    type="text"
+                                <textarea
                                     value={description}
                                     onChange={(e) => handleDescriptionChange(e.target.value)}
                                     placeholder="Optional description..."
+                                    rows={2}
                                     className="w-full px-3 py-2 text-sm border border-slate-300 dark:border-slate-600 rounded-md 
                                         bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100
-                                        focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none"
+                                        focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none resize-none"
                                 />
                             </div>
 
@@ -460,11 +534,28 @@ const FilterNode = ({ id, data }) => {
                     )}
                 </div>
 
+                {/* Output Handle */}
                 <Handle
                     type="source"
                     position={Position.Right}
-                    className="!bg-purple-500 !w-3 !h-3 !border-2 !border-white"
+                    className={`!bg-purple-500 !w-3 !h-3 !border-2 !border-white
+                        ${!isOutputConnected ? 'opacity-0' : 'opacity-100'}
+                    `}
+                    style={{ right: '-6px', top: '50%' }}
                 />
+
+                {/* Add Button */}
+                {!isOutputConnected && (
+                    <div className="absolute right-0 top-1/2 translate-x-1/2 -translate-y-1/2 z-10">
+                        <AddNodeButton
+                            onAddNode={handleAddConnectedNode}
+                            sourceNodeId={id}
+                            livewireId={data.livewireId}
+                            availableNodes={data.availableNodes}
+                            color="purple"
+                        />
+                    </div>
+                )}
             </div>
         </>
     );
