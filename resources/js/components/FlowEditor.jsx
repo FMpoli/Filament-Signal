@@ -24,11 +24,24 @@ const nodeTypes = {
     action: ActionNode,
 };
 
-function FlowCanvas({ initialNodes, initialEdges, initialViewport, livewireId, eventOptions }) {
-    const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes.map(n => ({
-        ...n,
-        data: { ...n.data, livewireId, eventOptions }
-    })));
+function FlowCanvas({ initialNodes, initialEdges, initialViewport, livewireId, eventOptions, filterFieldsMap }) {
+    // Find trigger's eventClass for passing to filter nodes
+    const getTriggerEventClass = () => {
+        const triggerNode = initialNodes.find(n => n.type === 'trigger');
+        return triggerNode?.data?.eventClass || null;
+    };
+
+    const triggerEventClass = getTriggerEventClass();
+    const availableFields = triggerEventClass ? (filterFieldsMap[triggerEventClass] || {}) : {};
+
+    const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes.map(n => {
+        const baseData = { ...n.data, livewireId, eventOptions };
+        // Add availableFields to filter nodes
+        if (n.type === 'filter') {
+            baseData.availableFields = availableFields;
+        }
+        return { ...n, data: baseData };
+    }));
     const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
     const { getViewport } = useReactFlow();
 
@@ -242,7 +255,7 @@ function FlowCanvas({ initialNodes, initialEdges, initialViewport, livewireId, e
     );
 }
 
-export default function FlowEditor({ nodes, edges, viewport, livewireId, eventOptions }) {
+export default function FlowEditor({ nodes, edges, viewport, livewireId, eventOptions, filterFieldsMap }) {
     return (
         <ReactFlowProvider>
             <FlowCanvas
@@ -251,6 +264,7 @@ export default function FlowEditor({ nodes, edges, viewport, livewireId, eventOp
                 initialViewport={viewport}
                 livewireId={livewireId}
                 eventOptions={eventOptions}
+                filterFieldsMap={filterFieldsMap || {}}
             />
         </ReactFlowProvider>
     );

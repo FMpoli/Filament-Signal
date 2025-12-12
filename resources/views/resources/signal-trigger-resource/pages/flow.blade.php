@@ -37,6 +37,18 @@
         // Load viewport from metadata or use default
         $viewport = $record->metadata['viewport'] ?? ['x' => 0, 'y' => 0, 'zoom' => 0.7];
         $viewportJson = json_encode($viewport, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE);
+
+        // Get filter field options for each event class (for filter nodes)
+        $filterFieldsMap = [];
+        foreach ($savedNodes as $node) {
+            if ($node->type === 'trigger') {
+                $eventClass = $node->config['eventClass'] ?? null;
+                if ($eventClass && !isset($filterFieldsMap[$eventClass])) {
+                    $filterFieldsMap[$eventClass] = \Base33\FilamentSignal\Filament\Resources\SignalTriggerResource::getFilterFieldOptionsForEvent($eventClass);
+                }
+            }
+        }
+        $filterFieldsMapJson = json_encode($filterFieldsMap, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE);
     @endphp
 
     <div class="fi-section-content-ctn rounded-xl bg-white p-6 shadow-sm ring-1 ring-gray-950/5 dark:bg-gray-900 dark:ring-white/10"
@@ -61,6 +73,7 @@
              data-edges='{!! $edgesJson !!}'
              data-viewport='{!! $viewportJson !!}'
              data-event-options='@json(\Base33\FilamentSignal\Filament\Resources\SignalTriggerResource::getEventClassOptions())'
+             data-filter-fields-map='{!! $filterFieldsMapJson !!}'
              data-livewire-id="{{ $this->getId() }}"
              wire:ignore></div>
     </div>

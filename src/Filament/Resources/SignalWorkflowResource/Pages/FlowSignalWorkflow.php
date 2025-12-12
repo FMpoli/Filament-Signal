@@ -133,6 +133,29 @@ class FlowSignalWorkflow extends Page implements HasActions, HasForms
         }
     }
 
+    public function updateFilterConfig(array $data): void
+    {
+        $nodeId = $data['nodeId'] ?? null;
+        if (! $nodeId) {
+            return;
+        }
+
+        $node = $this->record->nodes()->where('node_id', $nodeId)->first();
+
+        if ($node) {
+            $config = $node->config ?? [];
+            $config['filters'] = $data['filters'] ?? [];
+            $config['matchType'] = $data['matchType'] ?? 'all';
+
+            // Ensure transient data is not saved
+            unset($config['availableFields'], $config['livewireId']);
+
+            $node->update([
+                'config' => $config,
+            ]);
+        }
+    }
+
     // Store current editing node
     public ?string $editingNodeId = null;
 
