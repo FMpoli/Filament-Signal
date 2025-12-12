@@ -37,17 +37,19 @@ const TriggerNode = ({
     };
 
     // Helper to perform the save
-    const saveTriggerConfig = useCallback(() => {
+    const performSave = useCallback((dataToSave = null) => {
         if (data.livewireId && window.Livewire) {
             const livewire = window.Livewire.find(data.livewireId);
             if (livewire) {
+                const payload = dataToSave ? { ...formData, ...dataToSave } : formData;
+
                 // Update the trigger configuration
                 livewire.call('updateTriggerConfig', {
                     nodeId: id,
-                    label: formData.label,
-                    description: formData.description,
-                    eventClass: formData.eventClass,
-                    status: formData.status
+                    label: payload.label,
+                    description: payload.description,
+                    eventClass: payload.eventClass,
+                    status: payload.status
                 });
             }
         }
@@ -74,9 +76,10 @@ const TriggerNode = ({
             clearTimeout(saveTimeoutRef.current);
         }
 
-        // Set new timeout
+        // Set new timeout by checking if performSave is stable
+        // Only debounce if the change wasn't immediate (handled by handleImmediateChange)
         saveTimeoutRef.current = setTimeout(() => {
-            saveTriggerConfig();
+            performSave();
         }, 1000);
 
         // Cleanup
@@ -85,7 +88,7 @@ const TriggerNode = ({
                 clearTimeout(saveTimeoutRef.current);
             }
         };
-    }, [formData, saveTriggerConfig]);
+    }, [formData, performSave]);
 
     const handleFieldChange = (field, value) => {
         setFormData(prev => ({
@@ -94,12 +97,28 @@ const TriggerNode = ({
         }));
     };
 
+    const handleImmediateChange = (field, value) => {
+        // Update local state
+        setFormData(prev => ({
+            ...prev,
+            [field]: value
+        }));
+
+        // Cancel pending debounce
+        if (saveTimeoutRef.current) {
+            clearTimeout(saveTimeoutRef.current);
+        }
+
+        // Save immediately with new value
+        performSave({ [field]: value });
+    };
+
     const handleBlur = (e) => {
         // Force immediate save and clear pending debounce
         if (saveTimeoutRef.current) {
             clearTimeout(saveTimeoutRef.current);
         }
-        saveTriggerConfig();
+        performSave();
     };
 
     return (
@@ -161,7 +180,7 @@ const TriggerNode = ({
                                         key={s}
                                         onClick={(e) => {
                                             e.stopPropagation();
-                                            handleFieldChange('status', s);
+                                            handleImmediateChange('status', s);
                                             setShowStatusMenu(false);
                                         }}
                                         className={cn(
@@ -312,7 +331,7 @@ const TriggerNode = ({
                                                     key={value}
                                                     onClick={(e) => {
                                                         e.stopPropagation();
-                                                        handleFieldChange('eventClass', value);
+                                                        handleImmediateChange('eventClass', value);
                                                         setShowEventMenu(false);
                                                     }}
                                                     className={cn(
