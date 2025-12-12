@@ -173,6 +173,26 @@ class FlowSignalWorkflow extends Page implements HasActions, HasForms
         $this->mountAction('editTrigger');
     }
 
+    // Public method for JavaScript to call when creating new filter (no modal)
+    public function createNewFilter(): void
+    {
+        $filterId = 'filter-' . \Illuminate\Support\Str::uuid();
+
+        $this->record->nodes()->create([
+            'node_id' => $filterId,
+            'type' => 'filter',
+            'name' => 'Filter Logic',
+            'config' => [
+                'matchType' => 'all',
+                'filters' => [],
+            ],
+            'position' => ['x' => 400, 'y' => 100],
+        ]);
+
+        // Refresh the page to show the new node
+        $this->dispatch('flow-refresh');
+    }
+
     // Define Actions
     public function editTriggerAction(): Action
     {

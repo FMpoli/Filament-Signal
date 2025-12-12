@@ -71,7 +71,7 @@ function FlowCanvas({ initialNodes, initialEdges, initialViewport, livewireId, e
         if (!window.Livewire || !livewireId) return;
         const component = window.Livewire.find(livewireId);
         if (component) {
-            component.call('mountAction', 'editFilters');
+            component.call('createNewFilter');
         }
     }, [livewireId]);
 
