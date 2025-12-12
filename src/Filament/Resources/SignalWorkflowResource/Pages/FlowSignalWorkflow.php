@@ -202,11 +202,11 @@ class FlowSignalWorkflow extends Page implements HasActions, HasForms
     public function createNewFilter(): void
     {
         $filterId = 'filter-' . \Illuminate\Support\Str::uuid();
-        
+
         // Calculate position - offset each new filter by 150px vertically
         $existingFilters = $this->record->nodes()->where('type', 'filter')->count();
         $position = ['x' => 400, 'y' => 100 + ($existingFilters * 180)];
-        
+
         $config = [
             'matchType' => 'all',
             'filters' => [],
