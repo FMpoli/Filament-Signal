@@ -76,6 +76,9 @@ class FlowSignalWorkflow extends Page implements HasActions, HasForms
 
     public function deleteTrigger(): void
     {
+        // Get all node IDs before deleting (for frontend notification)
+        $nodeIds = $this->record->nodes()->pluck('node_id')->toArray();
+
         // Delete all trigger nodes (there should only be one)
         $this->record->nodes()->where('type', 'trigger')->delete();
 
@@ -85,17 +88,24 @@ class FlowSignalWorkflow extends Page implements HasActions, HasForms
         // Also delete all other nodes (actions, filters)
         $this->record->nodes()->delete();
 
-        // Refresh the page
-        $this->dispatch('flow-refresh');
+        // Notify frontend about each removed node
+        foreach ($nodeIds as $nodeId) {
+            $this->dispatch('node-removed', $nodeId);
+        }
     }
 
     public function deleteFilters(): void
     {
+        // Get filter node IDs before deleting
+        $filterNodeIds = $this->record->nodes()->where('type', 'filter')->pluck('node_id')->toArray();
+
         // Delete all filter nodes
         $this->record->nodes()->where('type', 'filter')->delete();
 
-        // Refresh the page
-        $this->dispatch('flow-refresh');
+        // Notify frontend about each removed node
+        foreach ($filterNodeIds as $nodeId) {
+            $this->dispatch('node-removed', $nodeId);
+        }
     }
 
     public function deleteAction(string $nodeId): void
@@ -103,8 +113,8 @@ class FlowSignalWorkflow extends Page implements HasActions, HasForms
         // Delete specific action node by node_id
         $this->record->nodes()->where('node_id', $nodeId)->delete();
 
-        // Refresh the page
-        $this->dispatch('flow-refresh');
+        // Notify frontend
+        $this->dispatch('node-removed', $nodeId);
     }
 
     public function updateTriggerConfig(array $data): void
@@ -177,20 +187,27 @@ class FlowSignalWorkflow extends Page implements HasActions, HasForms
     public function createNewFilter(): void
     {
         $filterId = 'filter-' . \Illuminate\Support\Str::uuid();
+        $position = ['x' => 400, 'y' => 100];
+        $config = [
+            'matchType' => 'all',
+            'filters' => [],
+        ];
 
         $this->record->nodes()->create([
             'node_id' => $filterId,
             'type' => 'filter',
             'name' => 'Filter Logic',
-            'config' => [
-                'matchType' => 'all',
-                'filters' => [],
-            ],
-            'position' => ['x' => 400, 'y' => 100],
+            'config' => $config,
+            'position' => $position,
         ]);
 
-        // Refresh the page to show the new node
-        $this->dispatch('flow-refresh');
+        // Send new node data to frontend without page reload
+        $this->dispatch('node-added', [
+            'id' => $filterId,
+            'type' => 'filter',
+            'position' => $position,
+            'data' => $config,
+        ]);
     }
 
     // Define Actions

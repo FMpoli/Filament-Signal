@@ -104,20 +104,60 @@ function FlowCanvas({ initialNodes, initialEdges, initialViewport, livewireId, e
         return () => clearTimeout(timer);
     }, [nodes, edges, livewireId, getViewport]);
 
-    // Livewire Refresh Listener
+    // Livewire event listeners for dynamic node updates
     useEffect(() => {
+        // Handle new node added
+        const handleNodeAdded = (event) => {
+            const nodeData = event.detail?.[0] || event;
+            console.log('[FlowEditor] Node added:', nodeData);
+
+            if (nodeData && nodeData.id) {
+                const newNode = {
+                    id: nodeData.id,
+                    type: nodeData.type,
+                    position: nodeData.position || { x: 400, y: 100 },
+                    data: {
+                        ...nodeData.data,
+                        livewireId,
+                        eventOptions,
+                        filterFieldsMap,
+                    }
+                };
+                setNodes(nds => [...nds, newNode]);
+            }
+        };
+
+        // Handle node removed
+        const handleNodeRemoved = (event) => {
+            const nodeId = event.detail?.[0] || event;
+            console.log('[FlowEditor] Node removed:', nodeId);
+
+            if (nodeId) {
+                setNodes(nds => nds.filter(n => n.id !== nodeId));
+                setEdges(eds => eds.filter(e => e.source !== nodeId && e.target !== nodeId));
+            }
+        };
+
+        // Handle full refresh (fallback)
         const handleRefresh = () => {
             console.log('Flow refresh received, reloading...');
             window.location.reload();
         };
-        window.addEventListener('flow-refresh', handleRefresh);
+
+        // Register Livewire listeners
         if (window.Livewire && window.Livewire.on) {
+            window.Livewire.on('node-added', handleNodeAdded);
+            window.Livewire.on('node-removed', handleNodeRemoved);
             window.Livewire.on('flow-refresh', handleRefresh);
         }
+
+        // Also listen for browser events (fallback)
+        window.addEventListener('flow-refresh', handleRefresh);
+
         return () => {
             window.removeEventListener('flow-refresh', handleRefresh);
         };
-    }, []);
+    }, [livewireId, eventOptions, filterFieldsMap, setNodes, setEdges]);
 
     // Sync with Livewire (existing code...)
     useEffect(() => {
