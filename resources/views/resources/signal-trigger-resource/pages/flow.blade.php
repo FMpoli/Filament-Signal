@@ -38,13 +38,13 @@
         $viewport = $record->metadata['viewport'] ?? ['x' => 0, 'y' => 0, 'zoom' => 0.7];
         $viewportJson = json_encode($viewport, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE);
 
-        // Get filter field options for each event class (for filter nodes)
+        // Get filter field options for each event class (for filter nodes) - includes type info
         $filterFieldsMap = [];
         foreach ($savedNodes as $node) {
             if ($node->type === 'trigger') {
                 $eventClass = $node->config['eventClass'] ?? null;
                 if ($eventClass && !isset($filterFieldsMap[$eventClass])) {
-                    $filterFieldsMap[$eventClass] = \Base33\FilamentSignal\Filament\Resources\SignalTriggerResource::getFilterFieldOptionsForEvent($eventClass);
+                    $filterFieldsMap[$eventClass] = \Base33\FilamentSignal\Filament\Resources\SignalTriggerResource::getFilterFieldOptionsWithTypesForEvent($eventClass);
                 }
             }
         }

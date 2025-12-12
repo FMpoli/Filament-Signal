@@ -1566,6 +1566,120 @@ class SignalTriggerResource extends Resource
     }
 
     /**
+     * Ottiene le opzioni dei campi per un event_class con informazioni sul tipo.
+     *
+     * @return array<string, array{label: string, type: string}> Array associativo [campo => {label, type}]
+     */
+    public static function getFilterFieldOptionsWithTypesForEvent(string $eventClass): array
+    {
+        try {
+            $analyzer = app(SignalPayloadFieldAnalyzer::class);
+            $analysis = $analyzer->analyzeEvent($eventClass);
+
+            $options = [];
+
+            // Campi del modello principale
+            foreach ($analysis['fields'] as $field => $data) {
+                if (substr_count($field, '.') > 1) {
+                    continue;
+                }
+
+                $parts = explode('.', $field);
+                if (count($parts) === 2) {
+                    $fieldName = $parts[1];
+                    if (in_array($fieldName, ['created_at', 'updated_at', 'attachments'])) {
+                        continue;
+                    }
+                }
+
+                $label = $data['label'] ?? $field;
+                if (str_contains($label, '.')) {
+                    $labelParts = explode('.', $label);
+                    $formattedParts = [];
+                    foreach ($labelParts as $part) {
+                        $trimmed = trim($part);
+                        $formattedParts[] = ucfirst(strtolower($trimmed));
+                    }
+                    $label = implode(' → ', $formattedParts);
+                } elseif (str_contains($label, ' - ')) {
+                    $label = str_replace(' - ', ' → ', $label);
+                }
+
+                // Determina il tipo del campo
+                $type = $data['type'] ?? 'string';
+                
+                // Normalizza i tipi per il frontend
+                $normalizedType = match(strtolower($type)) {
+                    'datetime', 'date', 'timestamp', 'carbon' => 'date',
+                    'int', 'integer', 'bigint', 'smallint' => 'number',
+                    'float', 'double', 'decimal' => 'number',
+                    'bool', 'boolean' => 'boolean',
+                    default => 'string'
+                };
+
+                $options[$field] = [
+                    'label' => $label,
+                    'type' => $normalizedType,
+                ];
+            }
+
+            // Campi delle relazioni
+            if (! empty($analysis['relations'])) {
+                foreach ($analysis['relations'] as $relation) {
+                    $fieldOptions = $relation['field_options'] ?? [];
+                    if (empty($fieldOptions)) {
+                        continue;
+                    }
+
+                    $alias = $relation['alias'] ?? 'relation';
+                    $parentProperty = $relation['parent_property'] ?? null;
+                    $relationName = $relation['relation_name'] ?? $alias;
+
+                    foreach ($fieldOptions as $fieldKey => $fieldLabel) {
+                        $formattedLabel = $fieldLabel;
+                        if (str_contains($fieldLabel, '.')) {
+                            $parts = explode('.', $fieldLabel);
+                            $formattedParts = [];
+                            foreach ($parts as $part) {
+                                $trimmed = trim($part);
+                                $formattedParts[] = ucfirst(strtolower($trimmed));
+                            }
+                            $formattedLabel = implode(' → ', $formattedParts);
+                        } elseif (str_contains($fieldLabel, ' - ')) {
+                            $formattedLabel = str_replace(' - ', ' → ', $fieldLabel);
+                        }
+
+                        if ($parentProperty) {
+                            $fieldPath = "{$parentProperty}.{$relationName}.{$fieldKey}";
+                        } else {
+                            $fieldPath = "{$alias}.{$fieldKey}";
+                        }
+
+                        $relationLabel = $relation['label'] ?? $relationName;
+                        
+                        // Per relazioni, determina il tipo dal nome campo
+                        $type = 'string';
+                        if (str_ends_with($fieldKey, '_at') || $fieldKey === 'date') {
+                            $type = 'date';
+                        } elseif (str_ends_with($fieldKey, '_id') || $fieldKey === 'id') {
+                            $type = 'number';
+                        }
+                        
+                        $options[$fieldPath] = [
+                            'label' => "{$relationLabel} → {$formattedLabel}",
+                            'type' => $type,
+                        ];
+                    }
+                }
+            }
+
+            return $options;
+        } catch (\Throwable $e) {
+            return [];
+        }
+    }
+
+    /**
      * Ottiene le opzioni dei campi disponibili per i filtri basati sull'event_class selezionato.
      * Include sia i campi del modello principale che le relazioni.
      *
