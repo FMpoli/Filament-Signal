@@ -72,11 +72,11 @@ class SendWebhookNode implements NodeInterface
      */
     public function execute(array $input, array $config): array
     {
-        // TODO: Implement your node logic here
-        
-        // Example:
-        // $result = $this->doSomething($input, $config);
-        // return ['success' => true, 'data' => $result];
+        // TODO: Implement actual webhook sending
+        // 1. Get Http client
+        // 2. Build payload from input based on config['fields']
+        // 3. Send request to config['url'] with config['method']
+        // 4. Return ['success' => true/false] to determine next branch
         
         return $input;
     }
@@ -91,11 +91,14 @@ class SendWebhookNode implements NodeInterface
     {
         $errors = [];
         
-        // TODO: Add your validation logic here
-        // Example:
-        // if (empty($config['required_field'])) {
-        //     $errors[] = 'Required field is missing';
-        // }
+        // Check required fields
+        if (empty($config['url'])) {
+            $errors[] = 'URL is required';
+        }
+
+        if (empty($config['method'])) {
+            $errors[] = 'HTTP Method is required';
+        }
         
         return $errors;
     }

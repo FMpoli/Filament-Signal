@@ -60,10 +60,8 @@ function FlowCanvas({ initialNodes, initialEdges, initialViewport, livewireId, e
             eventOptions,
             availableNodes: availableNodesList
         };
-        // Pass filterFieldsMap to filter nodes for dynamic field lookup
-        if (n.type === 'filter') {
-            baseData.filterFieldsMap = filterFieldsMap;
-        }
+        // Pass filterFieldsMap to all nodes for dynamic field lookup
+        baseData.filterFieldsMap = filterFieldsMap;
         return { ...n, data: baseData };
     }));
 
