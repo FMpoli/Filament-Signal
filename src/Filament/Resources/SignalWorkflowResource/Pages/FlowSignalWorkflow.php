@@ -121,6 +121,7 @@ class FlowSignalWorkflow extends Page implements HasActions, HasForms
             $config['label'] = $data['label'] ?? $node->name;
             $config['description'] = $data['description'] ?? ($config['description'] ?? '');
             $config['eventClass'] = $data['eventClass'] ?? ($config['eventClass'] ?? null);
+            $config['status'] = $data['status'] ?? ($config['status'] ?? 'draft');
 
             // Ensure transient data is not saved
             unset($config['eventOptions'], $config['livewireId']);
