@@ -119,17 +119,19 @@ const TriggerNode = ({ id, data }) => {
                     {!isExpanded ? (
                         /* Collapsed View */
                         <div>
+                            {/* Description at top - same style as FilterNode */}
+                            {formData.description && (
+                                <div className="text-slate-500 dark:text-slate-400 text-xs italic mb-2">
+                                    {formData.description}
+                                </div>
+                            )}
+
                             <div className="text-base font-semibold text-slate-800 dark:text-slate-100 mb-1">
                                 {formData.label || 'Untitled Trigger'}
                             </div>
                             {formData.eventClass && (
                                 <div className="text-xs text-slate-500 dark:text-slate-400 font-mono bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded truncate">
                                     {eventOptions[formData.eventClass] || formData.eventClass}
-                                </div>
-                            )}
-                            {formData.description && (
-                                <div className="text-xs text-slate-600 dark:text-slate-400 mt-2 line-clamp-2">
-                                    {formData.description}
                                 </div>
                             )}
                         </div>
