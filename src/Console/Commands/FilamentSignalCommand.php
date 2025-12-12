@@ -1,6 +1,6 @@
 <?php
 
-namespace Base33\FilamentSignal\Commands;
+namespace Base33\FilamentSignal\Console\Commands;
 
 use Illuminate\Console\Command;
 

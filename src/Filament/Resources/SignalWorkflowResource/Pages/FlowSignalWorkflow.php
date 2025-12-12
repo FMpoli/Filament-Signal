@@ -67,7 +67,8 @@ class FlowSignalWorkflow extends Page implements HasActions, HasForms
         $sourceHandle = $data['sourceHandle'] ?? null;
         
         $nodeId = $type . '-' . \Illuminate\Support\Str::uuid();
-        $position = $this->calculateNewNodePosition($sourceNodeId, $sourceHandle);
+        $nodeId = $type . '-' . \Illuminate\Support\Str::uuid();
+        $position = $data['position'] ?? $this->calculateNewNodePosition($sourceNodeId, $sourceHandle);
 
         $defaultConfig = $class::defaultConfig();
         // Merge provided config if any
@@ -349,9 +350,10 @@ class FlowSignalWorkflow extends Page implements HasActions, HasForms
         $sourceHandle = $data['sourceHandle'] ?? null;
         $filterId = 'filter-' . \Illuminate\Support\Str::uuid();
 
-        // Calculate position - offset each new filter by 150px vertically
+        // Calculate position - offset each new filter by 150px vertically if no position provided
         $existingFilters = $this->record->nodes()->where('type', 'filter')->count();
-        $position = ['x' => 400, 'y' => 100 + ($existingFilters * 180)];
+        $defaultPos = ['x' => 400, 'y' => 100 + ($existingFilters * 180)];
+        $position = $data['position'] ?? $defaultPos;
 
         $config = [
             'matchType' => 'all',
@@ -401,13 +403,14 @@ class FlowSignalWorkflow extends Page implements HasActions, HasForms
             'type' => 'trigger',
             'name' => $config['label'],
             'config' => $config,
-            'position' => ['x' => 100, 'y' => 200],
+            'config' => $config,
+            'position' => $data['position'] ?? ['x' => 100, 'y' => 200],
         ]);
 
         $this->dispatch('node-added', [
             'id' => $triggerId,
             'type' => 'trigger',
-            'position' => ['x' => 100, 'y' => 200],
+            'position' => $data['position'] ?? ['x' => 100, 'y' => 200],
             'data' => array_merge($config, ['livewireId' => $this->getId()]),
         ]);
     }
@@ -420,7 +423,8 @@ class FlowSignalWorkflow extends Page implements HasActions, HasForms
         $actionType = $data['actionType'] ?? 'log'; 
         
         $nodeId = 'action-' . Str::uuid();
-        $position = $this->calculateNewNodePosition($sourceNodeId, $sourceHandle);
+        $nodeId = 'action-' . Str::uuid();
+        $position = $data['position'] ?? $this->calculateNewNodePosition($sourceNodeId, $sourceHandle);
         
         $config = [
             'label' => ucfirst($actionType) . ' Action',
@@ -456,7 +460,9 @@ class FlowSignalWorkflow extends Page implements HasActions, HasForms
         $sourceHandle = $data['sourceHandle'] ?? null;
         $nodeId = 'sendwebhook-' . \Illuminate\Support\Str::uuid();
         
-        $position = $this->calculateNewNodePosition($sourceNodeId, $sourceHandle);
+        $nodeId = 'sendwebhook-' . \Illuminate\Support\Str::uuid();
+        
+        $position = $data['position'] ?? $this->calculateNewNodePosition($sourceNodeId, $sourceHandle);
         
         $config = [
             'label' => 'Send Webhook',

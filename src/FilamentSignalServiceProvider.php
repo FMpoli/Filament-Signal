@@ -2,7 +2,7 @@
 
 namespace Base33\FilamentSignal;
 
-use Base33\FilamentSignal\Commands\FilamentSignalCommand;
+
 use Base33\FilamentSignal\Models\SignalModelIntegration;
 use Base33\FilamentSignal\Services\SignalEventRegistrar;
 use Base33\FilamentSignal\Support\ReverseRelationRegistrar;
@@ -210,7 +210,7 @@ class FilamentSignalServiceProvider extends PackageServiceProvider
     protected function getCommands(): array
     {
         return [
-            FilamentSignalCommand::class,
+            \Base33\FilamentSignal\Console\Commands\FilamentSignalCommand::class,
             \Base33\FilamentSignal\Console\Commands\MakeSignalNodeCommand::class,
         ];
     }

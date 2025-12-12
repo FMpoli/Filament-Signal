@@ -16,14 +16,14 @@ import ReactFlow, {
 
 import TriggerNode from './TriggerNode';
 import FilterNode from './FilterNode';
-import ActionNode from './ActionNode';
 import SendWebhookNode from './SendWebhookNode';
 import EmptyCanvasState from './EmptyCanvasState';
+import ContextMenu from './ContextMenu';
 
 const nodeTypes = {
     trigger: TriggerNode,
     filter: FilterNode,
-    action: ActionNode,
+    // action: ActionNode, // Removed as file is deleted
     sendWebhook: SendWebhookNode,
 };
 
@@ -59,7 +59,9 @@ function FlowCanvas({ initialNodes, initialEdges, initialViewport, livewireId, e
     }));
 
     const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
-    const { getViewport } = useReactFlow();
+    const [menu, setMenu] = useState(null);
+    const ref = useRef(null);
+    const { getViewport, screenToFlowPosition } = useReactFlow();
 
     const onConnect = useCallback((params) => {
         setEdges((eds) => addEdge(params, eds));
@@ -69,29 +71,120 @@ function FlowCanvas({ initialNodes, initialEdges, initialViewport, livewireId, e
         // Double click logic is now handled internally by nodes (expanding)
     }, []);
 
-    const handleAddAction = useCallback(() => {
-        if (!window.Livewire || !livewireId) return;
-        const component = window.Livewire.find(livewireId);
-        if (component) {
-            component.call('createActionNode', { actionType: 'log' });
-        }
-    }, [livewireId]);
+    const onPaneContextMenu = useCallback(
+        (event) => {
+            event.preventDefault();
 
-    const handleAddTrigger = useCallback(() => {
-        if (!window.Livewire || !livewireId) return;
-        const component = window.Livewire.find(livewireId);
-        if (component) {
-            component.call('createNewTrigger');
-        }
-    }, [livewireId]);
+            // Calculate position for the menu
+            const pane = ref.current.getBoundingClientRect();
+            setMenu({
+                id: null,
+                top: event.clientY < pane.bottom - 200 ? event.clientY - pane.top : undefined,
+                left: event.clientX < pane.right - 200 ? event.clientX - pane.left : undefined,
+                bottom: event.clientY >= pane.bottom - 200 ? pane.bottom - event.clientY : undefined,
+                right: event.clientX >= pane.right - 200 ? pane.right - event.clientX : undefined,
+                // store absolute screen coords for flow conversion later
+                screenX: event.clientX,
+                screenY: event.clientY,
+            });
+        },
+        [],
+    );
 
-    const handleAddFilter = useCallback(() => {
+    const onNodeContextMenu = useCallback(
+        (event, node) => {
+            event.preventDefault();
+
+            // Calculate position for the menu
+            const pane = ref.current.getBoundingClientRect();
+            setMenu({
+                id: node.id, // Store the source node ID
+                top: event.clientY < pane.bottom - 200 ? event.clientY - pane.top : undefined,
+                left: event.clientX < pane.right - 200 ? event.clientX - pane.left : undefined,
+                bottom: event.clientY >= pane.bottom - 200 ? pane.bottom - event.clientY : undefined,
+                right: event.clientX >= pane.right - 200 ? pane.right - event.clientX : undefined,
+                // store absolute screen coords for flow conversion later
+                screenX: event.clientX,
+                screenY: event.clientY,
+            });
+        },
+        [],
+    );
+
+    const onPaneClick = useCallback(() => setMenu(null), []);
+
+    const handleAddAction = useCallback((posOrEvent) => {
         if (!window.Livewire || !livewireId) return;
         const component = window.Livewire.find(livewireId);
-        if (component) {
-            component.call('createNewFilter');
+
+        let flowPos = null;
+        if (posOrEvent && posOrEvent.x && posOrEvent.y) {
+            flowPos = screenToFlowPosition({ x: posOrEvent.x, y: posOrEvent.y });
+        } else if (menu && menu.screenX && menu.screenY) {
+            flowPos = screenToFlowPosition({ x: menu.screenX, y: menu.screenY });
         }
-    }, [livewireId]);
+
+        let sourceNodeId = menu?.id || null;
+
+        if (component) {
+            component.call('createActionNode', { actionType: 'log', position: flowPos, sourceNodeId: sourceNodeId });
+        }
+        setMenu(null);
+    }, [livewireId, menu, screenToFlowPosition]);
+
+    const handleAddTrigger = useCallback((posOrEvent) => {
+        if (!window.Livewire || !livewireId) return;
+        const component = window.Livewire.find(livewireId);
+
+        let flowPos = null;
+        if (posOrEvent && posOrEvent.x && posOrEvent.y) {
+            flowPos = screenToFlowPosition({ x: posOrEvent.x, y: posOrEvent.y });
+        } else if (menu && menu.screenX && menu.screenY) {
+            flowPos = screenToFlowPosition({ x: menu.screenX, y: menu.screenY });
+        }
+        // Triggers usually don't have sources, but just in case
+
+        if (component) {
+            component.call('createNewTrigger', { position: flowPos });
+        }
+        setMenu(null);
+    }, [livewireId, menu, screenToFlowPosition]);
+
+    const handleAddFilter = useCallback((posOrEvent) => {
+        if (!window.Livewire || !livewireId) return;
+        const component = window.Livewire.find(livewireId);
+
+        let flowPos = null;
+        if (posOrEvent && posOrEvent.x && posOrEvent.y) {
+            flowPos = screenToFlowPosition({ x: posOrEvent.x, y: posOrEvent.y });
+        } else if (menu && menu.screenX && menu.screenY) {
+            flowPos = screenToFlowPosition({ x: menu.screenX, y: menu.screenY });
+        }
+
+        let sourceNodeId = menu?.id || null;
+
+        if (component) {
+            component.call('createNewFilter', { position: flowPos, sourceNodeId: sourceNodeId });
+        }
+        setMenu(null);
+    }, [livewireId, menu, screenToFlowPosition]);
+
+    const handleAddWebhook = useCallback(() => {
+        if (!window.Livewire || !livewireId) return;
+        const component = window.Livewire.find(livewireId);
+
+        let flowPos = null;
+        if (menu && menu.screenX && menu.screenY) {
+            flowPos = screenToFlowPosition({ x: menu.screenX, y: menu.screenY });
+        }
+
+        let sourceNodeId = menu?.id || null;
+
+        if (component) {
+            component.call('createSendWebhookNode', { position: flowPos, sourceNodeId: sourceNodeId });
+        }
+        setMenu(null);
+    }, [livewireId, menu, screenToFlowPosition]);
 
     // Save viewport when user finishes panning or zooming
     const onMoveEnd = useCallback(() => {
@@ -236,7 +329,7 @@ function FlowCanvas({ initialNodes, initialEdges, initialViewport, livewireId, e
     const isEmpty = nodes.length === 0;
 
     return (
-        <div style={{ width: '100%', height: '100%', position: 'relative' }}>
+        <div ref={ref} style={{ width: '100%', height: '100%', position: 'relative' }}>
             {/* Empty State */}
             {isEmpty && (
                 <EmptyCanvasState
@@ -254,6 +347,9 @@ function FlowCanvas({ initialNodes, initialEdges, initialViewport, livewireId, e
                 onEdgesChange={onEdgesChange}
                 onConnect={onConnect}
                 onNodeDoubleClick={onNodeDoubleClick}
+                onPaneContextMenu={onPaneContextMenu}
+                onNodeContextMenu={onNodeContextMenu}
+                onPaneClick={onPaneClick}
                 onMoveEnd={onMoveEnd}
                 defaultViewport={initialViewport}
                 fitView={!initialViewport || (initialViewport.x === 0 && initialViewport.y === 0 && initialViewport.zoom === 1)}
@@ -261,6 +357,33 @@ function FlowCanvas({ initialNodes, initialEdges, initialViewport, livewireId, e
                 <Background variant="dots" gap={12} size={1} />
                 <Controls />
                 <MiniMap />
+                {menu && (
+                    <ContextMenu
+                        onClick={onPaneClick}
+                        {...menu}
+                        availableNodes={availableNodesList}
+                        onAddNode={(nodeType) => {
+                            if (!window.Livewire || !livewireId) return;
+                            const component = window.Livewire.find(livewireId);
+
+                            let flowPos = null;
+                            if (menu && menu.screenX && menu.screenY) {
+                                flowPos = screenToFlowPosition({ x: menu.screenX, y: menu.screenY });
+                            }
+
+                            let sourceNodeId = menu?.id || null;
+
+                            if (component) {
+                                component.call('createGenericNode', {
+                                    type: nodeType,
+                                    position: flowPos,
+                                    sourceNodeId: sourceNodeId
+                                });
+                            }
+                            setMenu(null);
+                        }}
+                    />
+                )}
             </ReactFlow>
         </div>
     );
