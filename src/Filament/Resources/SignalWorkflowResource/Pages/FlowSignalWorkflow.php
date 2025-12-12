@@ -171,11 +171,14 @@ class FlowSignalWorkflow extends Page implements HasActions, HasForms
             $config = $node->config ?? [];
             $config['filters'] = $data['filters'] ?? [];
             $config['matchType'] = $data['matchType'] ?? 'all';
+            $config['label'] = $data['label'] ?? ($config['label'] ?? 'Filter');
+            $config['description'] = $data['description'] ?? ($config['description'] ?? '');
 
             // Ensure transient data is not saved
             unset($config['availableFields'], $config['livewireId'], $config['filterFieldsMap']);
 
             $node->update([
+                'name' => $config['label'],
                 'config' => $config,
             ]);
         }
@@ -211,6 +214,7 @@ class FlowSignalWorkflow extends Page implements HasActions, HasForms
             'matchType' => 'all',
             'filters' => [],
             'label' => 'Filter ' . ($existingFilters + 1),
+            'description' => '',
         ];
 
         $this->record->nodes()->create([

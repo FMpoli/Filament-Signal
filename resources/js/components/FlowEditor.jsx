@@ -106,35 +106,41 @@ function FlowCanvas({ initialNodes, initialEdges, initialViewport, livewireId, e
 
     // Livewire event listeners for dynamic node updates
     useEffect(() => {
-        // Handle new node added
-        const handleNodeAdded = (event) => {
-            const nodeData = event.detail?.[0] || event;
-            console.log('[FlowEditor] Node added:', nodeData);
+        // Handle new node added - Livewire 3 passes data directly
+        const handleNodeAdded = (nodeData) => {
+            console.log('[FlowEditor] Node added event received:', nodeData);
 
-            if (nodeData && nodeData.id) {
+            // Handle array format from Livewire
+            const data = Array.isArray(nodeData) ? nodeData[0] : nodeData;
+
+            if (data && data.id) {
                 const newNode = {
-                    id: nodeData.id,
-                    type: nodeData.type,
-                    position: nodeData.position || { x: 400, y: 100 },
+                    id: data.id,
+                    type: data.type,
+                    position: data.position || { x: 400, y: 100 },
                     data: {
-                        ...nodeData.data,
+                        ...data.data,
                         livewireId,
                         eventOptions,
                         filterFieldsMap,
                     }
                 };
+                console.log('[FlowEditor] Adding new node:', newNode);
                 setNodes(nds => [...nds, newNode]);
             }
         };
 
-        // Handle node removed
-        const handleNodeRemoved = (event) => {
-            const nodeId = event.detail?.[0] || event;
-            console.log('[FlowEditor] Node removed:', nodeId);
+        // Handle node removed - Livewire 3 passes data directly
+        const handleNodeRemoved = (nodeId) => {
+            console.log('[FlowEditor] Node removed event received:', nodeId);
 
-            if (nodeId) {
-                setNodes(nds => nds.filter(n => n.id !== nodeId));
-                setEdges(eds => eds.filter(e => e.source !== nodeId && e.target !== nodeId));
+            // Handle array format from Livewire
+            const id = Array.isArray(nodeId) ? nodeId[0] : nodeId;
+
+            if (id) {
+                console.log('[FlowEditor] Removing node:', id);
+                setNodes(nds => nds.filter(n => n.id !== id));
+                setEdges(eds => eds.filter(e => e.source !== id && e.target !== id));
             }
         };
 

@@ -7,6 +7,8 @@ const FilterNode = ({ id, data }) => {
     const [isExpanded, setIsExpanded] = useState(false);
     const [filters, setFilters] = useState(Array.isArray(data.filters) ? data.filters : []);
     const [matchType, setMatchType] = useState(data.matchType || 'all');
+    const [label, setLabel] = useState(data.label || 'Filter');
+    const [description, setDescription] = useState(data.description || '');
 
     // Check if this filter node is connected to a trigger
     const isConnected = edges.some(edge => edge.target === id);
@@ -42,18 +44,30 @@ const FilterNode = ({ id, data }) => {
     ];
 
     // Save to backend
-    const save = (newFilters, newMatchType) => {
-        console.log('[FilterNode] Saving filters:', { nodeId: id, filters: newFilters, matchType: newMatchType });
+    const save = (newFilters = filters, newMatchType = matchType, newLabel = label, newDescription = description) => {
+        console.log('[FilterNode] Saving:', { nodeId: id, filters: newFilters, matchType: newMatchType, label: newLabel, description: newDescription });
         if (data.livewireId && window.Livewire) {
             const component = window.Livewire.find(data.livewireId);
             if (component) {
                 component.call('updateFilterConfig', {
                     nodeId: id,
                     filters: newFilters,
-                    matchType: newMatchType
+                    matchType: newMatchType,
+                    label: newLabel,
+                    description: newDescription
                 });
             }
         }
+    };
+
+    const handleLabelChange = (value) => {
+        setLabel(value);
+        save(filters, matchType, value, description);
+    };
+
+    const handleDescriptionChange = (value) => {
+        setDescription(value);
+        save(filters, matchType, label, value);
     };
 
     const handleAddFilter = () => {
@@ -63,13 +77,13 @@ const FilterNode = ({ id, data }) => {
         };
         const updated = [...filters, newFilter];
         setFilters(updated);
-        save(updated, matchType);
+        save(updated, matchType, label, description);
     };
 
     const handleRemoveFilter = (index) => {
         const updated = filters.filter((_, i) => i !== index);
         setFilters(updated);
-        save(updated, matchType);
+        save(updated, matchType, label, description);
     };
 
     const handleFilterChange = (index, field, value) => {
@@ -80,12 +94,12 @@ const FilterNode = ({ id, data }) => {
             updated[index].data = { ...updated[index].data, [field]: value };
         }
         setFilters(updated);
-        save(updated, matchType);
+        save(updated, matchType, label, description);
     };
 
     const handleMatchTypeChange = (value) => {
         setMatchType(value);
-        save(filters, value);
+        save(filters, value, label, description);
     };
 
     const handleDelete = () => {
@@ -95,8 +109,6 @@ const FilterNode = ({ id, data }) => {
             }
         }
     };
-
-    const filterLabel = data.label || 'Filter Logic';
 
     return (
         <div className={`
@@ -118,7 +130,7 @@ const FilterNode = ({ id, data }) => {
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4 text-white">
                         <path fillRule="evenodd" d="M3 3a1 1 0 011-1h12a1 1 0 011 1v3a1 1 0 01-.293.707L12 11.414V15a1 1 0 01-.293.707l-2 2A1 1 0 018 17v-5.586L3.293 6.707A1 1 0 013 6V3z" clipRule="evenodd" />
                     </svg>
-                    <span className="text-xs font-bold text-white uppercase tracking-wider">{filterLabel}</span>
+                    <span className="text-xs font-bold text-white uppercase tracking-wider">{label}</span>
                 </div>
 
                 <div className="flex items-center gap-2">
@@ -194,6 +206,38 @@ const FilterNode = ({ id, data }) => {
                 ) : (
                     /* Expanded View - Edit Form */
                     <div className="nodrag space-y-3">
+                        {/* Label */}
+                        <div>
+                            <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">
+                                Name
+                            </label>
+                            <input
+                                type="text"
+                                value={label}
+                                onChange={(e) => handleLabelChange(e.target.value)}
+                                placeholder="Filter name..."
+                                className="w-full px-3 py-2 text-sm border border-slate-300 dark:border-slate-600 rounded-md 
+                                    bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100
+                                    focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none"
+                            />
+                        </div>
+
+                        {/* Description */}
+                        <div>
+                            <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">
+                                Description
+                            </label>
+                            <input
+                                type="text"
+                                value={description}
+                                onChange={(e) => handleDescriptionChange(e.target.value)}
+                                placeholder="Optional description..."
+                                className="w-full px-3 py-2 text-sm border border-slate-300 dark:border-slate-600 rounded-md 
+                                    bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100
+                                    focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none"
+                            />
+                        </div>
+
                         {/* Match Type */}
                         <div>
                             <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">
