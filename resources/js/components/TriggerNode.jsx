@@ -18,6 +18,7 @@ const TriggerNode = ({
 }) => {
     const [isExpanded, setIsExpanded] = useState(false);
     const [showStatusMenu, setShowStatusMenu] = useState(false);
+    const [showEventMenu, setShowEventMenu] = useState(false);
     const [formData, setFormData] = useState({
         label: data.label || '',
         description: data.description || '',
@@ -58,10 +59,13 @@ const TriggerNode = ({
             if (showStatusMenu && !event.target.closest('.status-dropdown-trigger')) {
                 setShowStatusMenu(false);
             }
+            if (showEventMenu && !event.target.closest('.event-dropdown-trigger')) {
+                setShowEventMenu(false);
+            }
         };
         document.addEventListener('mousedown', handleClickOutside);
         return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, [showStatusMenu]);
+    }, [showStatusMenu, showEventMenu]);
 
     // Auto-save when form data changes (Debounce)
     useEffect(() => {
@@ -270,17 +274,64 @@ const TriggerNode = ({
                             <label className="fs-label">
                                 Event Class
                             </label>
-                            <select
-                                value={formData.eventClass}
-                                onChange={(e) => handleFieldChange('eventClass', e.target.value)}
-                                className="fs-select"
-                                onBlur={handleBlur}
-                            >
-                                <option value="" disabled>Select an event...</option>
-                                {Object.entries(eventOptions).map(([value, label]) => (
-                                    <option key={value} value={value}>{label}</option>
-                                ))}
-                            </select>
+                            <div className="relative event-dropdown-trigger">
+                                <div
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        setShowEventMenu(!showEventMenu);
+                                    }}
+                                    className={cn(
+                                        "w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700",
+                                        "rounded-md px-3 py-2 text-sm text-slate-900 dark:text-slate-100",
+                                        "cursor-pointer flex items-center justify-between transition-colors",
+                                        "hover:border-slate-400 dark:hover:border-slate-600",
+                                        showEventMenu ? "border-orange-500 dark:border-orange-500 ring-1 ring-orange-500/50" : ""
+                                    )}
+                                >
+                                    <span className={cn("truncate", !formData.eventClass && "text-slate-400")}>
+                                        {formData.eventClass ? (eventOptions[formData.eventClass] || formData.eventClass) : "Select an event..."}
+                                    </span>
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        viewBox="0 0 20 20"
+                                        fill="currentColor"
+                                        className={cn(
+                                            "w-4 h-4 text-slate-500 transition-transform duration-200 flex-shrink-0 ml-2",
+                                            showEventMenu ? "rotate-180" : ""
+                                        )}
+                                    >
+                                        <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clipRule="evenodd" />
+                                    </svg>
+                                </div>
+
+                                {showEventMenu && (
+                                    <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-slate-800 rounded-md shadow-lg border border-slate-200 dark:border-slate-700 z-50 overflow-hidden max-h-[200px] overflow-y-auto nodrag">
+                                        {Object.entries(eventOptions).length > 0 ? (
+                                            Object.entries(eventOptions).map(([value, label]) => (
+                                                <div
+                                                    key={value}
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleFieldChange('eventClass', value);
+                                                        setShowEventMenu(false);
+                                                    }}
+                                                    className={cn(
+                                                        "px-3 py-2 text-sm cursor-pointer transition-colors border-b last:border-0 border-slate-100 dark:border-slate-700/50",
+                                                        "hover:bg-slate-50 dark:hover:bg-slate-700",
+                                                        formData.eventClass === value ? "bg-orange-50 dark:bg-slate-700 text-orange-600 dark:text-orange-400 font-medium" : "text-slate-700 dark:text-slate-200"
+                                                    )}
+                                                >
+                                                    {label}
+                                                </div>
+                                            ))
+                                        ) : (
+                                            <div className="px-3 py-2 text-sm text-slate-500 italic">
+                                                No events available
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
                             <div className="text-[10px] text-slate-500 dark:text-slate-500 mt-1">
                                 Select the event to listen for
                             </div>
