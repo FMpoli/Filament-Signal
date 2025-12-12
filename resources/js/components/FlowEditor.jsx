@@ -1,5 +1,5 @@
 
-import React, { useCallback, useEffect, useState, useRef } from 'react';
+import React, { useCallback, useEffect, useState, useRef, useMemo } from 'react';
 import ReactFlow, {
     ReactFlowProvider,
     useNodesState,
@@ -25,20 +25,11 @@ const nodeTypes = {
 };
 
 function FlowCanvas({ initialNodes, initialEdges, initialViewport, livewireId, eventOptions, filterFieldsMap }) {
-    // Find trigger's eventClass for passing to filter nodes
-    const getTriggerEventClass = () => {
-        const triggerNode = initialNodes.find(n => n.type === 'trigger');
-        return triggerNode?.data?.eventClass || null;
-    };
-
-    const triggerEventClass = getTriggerEventClass();
-    const availableFields = triggerEventClass ? (filterFieldsMap[triggerEventClass] || {}) : {};
-
     const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes.map(n => {
         const baseData = { ...n.data, livewireId, eventOptions };
-        // Add availableFields to filter nodes
+        // Pass filterFieldsMap to filter nodes for dynamic field lookup
         if (n.type === 'filter') {
-            baseData.availableFields = availableFields;
+            baseData.filterFieldsMap = filterFieldsMap;
         }
         return { ...n, data: baseData };
     }));
@@ -54,9 +45,8 @@ function FlowCanvas({ initialNodes, initialEdges, initialViewport, livewireId, e
         const component = window.Livewire.find(livewireId);
         if (!component) return;
 
-        if (node.type === 'filter') {
-            component.call('mountAction', 'editFilters', { nodeId: node.id, nodeData: node.data });
-        } else if (node.type === 'action') {
+        // Only action nodes open modal on double-click
+        if (node.type === 'action') {
             component.call('mountAction', 'editAction', { nodeId: node.id, nodeData: node.data });
         }
     }, [livewireId]);

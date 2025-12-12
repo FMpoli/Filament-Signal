@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
-import { Handle, Position, useEdges } from 'reactflow';
+import React, { useState, useMemo } from 'react';
+import { Handle, Position, useEdges, useNodes } from 'reactflow';
 
 const FilterNode = ({ id, data }) => {
     const edges = useEdges();
+    const allNodes = useNodes();
     const [isExpanded, setIsExpanded] = useState(false);
     const [filters, setFilters] = useState(Array.isArray(data.filters) ? data.filters : []);
     const [matchType, setMatchType] = useState(data.matchType || 'all');
@@ -10,8 +11,24 @@ const FilterNode = ({ id, data }) => {
     // Check if this filter node is connected to a trigger
     const isConnected = edges.some(edge => edge.target === id);
 
-    // Get available fields from connected trigger (passed via data)
-    const availableFields = data.availableFields || {};
+    // Dynamically get available fields from connected trigger
+    const availableFields = useMemo(() => {
+        // Find the edge that connects to this filter
+        const incomingEdge = edges.find(edge => edge.target === id);
+        if (!incomingEdge) return {};
+
+        // Find the source node (should be trigger)
+        const sourceNode = allNodes.find(n => n.id === incomingEdge.source);
+        if (!sourceNode || sourceNode.type !== 'trigger') return {};
+
+        // Get eventClass from trigger
+        const eventClass = sourceNode.data?.eventClass;
+        if (!eventClass) return {};
+
+        // Look up fields in filterFieldsMap (passed via data)
+        const filterFieldsMap = data.filterFieldsMap || {};
+        return filterFieldsMap[eventClass] || {};
+    }, [edges, allNodes, id, data.filterFieldsMap]);
 
     const operatorOptions = [
         { value: 'equals', label: 'Equals' },
@@ -26,6 +43,7 @@ const FilterNode = ({ id, data }) => {
 
     // Save to backend
     const save = (newFilters, newMatchType) => {
+        console.log('[FilterNode] Saving filters:', { nodeId: id, filters: newFilters, matchType: newMatchType });
         if (data.livewireId && window.Livewire) {
             const component = window.Livewire.find(data.livewireId);
             if (component) {
