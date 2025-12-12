@@ -199,4 +199,3 @@ class FlowSignalTrigger extends EditRecord
         $this->dispatch('flow-refresh');
     }
 }
-
