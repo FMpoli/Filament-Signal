@@ -211,6 +211,7 @@ class FilamentSignalServiceProvider extends PackageServiceProvider
     {
         return [
             FilamentSignalCommand::class,
+            \Base33\FilamentSignal\Console\Commands\MakeSignalNodeCommand::class,
         ];
     }
 

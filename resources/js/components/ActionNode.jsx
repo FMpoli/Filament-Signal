@@ -4,7 +4,12 @@ import { cn } from '../utils/classNames';
 import ConfirmModal from './ConfirmModal';
 
 const ActionNode = ({ id, data }) => {
+    const [isExpanded, setIsExpanded] = useState(data.isNew || false);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
+
+    // Form state
+    const [label, setLabel] = useState(data.label || 'Action');
+    const [description, setDescription] = useState(data.description || '');
 
     // Determine color based on action type
     const isWebhook = data.actionType === 'webhook';
@@ -15,15 +20,41 @@ const ActionNode = ({ id, data }) => {
         : 'bg-gradient-to-r from-gray-600 to-gray-700';
     const handleColor = isWebhook ? '!bg-blue-600' : '!bg-gray-600';
 
+    // Save configuration to backend
+    const save = (newLabel = label, newDescription = description) => {
+        if (data.livewireId && window.Livewire) {
+            const component = window.Livewire.find(data.livewireId);
+            if (component) {
+                // Use generic updateNodeConfig since we unified it in backend
+                component.call('updateNodeConfig', {
+                    nodeId: id,
+                    label: newLabel,
+                    description: newDescription,
+                });
+            }
+        }
+    };
+
+    const handleLabelChange = (value) => {
+        setLabel(value);
+        save(value, description);
+    };
+
+    const handleDescriptionChange = (value) => {
+        setDescription(value);
+        save(label, value);
+    };
+
     const handleDelete = (e) => {
-        e.stopPropagation();
+        if (e) e.stopPropagation();
         setShowDeleteModal(true);
     };
 
     const confirmDelete = () => {
         setShowDeleteModal(false);
         if (data.livewireId && window.Livewire) {
-            window.Livewire.find(data.livewireId)?.call('deleteAction', id);
+            // Use generic deleteNode
+            window.Livewire.find(data.livewireId)?.call('deleteNode', id);
         }
     };
 
@@ -32,7 +63,7 @@ const ActionNode = ({ id, data }) => {
             <ConfirmModal
                 isOpen={showDeleteModal}
                 title="Delete Action"
-                message={`Are you sure you want to delete "${data.label || 'this action'}"?`}
+                message={`Are you sure you want to delete "${label}"?`}
                 onConfirm={confirmDelete}
                 onCancel={() => setShowDeleteModal(false)}
                 confirmColor="red"
@@ -44,12 +75,12 @@ const ActionNode = ({ id, data }) => {
                 'border border-solid rounded-xl',
                 isWebhook ? 'border-blue-500 dark:border-blue-700' : 'border-gray-500 dark:border-gray-700',
                 'text-slate-700 dark:text-slate-200',
-                'min-w-[240px] max-w-[280px]',
+                'min-w-[300px] max-w-[400px]',
                 'shadow-md dark:shadow-lg',
-                'overflow-hidden'
+                'transition-all duration-200'
             )}>
                 {/* Header */}
-                <div className={cn(headerGradient, 'px-4 py-2 flex items-center justify-between box-border')}>
+                <div className={cn(headerGradient, 'px-4 py-2 flex items-center justify-between box-border rounded-t-lg')}>
                     <div className="flex items-center gap-2">
                         {isWebhook ? (
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4 text-white">
@@ -61,34 +92,103 @@ const ActionNode = ({ id, data }) => {
                             </svg>
                         )}
                         <div className="text-xs font-bold text-white uppercase tracking-wider">
-                            {data.label || 'Action'}
+                            {label}
                         </div>
                     </div>
 
-                    <button
-                        onClick={handleDelete}
-                        className="nodrag cursor-pointer text-white/80 hover:text-white transition-colors"
-                        title="Delete Action"
-                    >
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3.5 h-3.5">
-                            <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
-                        </svg>
-                    </button>
+                    <div className="flex items-center gap-2">
+                        {/* Expand/Collapse */}
+                        <button
+                            onClick={() => setIsExpanded(!isExpanded)}
+                            className="nodrag text-white/80 hover:text-white transition-colors"
+                            title={isExpanded ? "Collapse" : "Expand"}
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
+                                className={`w-4 h-4 transition-transform ${isExpanded ? 'rotate-180' : ''}`}>
+                                <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                            </svg>
+                        </button>
+
+                        <button
+                            onClick={handleDelete}
+                            className="nodrag cursor-pointer text-white/80 hover:text-white transition-colors"
+                            title="Delete Action"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3.5 h-3.5">
+                                <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
+                            </svg>
+                        </button>
+                    </div>
                 </div>
 
                 {/* Body */}
-                <div className="p-3 px-4">
-                    {/* Description */}
-                    {data.description && (
-                        <div className="text-slate-500 dark:text-slate-400 text-xs italic mb-2">
-                            {data.description}
+                <div className="p-4">
+                    {!isExpanded ? (
+                        /* Collapsed View */
+                        <div>
+                            {description && (
+                                <div className="text-slate-500 dark:text-slate-400 text-xs italic mb-2">
+                                    {description}
+                                </div>
+                            )}
+
+                            {/* Action Type Badge */}
+                            <div className="text-xs text-slate-500 dark:text-slate-400 font-mono bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded inline-block">
+                                {data.actionType || 'action'}
+                            </div>
+
+                            {!description && (
+                                <div className="text-slate-400 dark:text-slate-500 text-sm italic mt-2">
+                                    Click arrow to configure...
+                                </div>
+                            )}
+                        </div>
+                    ) : (
+                        /* Expanded View - Edit Form */
+                        <div className="nodrag space-y-3">
+                            {/* Name */}
+                            <div>
+                                <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">
+                                    Action Name
+                                </label>
+                                <input
+                                    type="text"
+                                    value={label}
+                                    onChange={(e) => handleLabelChange(e.target.value)}
+                                    placeholder="Action name..."
+                                    className="w-full px-3 py-2 text-sm border border-slate-300 dark:border-slate-600 rounded-md 
+                                        bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100
+                                        focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                                />
+                            </div>
+
+                            {/* Description */}
+                            <div>
+                                <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">
+                                    Description
+                                </label>
+                                <input
+                                    type="text"
+                                    value={description}
+                                    onChange={(e) => handleDescriptionChange(e.target.value)}
+                                    placeholder="Optional description..."
+                                    className="w-full px-3 py-2 text-sm border border-slate-300 dark:border-slate-600 rounded-md 
+                                        bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100
+                                        focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                                />
+                            </div>
+
+                            {/* Read-only Type info */}
+                            <div>
+                                <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">
+                                    Type
+                                </label>
+                                <div className="px-3 py-2 text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md text-slate-500">
+                                    {data.actionType || 'action'}
+                                </div>
+                            </div>
                         </div>
                     )}
-
-                    {/* Action Type Badge */}
-                    <div className="text-xs text-slate-500 dark:text-slate-400 font-mono bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded inline-block">
-                        {data.actionType || 'action'}
-                    </div>
                 </div>
 
                 <Handle

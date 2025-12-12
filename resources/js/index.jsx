@@ -16,12 +16,14 @@ window.mountSignalFlowEditor = (container) => {
     let viewport = { x: 0, y: 0, zoom: 0.7 };
     let eventOptions = {};
     let filterFieldsMap = {};
+    let availableNodes = [];
     try {
         const rawNodes = container.dataset.nodes;
         const rawEdges = container.dataset.edges;
         const rawViewport = container.dataset.viewport;
         const rawEventOptions = container.dataset.eventOptions;
         const rawFilterFieldsMap = container.dataset.filterFieldsMap;
+        const rawAvailableNodes = container.dataset.availableNodes;
 
         console.log('[FlowEditor Debug] Raw Nodes:', rawNodes);
 
@@ -36,13 +38,23 @@ window.mountSignalFlowEditor = (container) => {
         if (rawFilterFieldsMap) {
             filterFieldsMap = JSON.parse(rawFilterFieldsMap);
         }
+        if (rawAvailableNodes) {
+            availableNodes = JSON.parse(rawAvailableNodes);
+            // Convert metadata map (object) to array if needed for UI list
+            // Or keep as object. The FlowEditor expects array for AddNodeButton?
+            // AddNodeButton expects: [{type, label, icon, color} ...]
+
+            // The backend sends map: key => { name, type, metadata: { ... } }
+            // We'll process this inside FlowEditor or here.
+            // Let's pass it raw or transformed.
+            // Let's transform here to match AddNodeButton expectation for specific usage,
+            // BUT keeping full metadata is better.
+            // Let's just pass the raw object/array.
+        }
 
         console.log('[FlowEditor Debug] Parsed Nodes:', nodes);
-        console.log('[FlowEditor Debug] Parsed Edges:', edges);
+        console.log('[FlowEditor Debug] Available Nodes:', availableNodes);
 
-        if (nodes.length === 0) {
-            console.warn('[FlowEditor Debug] No nodes found! Grid will be empty.');
-        }
     } catch (e) {
         console.error('[FlowEditor Debug] Error parsing flow data', e);
     }
@@ -59,6 +71,7 @@ window.mountSignalFlowEditor = (container) => {
             livewireId={livewireId}
             eventOptions={eventOptions}
             filterFieldsMap={filterFieldsMap}
+            availableNodesMap={availableNodes}
         />
     );
 };
