@@ -39,11 +39,16 @@ class FlowSignalWorkflow extends Page implements HasActions, HasForms
 
         // Create nodes from flow data
         foreach ($data['nodes'] ?? [] as $nodeData) {
+            $config = $nodeData['data'] ?? [];
+            
+            // Remove transient data that shouldn't be saved to DB
+            unset($config['eventOptions'], $config['livewireId']);
+
             $this->record->nodes()->create([
                 'node_id' => $nodeData['id'],
                 'type' => $nodeData['type'],
-                'name' => $nodeData['data']['label'] ?? null,
-                'config' => $nodeData['data'] ?? [],
+                'name' => $config['label'] ?? null,
+                'config' => $config,
                 'position' => $nodeData['position'] ?? ['x' => 0, 'y' => 0],
             ]);
         }
@@ -116,6 +121,9 @@ class FlowSignalWorkflow extends Page implements HasActions, HasForms
             $config['label'] = $data['label'] ?? $node->name;
             $config['description'] = $data['description'] ?? ($config['description'] ?? '');
             $config['eventClass'] = $data['eventClass'] ?? ($config['eventClass'] ?? null);
+
+            // Ensure transient data is not saved
+            unset($config['eventOptions'], $config['livewireId']);
 
             $node->update([
                 'name' => $config['label'],
