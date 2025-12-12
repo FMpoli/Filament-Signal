@@ -189,7 +189,6 @@ function FlowCanvas({ initialNodes, initialEdges, initialViewport, livewireId, e
     }, [nodes, edges, livewireId]); // getViewport is stable, can emit
 
     const hasTrigger = nodes.some(n => n.type === 'trigger');
-    const hasFilter = nodes.some(n => n.type === 'filter');
 
     return (
         <div style={{ width: '100%', height: '100%', position: 'relative' }}>
@@ -241,17 +240,16 @@ function FlowCanvas({ initialNodes, initialEdges, initialViewport, livewireId, e
                 </button>
                 <button
                     onClick={handleAddFilter}
-                    disabled={hasFilter}
                     style={{
-                        background: hasFilter ? '#64748B' : '#9333EA',
+                        background: '#9333EA',
                         color: 'white',
                         border: 'none',
                         padding: '8px 16px',
                         borderRadius: '6px',
                         fontWeight: '600',
-                        cursor: hasFilter ? 'not-allowed' : 'pointer',
+                        cursor: 'pointer',
                         boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
-                        display: 'flex', alignItems: 'center', gap: '6px', opacity: hasFilter ? 0.7 : 1
+                        display: 'flex', alignItems: 'center', gap: '6px'
                     }}
                 >
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" style={{ width: '16px', height: '16px' }}>

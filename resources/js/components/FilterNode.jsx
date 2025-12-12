@@ -89,12 +89,14 @@ const FilterNode = ({ id, data }) => {
     };
 
     const handleDelete = () => {
-        if (confirm('Are you sure you want to delete all filters?')) {
+        if (confirm('Are you sure you want to delete this filter?')) {
             if (data.livewireId && window.Livewire) {
-                window.Livewire.find(data.livewireId)?.call('deleteFilters');
+                window.Livewire.find(data.livewireId)?.call('deleteFilter', id);
             }
         }
     };
+
+    const filterLabel = data.label || 'Filter Logic';
 
     return (
         <div className={`
@@ -116,7 +118,7 @@ const FilterNode = ({ id, data }) => {
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4 text-white">
                         <path fillRule="evenodd" d="M3 3a1 1 0 011-1h12a1 1 0 011 1v3a1 1 0 01-.293.707L12 11.414V15a1 1 0 01-.293.707l-2 2A1 1 0 018 17v-5.586L3.293 6.707A1 1 0 013 6V3z" clipRule="evenodd" />
                     </svg>
-                    <span className="text-xs font-bold text-white uppercase tracking-wider">Filter Logic</span>
+                    <span className="text-xs font-bold text-white uppercase tracking-wider">{filterLabel}</span>
                 </div>
 
                 <div className="flex items-center gap-2">

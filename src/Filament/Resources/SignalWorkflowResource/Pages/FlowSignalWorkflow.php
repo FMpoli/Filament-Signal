@@ -108,6 +108,21 @@ class FlowSignalWorkflow extends Page implements HasActions, HasForms
         }
     }
 
+    public function deleteFilter(string $nodeId): void
+    {
+        // Delete specific filter node by node_id
+        $this->record->nodes()->where('node_id', $nodeId)->delete();
+
+        // Also delete edges connected to this filter
+        $this->record->edges()
+            ->where('source_node_id', $nodeId)
+            ->orWhere('target_node_id', $nodeId)
+            ->delete();
+
+        // Notify frontend
+        $this->dispatch('node-removed', $nodeId);
+    }
+
     public function deleteAction(string $nodeId): void
     {
         // Delete specific action node by node_id
@@ -187,16 +202,21 @@ class FlowSignalWorkflow extends Page implements HasActions, HasForms
     public function createNewFilter(): void
     {
         $filterId = 'filter-' . \Illuminate\Support\Str::uuid();
-        $position = ['x' => 400, 'y' => 100];
+        
+        // Calculate position - offset each new filter by 150px vertically
+        $existingFilters = $this->record->nodes()->where('type', 'filter')->count();
+        $position = ['x' => 400, 'y' => 100 + ($existingFilters * 180)];
+        
         $config = [
             'matchType' => 'all',
             'filters' => [],
+            'label' => 'Filter ' . ($existingFilters + 1),
         ];
 
         $this->record->nodes()->create([
             'node_id' => $filterId,
             'type' => 'filter',
-            'name' => 'Filter Logic',
+            'name' => $config['label'],
             'config' => $config,
             'position' => $position,
         ]);
