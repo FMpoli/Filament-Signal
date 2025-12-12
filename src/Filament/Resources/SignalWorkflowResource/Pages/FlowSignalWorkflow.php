@@ -40,7 +40,7 @@ class FlowSignalWorkflow extends Page implements HasActions, HasForms
         // Create nodes from flow data
         foreach ($data['nodes'] ?? [] as $nodeData) {
             $config = $nodeData['data'] ?? [];
-            
+
             // Remove transient data that shouldn't be saved to DB
             unset($config['eventOptions'], $config['livewireId']);
 
