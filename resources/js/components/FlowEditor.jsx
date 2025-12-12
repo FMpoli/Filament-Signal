@@ -18,6 +18,7 @@ import TriggerNode from './TriggerNode';
 import FilterNode from './FilterNode';
 import FilterProNode from './FilterProNode';
 import SendWebhookNode from './SendWebhookNode';
+import ConditionalNode from './ConditionalNode';
 import EmptyCanvasState from './EmptyCanvasState';
 import ContextMenu from './ContextMenu';
 
@@ -33,6 +34,7 @@ const nodeTypes = {
     base33_filter: FilterNode,
     base33_filter_pro: FilterProNode,
     base33_send_webhook: SendWebhookNode,
+    base33_conditional: ConditionalNode,
 };
 
 function FlowCanvas({ initialNodes, initialEdges, initialViewport, livewireId, eventOptions, filterFieldsMap, availableNodesMap }) {
