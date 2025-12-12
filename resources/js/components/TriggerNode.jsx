@@ -237,7 +237,7 @@ const TriggerNode = ({
                     <div className="nodrag flex flex-col gap-3">
                         {/* Trigger Name */}
                         <div>
-                            <label className="text-[11px] text-slate-500 dark:text-slate-400 font-semibold mb-1 block uppercase tracking-wider">
+                            <label className="fs-label">
                                 Trigger Name
                             </label>
                             <input
@@ -245,14 +245,14 @@ const TriggerNode = ({
                                 value={formData.label}
                                 onChange={(e) => handleFieldChange('label', e.target.value)}
                                 placeholder="Enter trigger name"
-                                className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-md px-3 py-2 text-sm text-slate-900 dark:text-slate-100 outline-none focus:border-orange-500 dark:focus:border-orange-500 transition-colors"
+                                className="fs-input"
                                 onBlur={handleBlur}
                             />
                         </div>
 
                         {/* Description */}
                         <div>
-                            <label className="text-[11px] text-slate-500 dark:text-slate-400 font-semibold mb-1 block uppercase tracking-wider">
+                            <label className="fs-label">
                                 Description
                             </label>
                             <textarea
@@ -260,20 +260,20 @@ const TriggerNode = ({
                                 onChange={(e) => handleFieldChange('description', e.target.value)}
                                 placeholder="Describe this trigger"
                                 rows={2}
-                                className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-md px-3 py-2 text-sm text-slate-900 dark:text-slate-100 outline-none focus:border-orange-500 dark:focus:border-orange-500 resize-none font-inherit transition-colors"
+                                className="fs-input resize-none font-inherit"
                                 onBlur={handleBlur}
                             />
                         </div>
 
                         {/* Event Class - Select */}
                         <div>
-                            <label className="text-[11px] text-slate-500 dark:text-slate-400 font-semibold mb-1 block uppercase tracking-wider">
+                            <label className="fs-label">
                                 Event Class
                             </label>
                             <select
                                 value={formData.eventClass}
                                 onChange={(e) => handleFieldChange('eventClass', e.target.value)}
-                                className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-md px-3 py-2 text-sm text-slate-900 dark:text-slate-100 outline-none focus:border-orange-500 dark:focus:border-orange-500 cursor-pointer transition-colors"
+                                className="fs-select"
                                 onBlur={handleBlur}
                             >
                                 <option value="" disabled>Select an event...</option>
