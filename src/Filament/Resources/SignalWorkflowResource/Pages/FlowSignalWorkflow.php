@@ -42,7 +42,7 @@ class FlowSignalWorkflow extends Page implements HasActions, HasForms
             $config = $nodeData['data'] ?? [];
 
             // Remove transient data that shouldn't be saved to DB
-            unset($config['eventOptions'], $config['livewireId']);
+            unset($config['eventOptions'], $config['livewireId'], $config['filterFieldsMap']);
 
             $this->record->nodes()->create([
                 'node_id' => $nodeData['id'],
@@ -158,7 +158,7 @@ class FlowSignalWorkflow extends Page implements HasActions, HasForms
             $config['matchType'] = $data['matchType'] ?? 'all';
 
             // Ensure transient data is not saved
-            unset($config['availableFields'], $config['livewireId']);
+            unset($config['availableFields'], $config['livewireId'], $config['filterFieldsMap']);
 
             $node->update([
                 'config' => $config,
