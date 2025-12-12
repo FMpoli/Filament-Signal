@@ -87,7 +87,7 @@ export default function ContextMenu({ id, top, left, right, bottom, availableNod
 
             {availableNodes.map((node) => (
                 <button
-                    key={node.type}
+                    key={node.id}
                     className="w-full text-left px-4 py-2 hover:bg-slate-50 text-slate-700 flex items-center gap-3 transition-colors group"
                     onClick={() => handleNodeClick(node.type)}
                 >

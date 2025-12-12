@@ -151,7 +151,7 @@ class MakeSignalNodeCommand extends Command
 
         // Generate files
         $this->generateReactComponent($name, $type, $color, $icon, $description);
-        $this->generatePhpHandler($name, $type, $description);
+        $this->generatePhpHandler($name, $type, $description, $color, $icon);
         $this->updateNodeRegistry($name, $type);
 
         $this->info('');
@@ -217,18 +217,29 @@ class MakeSignalNodeCommand extends Command
     /**
      * Generate PHP handler class
      */
-    protected function generatePhpHandler(string $name, string $type, string $description): void
+    protected function generatePhpHandler(string $name, string $type, string $description, string $color, string $icon): void
     {
         $stub = $this->getPhpStub();
+        $nodeConfig = $this->nodeTypes[$type];
 
         $content = str_replace([
             '{{NAME}}',
             '{{TYPE}}',
             '{{DESCRIPTION}}',
+            '{{COLOR}}',
+            '{{ICON}}',
+            '{{GROUP}}',
+            '{{HAS_INPUT}}',
+            '{{HAS_OUTPUT}}',
         ], [
             $name,
             $type,
             $description,
+            $color,
+            'heroicon-o-' . $icon, // Prefix with heroicon-o- as convention
+            ucfirst($type) . 's', // e.g. Filters, Actions
+            $nodeConfig['hasInputHandle'] ? 'true' : 'false',
+            $nodeConfig['hasOutputHandle'] ? 'true' : 'false',
         ], $stub);
 
         $dir = $this->getPackagePath() . '/src/Nodes';
@@ -567,6 +578,24 @@ class {{NAME}}Node implements NodeInterface
             'label' => '{{NAME}}',
             'description' => '',
             // Add your default config here
+        ];
+    }
+
+    /**
+     * Get node metadata
+     */
+    public static function metadata(): array
+    {
+        return [
+            'author' => 'Base33',
+            'version' => '1.0.0',
+            'color' => '{{COLOR}}',
+            'icon' => '{{ICON}}',
+            'group' => '{{GROUP}}',
+            'positioning' => [
+                'input' => {{HAS_INPUT}},
+                'output' => {{HAS_OUTPUT}},
+            ],
         ];
     }
 

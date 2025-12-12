@@ -16,6 +16,7 @@ import ReactFlow, {
 
 import TriggerNode from './TriggerNode';
 import FilterNode from './FilterNode';
+import FilterProNode from './FilterProNode';
 import SendWebhookNode from './SendWebhookNode';
 import EmptyCanvasState from './EmptyCanvasState';
 import ContextMenu from './ContextMenu';
@@ -23,6 +24,7 @@ import ContextMenu from './ContextMenu';
 const nodeTypes = {
     trigger: TriggerNode,
     filter: FilterNode,
+    filter_pro: FilterProNode,
     // action: ActionNode, // Removed as file is deleted
     sendWebhook: SendWebhookNode,
 };
@@ -35,9 +37,10 @@ function FlowCanvas({ initialNodes, initialEdges, initialViewport, livewireId, e
         return Object.values(availableNodesMap)
             .filter(node => node.metadata?.positioning?.input === true)
             .map(node => ({
-                type: node.type,
+                id: node.className, // Unique identifier instead of just type
+                type: node.type, // Visual component type (trigger, filter, etc)
                 label: node.metadata?.label || node.name,
-                icon: node.metadata?.icon || 'circle',
+                icon: (node.metadata?.icon || 'circle').replace('heroicon-o-', ''),
                 color: node.metadata?.color || 'gray',
                 group: node.metadata?.group || 'Custom',
                 positioning: node.metadata?.positioning || {}

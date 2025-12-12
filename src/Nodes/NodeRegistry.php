@@ -29,8 +29,8 @@ class NodeRegistry
             $fullClass = __NAMESPACE__ . '\\' . $filename;
             
             if (class_exists($fullClass) && in_array(\Base33\FilamentSignal\Contracts\NodeInterface::class, class_implements($fullClass))) {
-                // Key by node type (e.g. 'trigger', 'filter')
-                $nodes[$fullClass::type()] = $fullClass;
+                // Key by Full Class Name to support multiple nodes of same type
+                $nodes[$fullClass] = $fullClass;
             }
         }
         
@@ -38,24 +38,44 @@ class NodeRegistry
     }
 
     /**
-     * Get a node class by type
+     * Get a node class by type (returns first match if multiple exist - primarily for back compat)
+     * Or by Full Class Name
      */
-    public static function get(string $type): ?string
+    public static function get(string $identifier): ?string
     {
-        return static::all()[$type] ?? null;
+        $all = static::all();
+        
+        // Exact match (Class Name)
+        if (isset($all[$identifier])) {
+            return $all[$identifier];
+        }
+
+        // Search by type (Backwards compatibility / Generic types)
+        foreach ($all as $class) {
+            if ($class::type() === $identifier) {
+                return $class;
+            }
+        }
+
+        return null;
     }
 
     /**
-     * Get all node metadata keyed by node type (class name)
+     * Get all node metadata keyed by Class Name
      */
     public static function getMetadataMap(): array
     {
         $map = [];
-        foreach (static::all() as $name => $class) {
-            $map[$name] = [
+        foreach (static::all() as $className => $class) {
+            // Use short class name as easier identifier if needed, or stick to FQCN
+            // We use the 'type' in frontend to map to React components.
+            // But we need to distinguish them.
+            // Frontend 'availableNodes' list should primarily come from this map.
+            
+            $map[$className] = [
                 'name' => $class::name(),
-                'type' => $class::type(),
-                'class' => $class,
+                'type' => $class::type(), // visual/logic type (filter, trigger, etc)
+                'className' => $className, // unique identifier
                 'metadata' => $class::metadata(),
                 'defaultConfig' => $class::defaultConfig(),
             ];
