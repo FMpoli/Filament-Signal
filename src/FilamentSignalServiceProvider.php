@@ -2,7 +2,6 @@
 
 namespace Base33\FilamentSignal;
 
-
 use Base33\FilamentSignal\Models\SignalModelIntegration;
 use Base33\FilamentSignal\Services\SignalEventRegistrar;
 use Base33\FilamentSignal\Support\ReverseRelationRegistrar;

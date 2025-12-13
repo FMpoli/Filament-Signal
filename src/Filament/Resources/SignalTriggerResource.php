@@ -1607,9 +1607,9 @@ class SignalTriggerResource extends Resource
 
                 // Determina il tipo del campo
                 $type = $data['type'] ?? 'string';
-                
+
                 // Normalizza i tipi per il frontend
-                $normalizedType = match(strtolower($type)) {
+                $normalizedType = match (strtolower($type)) {
                     'datetime', 'date', 'timestamp', 'carbon' => 'date',
                     'int', 'integer', 'bigint', 'smallint' => 'number',
                     'float', 'double', 'decimal' => 'number',
@@ -1656,7 +1656,7 @@ class SignalTriggerResource extends Resource
                         }
 
                         $relationLabel = $relation['label'] ?? $relationName;
-                        
+
                         // Per relazioni, determina il tipo dal nome campo
                         $type = 'string';
                         if (str_ends_with($fieldKey, '_at') || $fieldKey === 'date') {
@@ -1664,7 +1664,7 @@ class SignalTriggerResource extends Resource
                         } elseif (str_ends_with($fieldKey, '_id') || $fieldKey === 'id') {
                             $type = 'number';
                         }
-                        
+
                         $options[$fieldPath] = [
                             'label' => "{$relationLabel} → {$formattedLabel}",
                             'type' => $type,

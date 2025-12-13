@@ -50,7 +50,7 @@ class FlowSignalWorkflow extends Page implements HasActions, HasForms
         foreach (array_keys($events) as $eventClass) {
             $map[$eventClass] = \Base33\FilamentSignal\Filament\Resources\SignalTriggerResource::getFilterFieldOptionsWithTypesForEvent($eventClass);
         }
-        
+
         return $map;
     }
 
@@ -59,13 +59,13 @@ class FlowSignalWorkflow extends Page implements HasActions, HasForms
         $type = $data['type'] ?? null;
         $class = \Base33\FilamentSignal\Nodes\NodeRegistry::get($type);
 
-        if (!$class) {
+        if (! $class) {
             return;
         }
 
         $sourceNodeId = $data['sourceNodeId'] ?? null;
         $sourceHandle = $data['sourceHandle'] ?? null;
-        
+
         $nodeId = $type . '-' . \Illuminate\Support\Str::uuid();
         $nodeId = $type . '-' . \Illuminate\Support\Str::uuid();
         $position = $data['position'] ?? $this->calculateNewNodePosition($sourceNodeId, $sourceHandle);
@@ -149,6 +149,7 @@ class FlowSignalWorkflow extends Page implements HasActions, HasForms
         // If nodeId is provided, delete only that node (and connected edges)
         if ($nodeId) {
             $this->deleteNode($nodeId);
+
             return;
         }
 
@@ -246,7 +247,7 @@ class FlowSignalWorkflow extends Page implements HasActions, HasForms
 
         if ($node) {
             $config = $node->config ?? [];
-            
+
             // Merge all provided data into config, excluding nodeId
             foreach ($data as $key => $value) {
                 if ($key !== 'nodeId') {
@@ -290,20 +291,18 @@ class FlowSignalWorkflow extends Page implements HasActions, HasForms
         }
     }
 
-
-
     // Store current editing node
     public ?string $editingNodeId = null;
 
     // Helper to calculate position based on source node and handle
     private function calculateNewNodePosition(?string $sourceNodeId, ?string $sourceHandle = null): array
     {
-        if (!$sourceNodeId) {
+        if (! $sourceNodeId) {
             return ['x' => 400, 'y' => 100]; // Default fallback
         }
 
         $sourceNode = $this->record->nodes()->where('node_id', $sourceNodeId)->first();
-        if (!$sourceNode || empty($sourceNode->position)) {
+        if (! $sourceNode || empty($sourceNode->position)) {
             return ['x' => 400, 'y' => 100];
         }
 
@@ -326,7 +325,7 @@ class FlowSignalWorkflow extends Page implements HasActions, HasForms
     private function createEdge(string $sourceNodeId, string $targetNodeId, ?string $sourceHandle = null): void
     {
         $edgeId = 'e' . $sourceNodeId . ($sourceHandle ? '-' . $sourceHandle : '') . '-' . $targetNodeId;
-        
+
         $this->record->edges()->create([
             'edge_id' => $edgeId,
             'source_node_id' => $sourceNodeId,
@@ -394,7 +393,7 @@ class FlowSignalWorkflow extends Page implements HasActions, HasForms
             'description' => '',
             'eventClass' => null,
             'status' => 'draft',
-            'isNew' => true, 
+            'isNew' => true,
             'eventOptions' => \Base33\FilamentSignal\Filament\Resources\SignalTriggerResource::getEventClassOptions(),
         ];
 
@@ -420,12 +419,12 @@ class FlowSignalWorkflow extends Page implements HasActions, HasForms
     {
         $sourceNodeId = $data['sourceNodeId'] ?? null;
         $sourceHandle = $data['sourceHandle'] ?? null;
-        $actionType = $data['actionType'] ?? 'log'; 
-        
+        $actionType = $data['actionType'] ?? 'log';
+
         $nodeId = 'action-' . Str::uuid();
         $nodeId = 'action-' . Str::uuid();
         $position = $data['position'] ?? $this->calculateNewNodePosition($sourceNodeId, $sourceHandle);
-        
+
         $config = [
             'label' => ucfirst($actionType) . ' Action',
             'actionType' => $actionType,
@@ -459,11 +458,11 @@ class FlowSignalWorkflow extends Page implements HasActions, HasForms
         $sourceNodeId = $data['sourceNodeId'] ?? null;
         $sourceHandle = $data['sourceHandle'] ?? null;
         $nodeId = 'sendwebhook-' . \Illuminate\Support\Str::uuid();
-        
+
         $nodeId = 'sendwebhook-' . \Illuminate\Support\Str::uuid();
-        
+
         $position = $data['position'] ?? $this->calculateNewNodePosition($sourceNodeId, $sourceHandle);
-        
+
         $config = [
             'label' => 'Send Webhook',
             'description' => '',

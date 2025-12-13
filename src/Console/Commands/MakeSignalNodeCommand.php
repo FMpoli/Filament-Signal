@@ -85,9 +85,10 @@ class MakeSignalNodeCommand extends Command
 
         // Get node name
         $name = $this->argument('name') ?? $this->ask('What is the name of your node? (e.g., SendEmail, WebhookCall)');
-        
+
         if (empty($name)) {
             $this->error('Node name is required.');
+
             return 1;
         }
 
@@ -105,6 +106,7 @@ class MakeSignalNodeCommand extends Command
 
         if (! isset($this->nodeTypes[$type])) {
             $this->error("Invalid node type: {$type}");
+
             return 1;
         }
 
@@ -207,10 +209,11 @@ class MakeSignalNodeCommand extends Command
         ], $stub);
 
         $path = $this->getPackagePath() . "/resources/js/components/{$name}Node.jsx";
-        
+
         if (file_exists($path)) {
             if (! $this->confirm("{$name}Node.jsx already exists. Overwrite?", false)) {
-                $this->warn("Skipped React component.");
+                $this->warn('Skipped React component.');
+
                 return;
             }
         }
@@ -253,10 +256,11 @@ class MakeSignalNodeCommand extends Command
         }
 
         $path = "{$dir}/{$name}Node.php";
-        
+
         if (file_exists($path)) {
             if (! $this->confirm("{$name}Node.php already exists. Overwrite?", false)) {
-                $this->warn("Skipped PHP handler.");
+                $this->warn('Skipped PHP handler.');
+
                 return;
             }
         }
@@ -271,14 +275,15 @@ class MakeSignalNodeCommand extends Command
     protected function updateNodeRegistry(string $name, string $type): void
     {
         $registryPath = $this->getPackagePath() . '/src/Nodes/NodeRegistry.php';
-        
+
         if (! file_exists($registryPath)) {
             // Create registry if it doesn't exist
             $this->createNodeRegistry($name, $type);
+
             return;
         }
 
-        $this->info("Note: Remember to register your node in FlowEditor.jsx nodeTypes");
+        $this->info('Note: Remember to register your node in FlowEditor.jsx nodeTypes');
     }
 
     /**
@@ -321,14 +326,14 @@ class NodeRegistry
 PHP;
 
         $content = str_replace('{{NAME}}', $name, $stub);
-        
+
         $dir = $this->getPackagePath() . '/src/Nodes';
         if (! is_dir($dir)) {
             mkdir($dir, 0755, true);
         }
 
         file_put_contents("{$dir}/NodeRegistry.php", $content);
-        $this->info("Created: src/Nodes/NodeRegistry.php");
+        $this->info('Created: src/Nodes/NodeRegistry.php');
     }
 
     /**

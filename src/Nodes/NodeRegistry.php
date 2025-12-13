@@ -4,7 +4,7 @@ namespace Base33\FilamentSignal\Nodes;
 
 /**
  * Registry of available Signal workflow nodes.
- * 
+ *
  * Add your custom nodes here after generating them with:
  * php artisan signal:make-node
  */
@@ -83,6 +83,7 @@ class NodeRegistry
                 'defaultConfig' => $class::defaultConfig(),
             ];
         }
+
         return $map;
     }
 }
