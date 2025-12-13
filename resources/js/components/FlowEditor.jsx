@@ -42,7 +42,7 @@ function FlowCanvas({ initialNodes, initialEdges, initialViewport, livewireId, e
     // Transform map to list for UI
     const availableNodesList = useMemo(() => {
         if (!availableNodesMap) return [];
-        return Object.values(availableNodesMap)
+        const list = Object.values(availableNodesMap)
             .filter(node => node.metadata?.positioning?.input === true)
             .map(node => ({
                 id: node.className, // Unique identifier instead of just type
@@ -53,6 +53,7 @@ function FlowCanvas({ initialNodes, initialEdges, initialViewport, livewireId, e
                 group: node.metadata?.group || 'Custom',
                 positioning: node.metadata?.positioning || {}
             }));
+        return list;
     }, [availableNodesMap]);
 
     const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes.map(n => {
@@ -342,9 +343,21 @@ function FlowCanvas({ initialNodes, initialEdges, initialViewport, livewireId, e
             {/* Empty State */}
             {isEmpty && (
                 <EmptyCanvasState
-                    onAddTrigger={handleAddTrigger}
-                    onAddAction={handleAddAction}
-                    onAddFilter={handleAddFilter}
+                    availableNodes={availableNodesList}
+                    onAddNode={(nodeType) => {
+                        if (!window.Livewire || !livewireId) return;
+                        const component = window.Livewire.find(livewireId);
+
+                        let flowPos = { x: 400, y: 200 };
+
+                        if (component) {
+                            component.call('createGenericNode', {
+                                type: nodeType,
+                                position: flowPos,
+                                sourceNodeId: null
+                            });
+                        }
+                    }}
                 />
             )}
 

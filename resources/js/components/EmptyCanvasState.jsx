@@ -6,48 +6,46 @@ import React, { useState } from 'react';
  * Shows an attractive call-to-action when the canvas is empty.
  * Allows users to start a new flow by adding a trigger.
  */
-const EmptyCanvasState = ({ onAddTrigger, onAddAction, onAddFilter }) => {
+const EmptyCanvasState = ({ availableNodes = [], onAddNode }) => {
     const [showNodePicker, setShowNodePicker] = useState(false);
 
-    const nodeOptions = [
-        {
-            type: 'trigger',
-            label: 'Start with a Trigger',
-            description: 'Triggers start your workflow when an event occurs',
-            icon: (
+    // Icon mapping for common node icons
+    const getIconForNode = (iconName) => {
+        const icons = {
+            'bolt': (
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-8 h-8">
                     <path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clipRule="evenodd" />
                 </svg>
             ),
-            color: 'orange',
-            onClick: onAddTrigger,
-            recommended: true,
-        },
-        {
-            type: 'filter',
-            label: 'Add a Filter',
-            description: 'Filters allow you to conditionally route your flow',
-            icon: (
+            'funnel': (
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-8 h-8">
                     <path fillRule="evenodd" d="M3 3a1 1 0 011-1h12a1 1 0 011 1v3a1 1 0 01-.293.707L12 11.414V15a1 1 0 01-.293.707l-2 2A1 1 0 018 17v-5.586L3.293 6.707A1 1 0 013 6V3z" clipRule="evenodd" />
                 </svg>
             ),
-            color: 'purple',
-            onClick: onAddFilter,
-        },
-        {
-            type: 'action',
-            label: 'Add an Action',
-            description: 'Actions perform tasks like sending emails or webhooks',
-            icon: (
+            'filter': (
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-8 h-8">
+                    <path fillRule="evenodd" d="M3 3a1 1 0 011-1h12a1 1 0 011 1v3a1 1 0 01-.293.707L12 11.414V15a1 1 0 01-.293.707l-2 2A1 1 0 018 17v-5.586L3.293 6.707A1 1 0 013 6V3z" clipRule="evenodd" />
+                </svg>
+            ),
+            'circle': (
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-8 h-8">
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clipRule="evenodd" />
                 </svg>
             ),
-            color: 'blue',
-            onClick: onAddAction,
-        },
-    ];
+        };
+        return icons[iconName] || icons['circle'];
+    };
+
+    // Transform availableNodes to nodeOptions format
+    const nodeOptions = availableNodes.map(node => ({
+        type: node.type,
+        label: node.label,
+        description: node.metadata?.description || `Add a ${node.label} node`,
+        icon: getIconForNode(node.icon),
+        color: node.color,
+        onClick: () => onAddNode(node.type),
+        recommended: node.positioning?.recommended || false,
+    }));
 
     const colorClasses = {
         orange: {
