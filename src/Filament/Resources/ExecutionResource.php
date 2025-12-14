@@ -3,9 +3,9 @@
 namespace Voodflow\Voodflow\Filament\Resources;
 
 use Voodflow\Voodflow\Filament\Resources\ExecutionResource\Pages;
-use Voodflow\Voodflow\Models\SignalExecution;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
+use Voodflow\Voodflow\Models\Execution;
 use Filament\Forms;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
@@ -14,9 +14,11 @@ use Filament\Tables\Table;
 
 class ExecutionResource extends Resource
 {
-    protected static ?string $model = SignalExecution::class;
+    protected static ?string $model = Execution::class;
 
-    protected static \BackedEnum | string | null $navigationIcon = 'heroicon-o-clipboard-document-list';
+    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+
+    protected static ?string $navigationGroup = 'Voodflow';
 
     public static function getNavigationGroup(): ?string
     {
