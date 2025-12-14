@@ -9,11 +9,11 @@ use ReflectionClass;
 
 class PayloadFieldAnalyzer
 {
-    protected SignalModelRegistry $modelRegistry;
+    protected ModelRegistry $modelRegistry;
 
     protected ReverseRelationRegistry $reverseRegistry;
 
-    public function __construct(SignalModelRegistry $modelRegistry, ReverseRelationRegistry $reverseRegistry)
+    public function __construct(ModelRegistry $modelRegistry, ReverseRelationRegistry $reverseRegistry)
     {
         $this->modelRegistry = $modelRegistry;
         $this->reverseRegistry = $reverseRegistry;

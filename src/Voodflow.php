@@ -2,28 +2,28 @@
 
 namespace Voodflow\Voodflow;
 
-use Voodflow\Voodflow\Support\SignalEventRegistry;
-use Voodflow\Voodflow\Support\SignalModelRegistry;
-use Voodflow\Voodflow\Support\SignalWebhookTemplate;
-use Voodflow\Voodflow\Support\SignalWebhookTemplateRegistry;
+use Voodflow\Voodflow\Support\EventRegistry;
+use Voodflow\Voodflow\Support\ModelRegistry;
+use Voodflow\Voodflow\Support\WebhookTemplate;
+use Voodflow\Voodflow\Support\WebhookTemplateRegistry;
 
 class Voodflow
 {
-    public static function registerWebhookTemplate(SignalWebhookTemplate | array $template): void
+    public static function registerWebhookTemplate(WebhookTemplate | array $template): void
     {
         if (is_array($template)) {
-            $template = SignalWebhookTemplate::fromArray($template);
+            $template = WebhookTemplate::fromArray($template);
         }
 
-        app(SignalWebhookTemplateRegistry::class)->register($template);
+        app(WebhookTemplateRegistry::class)->register($template);
     }
 
     /**
-     * @return array<string, SignalWebhookTemplate>
+     * @return array<string, WebhookTemplate>
      */
     public static function webhookTemplates(): array
     {
-        return app(SignalWebhookTemplateRegistry::class)->all();
+        return app(WebhookTemplateRegistry::class)->all();
     }
 
     /**
@@ -31,7 +31,7 @@ class Voodflow
      */
     public static function webhookTemplateOptions(): array
     {
-        return app(SignalWebhookTemplateRegistry::class)->options();
+        return app(WebhookTemplateRegistry::class)->options();
     }
 
     /**
@@ -52,7 +52,7 @@ class Voodflow
      */
     public static function registerEvent(string $eventClass, string $name, ?string $description = null, ?string $group = null): void
     {
-        app(SignalEventRegistry::class)->register($eventClass, $name, $description, $group);
+        app(EventRegistry::class)->register($eventClass, $name, $description, $group);
     }
 
     /**
@@ -60,7 +60,7 @@ class Voodflow
      */
     public static function eventOptions(): array
     {
-        return app(SignalEventRegistry::class)->options();
+        return app(EventRegistry::class)->options();
     }
 
     /**
@@ -68,7 +68,7 @@ class Voodflow
      */
     public static function groupedEventOptions(): array
     {
-        return app(SignalEventRegistry::class)->groupedOptions();
+        return app(EventRegistry::class)->groupedOptions();
     }
 
     /**
@@ -91,7 +91,7 @@ class Voodflow
      */
     public static function registerModelFields(string $modelClass, array $fields, ?string $alias = null): void
     {
-        app(SignalModelRegistry::class)->register($modelClass, $fields, $alias);
+        app(ModelRegistry::class)->register($modelClass, $fields, $alias);
     }
 
     /**
@@ -99,6 +99,6 @@ class Voodflow
      */
     public static function getModelFields(string $modelClass): ?array
     {
-        return app(SignalModelRegistry::class)->getFields($modelClass);
+        return app(ModelRegistry::class)->getFields($modelClass);
     }
 }

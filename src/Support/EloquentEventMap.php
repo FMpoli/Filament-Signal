@@ -6,7 +6,7 @@ namespace Voodflow\Voodflow\Support;
  * Tiene traccia delle informazioni necessarie per trasformare
  * gli eventi Eloquent (eloquent.created: ModelClass) in eventi Signal.
  */
-class SignalEloquentEventMap
+class EloquentEventMap
 {
     /**
      * @var array<string, array<string, mixed>>

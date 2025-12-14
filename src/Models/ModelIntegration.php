@@ -3,9 +3,9 @@
 namespace Voodflow\Voodflow\Models;
 
 use Voodflow\Voodflow\Voodflow;
-use Voodflow\Voodflow\Support\SignalEloquentEventMap;
-use Voodflow\Voodflow\Support\SignalEventRegistry;
-use Voodflow\Voodflow\Support\SignalModelRegistry;
+use Voodflow\Voodflow\Support\EloquentEventMap;
+use Voodflow\Voodflow\Support\EventRegistry;
+use Voodflow\Voodflow\Support\ModelRegistry;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Arr;
@@ -71,7 +71,7 @@ class ModelIntegration extends Model
                 $descriptor['group']
             );
 
-            app(SignalEloquentEventMap::class)->register($descriptor['event'], [
+            app(EloquentEventMap::class)->register($descriptor['event'], [
                 'model' => $this->model_class,
                 'event_key' => $descriptor['event'],
             ]);
@@ -90,15 +90,15 @@ class ModelIntegration extends Model
 
     public function unregisterFromSignal(): void
     {
-        app(SignalModelRegistry::class)->forget($this->model_class);
+        app(ModelRegistry::class)->forget($this->model_class);
 
         foreach ($this->getEloquentEventDescriptors() as $descriptor) {
-            app(SignalEventRegistry::class)->forget($descriptor['event']);
-            app(SignalEloquentEventMap::class)->forget($descriptor['event']);
+            app(EventRegistry::class)->forget($descriptor['event']);
+            app(EloquentEventMap::class)->forget($descriptor['event']);
         }
 
         foreach ($this->getCustomEventDescriptors() as $descriptor) {
-            app(SignalEventRegistry::class)->forget($descriptor['event']);
+            app(EventRegistry::class)->forget($descriptor['event']);
         }
     }
 

@@ -5,7 +5,7 @@ namespace Voodflow\Voodflow\Events;
 use Voodflow\Voodflow\Contracts\HasSignal;
 use Voodflow\Voodflow\Contracts\SignalIdentifiableEvent;
 use Voodflow\Voodflow\Contracts\SignalPayloadProvider;
-use Voodflow\Voodflow\Support\SignalModelRegistry;
+use Voodflow\Voodflow\Support\ModelRegistry;
 use Illuminate\Database\Eloquent\Model;
 
 class EloquentSignalEvent implements SignalIdentifiableEvent, SignalPayloadProvider
@@ -79,7 +79,7 @@ class EloquentSignalEvent implements SignalIdentifiableEvent, SignalPayloadProvi
         }
 
         // Altrimenti, carica le relazioni dalla Model Integration
-        $registry = app(SignalModelRegistry::class);
+        $registry = app(ModelRegistry::class);
         $modelFields = $registry->getFields($modelClass);
 
         if ($modelFields && isset($modelFields['relations'])) {

@@ -32,7 +32,7 @@ class PayloadConfigurator
             // Cerca il modello principale nel payload (es: 'loan' -> EquipmentLoan)
             $mainModelClass = $this->findMainModelClass($payload, $relationMetaMap);
             if ($mainModelClass) {
-                $registry = app(SignalModelRegistry::class);
+                $registry = app(ModelRegistry::class);
                 $modelFields = $registry->getFields($mainModelClass);
                 if ($modelFields && isset($modelFields['essential'])) {
                     // Estrai i nomi dei campi (gestisci sia array associativi che numerici)
@@ -165,7 +165,7 @@ class PayloadConfigurator
 
             // Se expand è vuoto, prova a leggere le relazioni da espandere da getSignalFields() del modello correlato
             if (empty($expand) && $modelClass) {
-                $registry = app(SignalModelRegistry::class);
+                $registry = app(ModelRegistry::class);
                 $modelFields = $registry->getFields($modelClass);
                 if ($modelFields && isset($modelFields['relations'])) {
                     foreach ($modelFields['relations'] as $relationName => $relationConfig) {
@@ -239,7 +239,7 @@ class PayloadConfigurator
         if (empty($fieldKeys)) {
             $modelClass = $meta['reverse_source_model'] ?? $meta['model_class'] ?? null;
             if ($modelClass && class_exists($modelClass)) {
-                $registry = app(SignalModelRegistry::class);
+                $registry = app(ModelRegistry::class);
                 $modelFields = $registry->getFields($modelClass);
                 if ($modelFields && isset($modelFields['essential'])) {
                     $fieldKeys = array_keys($modelFields['essential']);
@@ -335,7 +335,7 @@ class PayloadConfigurator
 
             // Se non ci sono relazioni da espandere specificate, prova a leggere quelle configurate nel modello
             if (empty($expand)) {
-                $registry = app(SignalModelRegistry::class);
+                $registry = app(ModelRegistry::class);
                 $modelFields = $registry->getFields($modelClass);
                 if ($modelFields && isset($modelFields['relations'])) {
                     foreach ($modelFields['relations'] as $relationName => $relationConfig) {
@@ -856,7 +856,7 @@ class PayloadConfigurator
                     // IMPORTANTE: Usa i campi da getSignalFields() del modello PADRE (parentModelClass)
                     // perché la configurazione della relazione annidata è nel modello padre
                     // Es: quando espando unit.model, la configurazione è in EquipmentUnit::getSignalFields()['relations']['model']
-                    $registry = app(SignalModelRegistry::class);
+                    $registry = app(ModelRegistry::class);
                     $parentModelFields = $registry->getFields($parentModelClass);
                     $fieldsToInclude = ['id'];
 
@@ -1195,7 +1195,7 @@ class PayloadConfigurator
             }
 
             // Ottieni la configurazione della relazione da getSignalFields()
-            $registry = app(SignalModelRegistry::class);
+            $registry = app(ModelRegistry::class);
             $parentModelFields = $registry->getFields($parentModelClass);
 
             if ($parentModelFields && isset($parentModelFields['relations'][$relationName])) {

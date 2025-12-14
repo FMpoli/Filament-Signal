@@ -5,14 +5,14 @@ namespace Voodflow\Voodflow\Services;
 use Voodflow\Voodflow\Contracts\SignalIdentifiableEvent;
 use Voodflow\Voodflow\Jobs\RunSignalTrigger;
 use Voodflow\Voodflow\Models\SignalTrigger;
-use Voodflow\Voodflow\Support\SignalPayloadFactory;
+use Voodflow\Voodflow\Support\PayloadFactory;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 
 class EventProcessor
 {
     public function __construct(
-        protected SignalPayloadFactory $payloadFactory,
+        protected PayloadFactory $payloadFactory,
     ) {
     }
 

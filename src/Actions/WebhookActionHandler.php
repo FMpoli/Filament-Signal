@@ -5,8 +5,8 @@ namespace Voodflow\Voodflow\Actions;
 use Voodflow\Voodflow\Contracts\SignalActionHandler;
 use Voodflow\Voodflow\Models\SignalAction;
 use Voodflow\Voodflow\Models\SignalActionLog;
-use Voodflow\Voodflow\Support\SignalPayloadConfigurator;
-use Voodflow\Voodflow\Support\SignalPayloadFieldAnalyzer;
+use Voodflow\Voodflow\Support\PayloadConfigurator;
+use Voodflow\Voodflow\Support\PayloadFieldAnalyzer;
 use Illuminate\Support\Arr;
 use InvalidArgumentException;
 use Spatie\WebhookServer\WebhookCall;
@@ -145,7 +145,7 @@ class WebhookActionHandler implements SignalActionHandler
             $relationFields = Arr::get($payloadConfig, 'relation_fields', []);
 
             if (! empty($relationFields) && is_array($relationFields)) {
-                $analyzer = app(SignalPayloadFieldAnalyzer::class);
+                $analyzer = app(PayloadFieldAnalyzer::class);
                 $analysis = $analyzer->analyzeEvent($eventClass);
 
                 $relationMetaMap = [];
@@ -196,7 +196,7 @@ class WebhookActionHandler implements SignalActionHandler
                 $expandRelations = Arr::get($payloadConfig, 'expand_relations', []);
                 if (is_array($expandRelations) && ! empty($expandRelations) && ! Arr::isAssoc($expandRelations)) {
                     // È un array di ID, convertilo in formato KeyValue usando l'analyzer
-                    $analyzer = app(SignalPayloadFieldAnalyzer::class);
+                    $analyzer = app(PayloadFieldAnalyzer::class);
                     $analysis = $analyzer->analyzeEvent($eventClass);
 
                     $relationsMap = [];
@@ -220,7 +220,7 @@ class WebhookActionHandler implements SignalActionHandler
                 }
             }
 
-            $configurator = app(SignalPayloadConfigurator::class);
+            $configurator = app(PayloadConfigurator::class);
             $payload = $configurator->configure($payload, $payloadConfig);
         }
 
@@ -228,7 +228,7 @@ class WebhookActionHandler implements SignalActionHandler
             'event' => [
                 'event' => $this->cleanEventClass($eventClass),
                 'timestamp' => now()->toIso8601String(),
-                'data' => $payload, // Non pulire il payload, è già stato configurato da SignalPayloadConfigurator
+                'data' => $payload, // Non pulire il payload, è già stato configurato da PayloadConfigurator
                 'metadata' => [
                     'trigger_id' => $action->trigger?->id,
                     'trigger_name' => $action->trigger?->name,

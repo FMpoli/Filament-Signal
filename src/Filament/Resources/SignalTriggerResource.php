@@ -8,8 +8,8 @@ use Voodflow\Voodflow\Filament\Infolists\Components\FiltersListEntry;
 use Voodflow\Voodflow\Filament\Resources\SignalTriggerResource\Pages;
 use Voodflow\Voodflow\Voodflow;
 use Voodflow\Voodflow\Models\SignalTrigger;
-use Voodflow\Voodflow\Support\SignalPayloadFieldAnalyzer;
-use Voodflow\Voodflow\Support\SignalWebhookTemplateRegistry;
+use Voodflow\Voodflow\Support\PayloadFieldAnalyzer;
+use Voodflow\Voodflow\Support\WebhookTemplateRegistry;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
@@ -381,7 +381,7 @@ class SignalTriggerResource extends Resource
      */
     public static function getWebhookTemplateOptions(): array
     {
-        return app(SignalWebhookTemplateRegistry::class)->options();
+        return app(WebhookTemplateRegistry::class)->options();
     }
 
     /**
@@ -441,7 +441,7 @@ class SignalTriggerResource extends Resource
 
     public static function applyWebhookTemplate(?string $templateId, callable $set): void
     {
-        $template = app(SignalWebhookTemplateRegistry::class)->find($templateId);
+        $template = app(WebhookTemplateRegistry::class)->find($templateId);
 
         if (!$template) {
             return;
@@ -815,7 +815,7 @@ class SignalTriggerResource extends Resource
                                     return [];
                                 }
 
-                                $analyzer = app(SignalPayloadFieldAnalyzer::class);
+                                $analyzer = app(PayloadFieldAnalyzer::class);
                                 $analysis = $analyzer->analyzeEvent($eventClass);
 
                                 // Mostra solo i campi essenziali del modello principale (non delle relazioni)
@@ -854,7 +854,7 @@ class SignalTriggerResource extends Resource
                                     return;
                                 }
 
-                                $analyzer = app(SignalPayloadFieldAnalyzer::class);
+                                $analyzer = app(PayloadFieldAnalyzer::class);
                                 $analysis = $analyzer->analyzeEvent($eventClass);
 
                                 $validFields = [];
@@ -885,7 +885,7 @@ class SignalTriggerResource extends Resource
                                     return;
                                 }
 
-                                $analyzer = app(SignalPayloadFieldAnalyzer::class);
+                                $analyzer = app(PayloadFieldAnalyzer::class);
                                 $analysis = $analyzer->analyzeEvent($eventClass);
 
                                 $validFields = [];
@@ -914,7 +914,7 @@ class SignalTriggerResource extends Resource
                     // Aggiungi le CheckboxList per le relazioni direttamente nella stessa sezione
                     $eventClass = $findEventClass($get);
                     if ($eventClass) {
-                        $analyzer = app(SignalPayloadFieldAnalyzer::class);
+                        $analyzer = app(PayloadFieldAnalyzer::class);
                         $analysis = $analyzer->analyzeEvent($eventClass);
 
                         if (!empty($analysis['relations'])) {
@@ -1412,7 +1412,7 @@ class SignalTriggerResource extends Resource
     public static function getFilterFieldOptionsForEvent(string $eventClass): array
     {
         try {
-            $analyzer = app(SignalPayloadFieldAnalyzer::class);
+            $analyzer = app(PayloadFieldAnalyzer::class);
             $analysis = $analyzer->analyzeEvent($eventClass);
 
             // Ottieni il modello per ottenere i nomi reali delle colonne
@@ -1573,7 +1573,7 @@ class SignalTriggerResource extends Resource
     public static function getFilterFieldOptionsWithTypesForEvent(string $eventClass): array
     {
         try {
-            $analyzer = app(SignalPayloadFieldAnalyzer::class);
+            $analyzer = app(PayloadFieldAnalyzer::class);
             $analysis = $analyzer->analyzeEvent($eventClass);
 
             $options = [];
@@ -1762,7 +1762,7 @@ class SignalTriggerResource extends Resource
     protected static function getFilterFieldOptionsInternal(string $eventClass): array
     {
         try {
-            $analyzer = app(SignalPayloadFieldAnalyzer::class);
+            $analyzer = app(PayloadFieldAnalyzer::class);
             $analysis = $analyzer->analyzeEvent($eventClass);
 
             // Ottieni il modello per ottenere i nomi reali delle colonne

@@ -6,7 +6,7 @@ use BackedEnum;
 use Voodflow\Voodflow\Filament\Resources\SignalModelIntegrationResource\Pages;
 use Voodflow\Voodflow\Models\ModelIntegration;
 use Voodflow\Voodflow\Support\ReverseRelationRegistry;
-use Voodflow\Voodflow\Support\SignalModelRegistry;
+use Voodflow\Voodflow\Support\ModelRegistry;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
@@ -444,7 +444,7 @@ class SignalModelIntegrationResource extends Resource
             // e include anche i campi delle relazioni annidate (es: unit.inventory_code, unit.model.name)
             $sourceModel = $descriptor['source_model'] ?? null;
             if ($sourceModel && class_exists($sourceModel)) {
-                $registry = app(SignalModelRegistry::class);
+                $registry = app(ModelRegistry::class);
                 $modelFields = $registry->getFields($sourceModel);
 
                 $allFieldOptions = [];
@@ -692,14 +692,14 @@ class SignalModelIntegrationResource extends Resource
      *
      * @param  array<string, mixed>  $relations  Configurazione delle relazioni
      * @param  string  $modelClass  Classe del modello corrente
-     * @param  SignalModelRegistry  $registry  Registry per ottenere i campi dei modelli
+     * @param  ModelRegistry  $registry  Registry per ottenere i campi dei modelli
      * @param  array<string, string>  &$allFieldOptions  Array di output per le opzioni dei campi
      * @param  string  $basePath  Path base corrente (es: 'unit' o 'unit.model')
      */
     protected static function collectNestedRelationFields(
         array $relations,
         string $modelClass,
-        SignalModelRegistry $registry,
+        ModelRegistry $registry,
         array &$allFieldOptions,
         string $basePath = ''
     ): void {

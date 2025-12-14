@@ -7,9 +7,9 @@ class ReverseRelationWarmup
     protected bool $warmed = false;
 
     public function __construct(
-        protected SignalEventRegistry $eventRegistry,
-        protected SignalPayloadFieldAnalyzer $analyzer,
-        protected SignalModelRegistry $modelRegistry,
+        protected EventRegistry $eventRegistry,
+        protected PayloadFieldAnalyzer $analyzer,
+        protected ModelRegistry $modelRegistry,
         protected ReverseRelationRegistrar $registrar
     ) {}
 

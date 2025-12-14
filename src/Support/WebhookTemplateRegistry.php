@@ -5,24 +5,24 @@ namespace Voodflow\Voodflow\Support;
 class WebhookTemplateRegistry
 {
     /**
-     * @var array<string, SignalWebhookTemplate>
+     * @var array<string, WebhookTemplate>
      */
     protected array $templates = [];
 
-    public function register(SignalWebhookTemplate $template): void
+    public function register(WebhookTemplate $template): void
     {
         $this->templates[$template->id] = $template;
     }
 
     /**
-     * @return array<string, SignalWebhookTemplate>
+     * @return array<string, WebhookTemplate>
      */
     public function all(): array
     {
         return $this->templates;
     }
 
-    public function find(?string $id): ?SignalWebhookTemplate
+    public function find(?string $id): ?WebhookTemplate
     {
         if (!$id) {
             return null;

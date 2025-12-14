@@ -4,8 +4,8 @@ namespace Voodflow\Voodflow\Services;
 
 use Voodflow\Voodflow\Events\EloquentSignalEvent;
 use Voodflow\Voodflow\Models\SignalTrigger;
-use Voodflow\Voodflow\Support\SignalEloquentEventMap;
-use Voodflow\Voodflow\Support\SignalEventRegistry;
+use Voodflow\Voodflow\Support\EloquentEventMap;
+use Voodflow\Voodflow\Support\EventRegistry;
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
@@ -18,8 +18,8 @@ class EventRegistrar
     public function __construct(
         protected Dispatcher $dispatcher,
         protected EventProcessor $processor,
-        protected SignalEventRegistry $eventRegistry,
-        protected SignalEloquentEventMap $eloquentEventMap
+        protected EventRegistry $eventRegistry,
+        protected EloquentEventMap $eloquentEventMap
     ) {
     }
 

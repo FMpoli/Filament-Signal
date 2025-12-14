@@ -8,12 +8,12 @@ use Voodflow\Voodflow\Services\EventRegistrar;
 use Voodflow\Voodflow\Support\ReverseRelationRegistrar;
 use Voodflow\Voodflow\Support\ReverseRelationRegistry;
 use Voodflow\Voodflow\Support\ReverseRelationWarmup;
-use Voodflow\Voodflow\Support\SignalEloquentEventMap;
-use Voodflow\Voodflow\Support\SignalEventRegistry;
-use Voodflow\Voodflow\Support\SignalModelRegistry;
-use Voodflow\Voodflow\Support\SignalPayloadFieldAnalyzer;
-use Voodflow\Voodflow\Support\SignalWebhookTemplate;
-use Voodflow\Voodflow\Support\SignalWebhookTemplateRegistry;
+use Voodflow\Voodflow\Support\EloquentEventMap;
+use Voodflow\Voodflow\Support\EventRegistry;
+use Voodflow\Voodflow\Support\ModelRegistry;
+use Voodflow\Voodflow\Support\PayloadFieldAnalyzer;
+use Voodflow\Voodflow\Support\WebhookTemplate;
+use Voodflow\Voodflow\Support\WebhookTemplateRegistry;
 use Voodflow\Voodflow\Testing\TestsFilamentSignal;
 use Filament\Support\Assets\Asset;
 use Filament\Support\Assets\Css;
@@ -71,20 +71,20 @@ class VoodflowServiceProvider extends PackageServiceProvider
 
     public function packageRegistered(): void
     {
-        $this->app->singleton(SignalWebhookTemplateRegistry::class, fn(): SignalWebhookTemplateRegistry => new SignalWebhookTemplateRegistry);
-        $this->app->singleton(SignalEventRegistry::class, fn(): SignalEventRegistry => new SignalEventRegistry);
-        $this->app->singleton(SignalModelRegistry::class, fn(): SignalModelRegistry => new SignalModelRegistry);
+        $this->app->singleton(WebhookTemplateRegistry::class, fn(): WebhookTemplateRegistry => new WebhookTemplateRegistry);
+        $this->app->singleton(EventRegistry::class, fn(): EventRegistry => new EventRegistry);
+        $this->app->singleton(ModelRegistry::class, fn(): ModelRegistry => new ModelRegistry);
         $this->app->singleton(ReverseRelationRegistry::class, fn(): ReverseRelationRegistry => new ReverseRelationRegistry);
         $this->app->singleton(ReverseRelationRegistrar::class, fn($app): ReverseRelationRegistrar => new ReverseRelationRegistrar(
             $app->make(ReverseRelationRegistry::class)
         ));
         $this->app->singleton(ReverseRelationWarmup::class, fn($app): ReverseRelationWarmup => new ReverseRelationWarmup(
-            $app->make(SignalEventRegistry::class),
-            $app->make(SignalPayloadFieldAnalyzer::class),
-            $app->make(SignalModelRegistry::class),
+            $app->make(EventRegistry::class),
+            $app->make(PayloadFieldAnalyzer::class),
+            $app->make(ModelRegistry::class),
             $app->make(ReverseRelationRegistrar::class)
         ));
-        $this->app->singleton(SignalEloquentEventMap::class, fn(): SignalEloquentEventMap => new SignalEloquentEventMap);
+        $this->app->singleton(EloquentEventMap::class, fn(): EloquentEventMap => new EloquentEventMap);
     }
 
     public function packageBooted(): void
@@ -166,14 +166,14 @@ class VoodflowServiceProvider extends PackageServiceProvider
             return;
         }
 
-        $registry = app(SignalWebhookTemplateRegistry::class);
+        $registry = app(WebhookTemplateRegistry::class);
 
         foreach ($templates as $template) {
             if (is_array($template)) {
-                $template = SignalWebhookTemplate::fromArray($template);
+                $template = WebhookTemplate::fromArray($template);
             }
 
-            if ($template instanceof SignalWebhookTemplate) {
+            if ($template instanceof WebhookTemplate) {
                 $registry->register($template);
             }
         }
