@@ -57,29 +57,14 @@ function FlowCanvas({ initialNodes, initialEdges, initialViewport, livewireId, e
         return list;
     }, [availableNodesMap]);
 
-    // Detect dark mode from Filament (checks for .dark class on html or body)
-    const [colorMode, setColorMode] = useState(() => {
-        if (typeof window !== 'undefined') {
-            return document.documentElement.classList.contains('dark') ? 'dark' : 'light';
-        }
-        return 'light';
-    });
+    // TEMPORARY: Force light mode until we understand Filament's theme system
+    // Filament doesn't use .dark class on html element
+    const [colorMode, setColorMode] = useState('light');
 
-    // Watch for theme changes
+    // TODO: Investigate Filament's actual theme detection mechanism
+    // For now, always use light mode
     useEffect(() => {
-        const handleThemeChange = () => {
-            const isDark = document.documentElement.classList.contains('dark');
-            setColorMode(isDark ? 'dark' : 'light');
-        };
-
-        // Use MutationObserver to detect class changes on html element
-        const observer = new MutationObserver(handleThemeChange);
-        observer.observe(document.documentElement, {
-            attributes: true,
-            attributeFilter: ['class']
-        });
-
-        return () => observer.disconnect();
+        console.log('[Voodflow] Forcing light mode - Filament theme detection TBD');
     }, []);
 
     const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes.map(n => {
