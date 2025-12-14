@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class SignalExecution extends Model
+class Execution extends Model
 {
     use HasFactory;
 
@@ -32,11 +32,11 @@ class SignalExecution extends Model
 
     public function workflow(): BelongsTo
     {
-        return $this->belongsTo(SignalWorkflow::class, 'workflow_id');
+        return $this->belongsTo(Workflow::class, 'workflow_id');
     }
 
     public function executionNodes(): HasMany
     {
-        return $this->hasMany(SignalExecutionNode::class, 'execution_id');
+        return $this->hasMany(ExecutionNode::class, 'execution_id');
     }
 }

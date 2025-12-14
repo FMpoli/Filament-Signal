@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class SignalExecutionNode extends Model
+class ExecutionNode extends Model
 {
     use HasFactory;
 
@@ -35,6 +35,6 @@ class SignalExecutionNode extends Model
 
     public function execution(): BelongsTo
     {
-        return $this->belongsTo(SignalExecution::class, 'execution_id');
+        return $this->belongsTo(Execution::class, 'execution_id');
     }
 }
