@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 
-class SignalModelIntegration extends Model
+class ModelIntegration extends Model
 {
     use SoftDeletes;
 
