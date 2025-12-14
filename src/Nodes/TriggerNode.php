@@ -17,7 +17,7 @@ class TriggerNode implements NodeInterface
      */
     public static function type(): string
     {
-        return 'base33_trigger';
+        return 'trigger';
     }
 
     /**
@@ -81,11 +81,11 @@ class TriggerNode implements NodeInterface
     public function validate(array $config): array
     {
         $errors = [];
-        
+
         if (empty($config['eventClass'])) {
             $errors[] = 'Event Class is required';
         }
-        
+
         return $errors;
     }
 }
