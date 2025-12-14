@@ -57,6 +57,36 @@ function FlowCanvas({ initialNodes, initialEdges, initialViewport, livewireId, e
         return list;
     }, [availableNodesMap]);
 
+    // Detect theme from system preference (Filament's default behavior)
+    // Filament uses prefers-color-scheme media query, not .dark class
+    const [colorMode, setColorMode] = useState(() => {
+        if (typeof window !== 'undefined') {
+            return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        }
+        return 'light';
+    });
+
+    // Watch for system theme changes
+    useEffect(() => {
+        if (typeof window === 'undefined') return;
+
+        const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+        const handleChange = (e) => {
+            setColorMode(e.matches ? 'dark' : 'light');
+            console.log('[Voodflow] Theme changed to:', e.matches ? 'dark' : 'light');
+        };
+
+        // Modern browsers
+        if (mediaQuery.addEventListener) {
+            mediaQuery.addEventListener('change', handleChange);
+            return () => mediaQuery.removeEventListener('change', handleChange);
+        }
+        // Fallback for older browsers
+        else if (mediaQuery.addListener) {
+            mediaQuery.addListener(handleChange);
+            return () => mediaQuery.removeListener(handleChange);
+        }
+    }, []);
 
 
     const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes.map(n => {
