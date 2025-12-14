@@ -7,7 +7,7 @@ use Voodflow\Voodflow\Support\SignalModelRegistry;
 use Voodflow\Voodflow\Support\SignalWebhookTemplate;
 use Voodflow\Voodflow\Support\SignalWebhookTemplateRegistry;
 
-class FilamentSignal
+class Voodflow
 {
     public static function registerWebhookTemplate(SignalWebhookTemplate | array $template): void
     {
@@ -38,7 +38,7 @@ class FilamentSignal
      * Registra un evento esposto da un plugin
      *
      * Esempio:
-     * FilamentSignal::registerEvent(
+     * Voodflow::registerEvent(
      *     eventClass: \Vendor\Plugin\Events\ModelCreated::class,
      *     name: 'Model Created',
      *     description: 'Triggered when a new model is created',
@@ -75,7 +75,7 @@ class FilamentSignal
      * Registra i campi disponibili per un modello che non implementa HasSignal
      *
      * Esempio:
-     * FilamentSignal::registerModelFields(
+     * Voodflow::registerModelFields(
      *     modelClass: \App\Models\User::class,
      *     fields: [
      *         'essential' => ['id', 'name', 'email'],
