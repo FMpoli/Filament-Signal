@@ -1,12 +1,12 @@
 @php
-    /** @var \Base33\FilamentSignal\Models\SignalTrigger $record */
-    $eventClassOptions = \Base33\FilamentSignal\FilamentSignal::eventOptions();
+    /** @var \Voodflow\Voodflow\Models\SignalTrigger $record */
+    $eventClassOptions = \Voodflow\Voodflow\Voodflow::eventOptions();
     $eventDisplayName = $eventClassOptions[$record->event_class] ?? class_basename($record->event_class);
     
     // Se non trovato, prova anche con getEventClassOptions
     if ($eventDisplayName === class_basename($record->event_class)) {
         try {
-            $allOptions = \Base33\FilamentSignal\Filament\Resources\SignalTriggerResource::getEventClassOptions();
+            $allOptions = \Voodflow\Voodflow\Filament\Resources\SignalTriggerResource::getEventClassOptions();
             $eventDisplayName = $allOptions[$record->event_class] ?? $eventDisplayName;
         } catch (\Throwable $e) {
             // Usa il nome della classe come fallback

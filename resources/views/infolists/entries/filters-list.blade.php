@@ -26,10 +26,7 @@
         : __('filament-signal::signal.fields.any_condition');
 @endphp
 
-<x-dynamic-component
-    :component="$getEntryWrapperView()"
-    :entry="$entry"
->
+<x-dynamic-component :component="$getEntryWrapperView()" :entry="$entry">
     @if(blank($filters) || empty($filters))
         <div class="py-8 text-center text-sm text-gray-500 dark:text-gray-400">
             {{ __('filament-signal::signal.fields.no_filters_configured') }}
@@ -50,7 +47,7 @@
                         $eventClass = $record->event_class ?? null;
                         if ($eventClass) {
                             // Usa la stessa funzione helper del form per ottenere il label formattato
-                            $fieldOptions = \Base33\FilamentSignal\Filament\Resources\SignalTriggerResource::getFilterFieldOptionsForEvent($eventClass);
+                            $fieldOptions = \Voodflow\Voodflow\Filament\Resources\SignalTriggerResource::getFilterFieldOptionsForEvent($eventClass);
                             if (isset($fieldOptions[$fieldKey])) {
                                 $field = $fieldOptions[$fieldKey];
                             } else {
@@ -108,7 +105,7 @@
                     $typeLabel = $typeLabels[$type] ?? ucfirst($type);
 
                     // Determina l'icona/simbolo in base al tipo
-                    $icon = match($type) {
+                    $icon = match ($type) {
                         'contains', 'not_contains' => 'heroicon-o-magnifying-glass',
                         'greater_than' => '>',
                         'greater_than_or_equal' => '≥',
@@ -123,7 +120,8 @@
                 {{-- Filter Block --}}
                 <div class="flex items-center gap-3">
                     {{-- Icon Button --}}
-                    <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded bg-primary-600 text-white dark:bg-primary-700">
+                    <div
+                        class="flex h-10 w-10 shrink-0 items-center justify-center rounded bg-primary-600 text-white dark:bg-primary-700">
                         @if(in_array($type, ['contains', 'not_contains']))
                             <x-filament::icon icon="heroicon-o-magnifying-glass" class="h-5 w-5" />
                         @elseif(in_array($type, ['in', 'not_in']))
@@ -159,7 +157,8 @@
             <span class="text-xs font-semibold uppercase tracking-wide text-gray-700 dark:text-gray-300">
                 {{ __('filament-signal::signal.fields.match_logic') }}
             </span>
-            <div class="rounded bg-gray-200 px-3 py-1 text-xs font-bold uppercase text-gray-800 dark:bg-gray-700 dark:text-white">
+            <div
+                class="rounded bg-gray-200 px-3 py-1 text-xs font-bold uppercase text-gray-800 dark:bg-gray-700 dark:text-white">
                 {{ $matchTypeDisplay }}
             </div>
         </div>
