@@ -1,8 +1,4 @@
-const preset = require('../../../vendor/filament/filament/tailwind.config.preset')
-const path = require('path')
-
 module.exports = {
-    presets: [preset],
     content: [
         './app/Filament/**/*.php',
         './resources/views/filament/**/*.blade.php',
