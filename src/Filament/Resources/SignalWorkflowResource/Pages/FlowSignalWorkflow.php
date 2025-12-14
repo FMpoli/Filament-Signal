@@ -36,7 +36,7 @@ class FlowSignalWorkflow extends Page implements HasActions, HasForms
      */
     public function getAvailableNodesProperty(): array
     {
-        return \Base33\FilamentSignal\Nodes\NodeRegistry::getMetadataMap();
+        return \Voodflow\Voodflow\Nodes\NodeRegistry::getMetadataMap();
     }
 
     /**
@@ -45,19 +45,19 @@ class FlowSignalWorkflow extends Page implements HasActions, HasForms
     public function getFilterFieldsMapProperty(): array
     {
         $map = [];
-        $events = \Base33\FilamentSignal\Filament\Resources\SignalTriggerResource::getEventClassOptions();
+        $events = \Voodflow\Voodflow\Filament\Resources\SignalTriggerResource::getEventClassOptions();
 
         foreach (array_keys($events) as $eventClass) {
-            $map[$eventClass] = \Base33\FilamentSignal\Filament\Resources\SignalTriggerResource::getFilterFieldOptionsWithTypesForEvent($eventClass);
+            $map[$eventClass] = \Voodflow\Voodflow\Filament\Resources\SignalTriggerResource::getFilterFieldOptionsWithTypesForEvent($eventClass);
         }
-        
+
         return $map;
     }
 
     public function createGenericNode(array $data): void
     {
         $type = $data['type'] ?? null;
-        $class = \Base33\FilamentSignal\Nodes\NodeRegistry::get($type);
+        $class = \Voodflow\Voodflow\Nodes\NodeRegistry::get($type);
 
         if (!$class) {
             return;
@@ -65,7 +65,7 @@ class FlowSignalWorkflow extends Page implements HasActions, HasForms
 
         $sourceNodeId = $data['sourceNodeId'] ?? null;
         $sourceHandle = $data['sourceHandle'] ?? null;
-        
+
         $nodeId = $type . '-' . \Illuminate\Support\Str::uuid();
         $nodeId = $type . '-' . \Illuminate\Support\Str::uuid();
         $position = $data['position'] ?? $this->calculateNewNodePosition($sourceNodeId, $sourceHandle);
@@ -78,7 +78,7 @@ class FlowSignalWorkflow extends Page implements HasActions, HasForms
 
         // Add special options if needed
         if ($type === 'trigger' || $class::type() === 'trigger') {
-            $config['eventOptions'] = \Base33\FilamentSignal\Filament\Resources\SignalTriggerResource::getEventClassOptions();
+            $config['eventOptions'] = \Voodflow\Voodflow\Filament\Resources\SignalTriggerResource::getEventClassOptions();
         }
 
         $this->record->nodes()->create([
@@ -238,7 +238,7 @@ class FlowSignalWorkflow extends Page implements HasActions, HasForms
     public function updateNodeConfig(array $data): void
     {
         $nodeId = $data['nodeId'] ?? null;
-        if (! $nodeId) {
+        if (!$nodeId) {
             return;
         }
 
@@ -246,7 +246,7 @@ class FlowSignalWorkflow extends Page implements HasActions, HasForms
 
         if ($node) {
             $config = $node->config ?? [];
-            
+
             // Merge all provided data into config, excluding nodeId
             foreach ($data as $key => $value) {
                 if ($key !== 'nodeId') {
@@ -267,7 +267,7 @@ class FlowSignalWorkflow extends Page implements HasActions, HasForms
     public function updateFilterConfig(array $data): void
     {
         $nodeId = $data['nodeId'] ?? null;
-        if (! $nodeId) {
+        if (!$nodeId) {
             return;
         }
 
@@ -326,7 +326,7 @@ class FlowSignalWorkflow extends Page implements HasActions, HasForms
     private function createEdge(string $sourceNodeId, string $targetNodeId, ?string $sourceHandle = null): void
     {
         $edgeId = 'e' . $sourceNodeId . ($sourceHandle ? '-' . $sourceHandle : '') . '-' . $targetNodeId;
-        
+
         $this->record->edges()->create([
             'edge_id' => $edgeId,
             'source_node_id' => $sourceNodeId,
@@ -394,8 +394,8 @@ class FlowSignalWorkflow extends Page implements HasActions, HasForms
             'description' => '',
             'eventClass' => null,
             'status' => 'draft',
-            'isNew' => true, 
-            'eventOptions' => \Base33\FilamentSignal\Filament\Resources\SignalTriggerResource::getEventClassOptions(),
+            'isNew' => true,
+            'eventOptions' => \Voodflow\Voodflow\Filament\Resources\SignalTriggerResource::getEventClassOptions(),
         ];
 
         $this->record->nodes()->create([
@@ -420,12 +420,12 @@ class FlowSignalWorkflow extends Page implements HasActions, HasForms
     {
         $sourceNodeId = $data['sourceNodeId'] ?? null;
         $sourceHandle = $data['sourceHandle'] ?? null;
-        $actionType = $data['actionType'] ?? 'log'; 
-        
+        $actionType = $data['actionType'] ?? 'log';
+
         $nodeId = 'action-' . Str::uuid();
         $nodeId = 'action-' . Str::uuid();
         $position = $data['position'] ?? $this->calculateNewNodePosition($sourceNodeId, $sourceHandle);
-        
+
         $config = [
             'label' => ucfirst($actionType) . ' Action',
             'actionType' => $actionType,
@@ -459,11 +459,11 @@ class FlowSignalWorkflow extends Page implements HasActions, HasForms
         $sourceNodeId = $data['sourceNodeId'] ?? null;
         $sourceHandle = $data['sourceHandle'] ?? null;
         $nodeId = 'sendwebhook-' . \Illuminate\Support\Str::uuid();
-        
+
         $nodeId = 'sendwebhook-' . \Illuminate\Support\Str::uuid();
-        
+
         $position = $data['position'] ?? $this->calculateNewNodePosition($sourceNodeId, $sourceHandle);
-        
+
         $config = [
             'label' => 'Send Webhook',
             'description' => '',
@@ -494,7 +494,7 @@ class FlowSignalWorkflow extends Page implements HasActions, HasForms
     public function editTriggerAction(): Action
     {
         return Action::make('editTrigger')
-            ->modalHeading(fn () => $this->editingNodeId ? 'Edit Trigger' : 'Create Trigger')
+            ->modalHeading(fn() => $this->editingNodeId ? 'Edit Trigger' : 'Create Trigger')
             ->modalWidth('2xl')
             ->fillForm(function (): array {
                 // If editing existing node, load its data
@@ -532,14 +532,14 @@ class FlowSignalWorkflow extends Page implements HasActions, HasForms
                     ->rows(3),
                 Select::make('event_class')
                     ->label('Event Class')
-                    ->options(\Base33\FilamentSignal\Filament\Resources\SignalTriggerResource::getEventClassOptions())
+                    ->options(\Voodflow\Voodflow\Filament\Resources\SignalTriggerResource::getEventClassOptions())
                     ->searchable()
                     ->preload()
                     ->required()
                     ->live()
                     ->helperText('Select an event from plugins (HasSignal) or Model Integrations')
                     ->getSearchResultsUsing(function (string $search): array {
-                        $options = \Base33\FilamentSignal\Filament\Resources\SignalTriggerResource::getEventClassOptions();
+                        $options = \Voodflow\Voodflow\Filament\Resources\SignalTriggerResource::getEventClassOptions();
                         $results = [];
 
                         foreach ($options as $class => $name) {
@@ -555,7 +555,7 @@ class FlowSignalWorkflow extends Page implements HasActions, HasForms
                         return $results;
                     })
                     ->getOptionLabelUsing(function (?string $value): ?string {
-                        if (! $value) {
+                        if (!$value) {
                             return null;
                         }
 
