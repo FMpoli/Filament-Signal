@@ -5,7 +5,7 @@ namespace Voodflow\Voodflow\Filament\Resources\WorkflowResource\Pages;
 use Voodflow\Voodflow\Filament\Resources\WorkflowResource;
 use Filament\Resources\Pages\EditRecord;
 
-class EditSignalWorkflow extends EditRecord
+class EditWorkflow extends EditRecord
 {
     protected static string $resource = WorkflowResource::class;
 

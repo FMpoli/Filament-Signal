@@ -84,7 +84,7 @@ class ExecutionResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListSignalExecutions::route('/'),
+            'index' => Pages\ListExecutions::route('/'),
         ];
     }
 }

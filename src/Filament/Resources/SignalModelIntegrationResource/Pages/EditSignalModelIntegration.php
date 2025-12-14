@@ -5,7 +5,7 @@ namespace Voodflow\Voodflow\Filament\Resources\ModelIntegrationResource\Pages;
 use Voodflow\Voodflow\Filament\Resources\ModelIntegrationResource;
 use Filament\Resources\Pages\EditRecord;
 
-class EditSignalModelIntegration extends EditRecord
+class EditModelIntegration extends EditRecord
 {
     protected static string $resource = ModelIntegrationResource::class;
 

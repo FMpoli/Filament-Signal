@@ -15,7 +15,7 @@ use Filament\Forms\Contracts\HasForms;
 use Filament\Resources\Pages\Page;
 use Illuminate\Support\Str;
 
-class FlowSignalWorkflow extends Page implements HasActions, HasForms
+class FlowWorkflow extends Page implements HasActions, HasForms
 {
     use InteractsWithActions;
     use InteractsWithForms;

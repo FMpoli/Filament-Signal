@@ -265,9 +265,9 @@ class ModelIntegrationResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListSignalModelIntegrations::route('/'),
-            'create' => Pages\CreateSignalModelIntegration::route('/create'),
-            'edit' => Pages\EditSignalModelIntegration::route('/{record}/edit'),
+            'index' => Pages\ListModelIntegrations::route('/'),
+            'create' => Pages\CreateModelIntegration::route('/create'),
+            'edit' => Pages\EditModelIntegration::route('/{record}/edit'),
         ];
     }
 

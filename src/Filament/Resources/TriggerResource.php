@@ -1279,11 +1279,11 @@ class TriggerResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListSignalTriggers::route('/'),
-            'create' => Pages\CreateSignalTrigger::route('/create'),
-            'view' => Pages\ViewSignalTrigger::route('/{record}'),
-            'edit' => Pages\EditSignalTrigger::route('/{record}/edit'),
-            'flow' => Pages\FlowSignalTrigger::route('/{record}/flow'),
+            'index' => Pages\ListTriggers::route('/'),
+            'create' => Pages\CreateTrigger::route('/create'),
+            'view' => Pages\ViewTrigger::route('/{record}'),
+            'edit' => Pages\EditTrigger::route('/{record}/edit'),
+            'flow' => Pages\FlowTrigger::route('/{record}/flow'),
         ];
     }
 

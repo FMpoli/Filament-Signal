@@ -103,7 +103,7 @@ class TemplateResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListSignalTemplates::route('/'),
+            'index' => Pages\ListTemplates::route('/'),
         ];
     }
 }

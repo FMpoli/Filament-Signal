@@ -6,7 +6,7 @@ use Voodflow\Voodflow\Filament\Resources\ModelIntegrationResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 
-class ListSignalModelIntegrations extends ListRecords
+class ListModelIntegrations extends ListRecords
 {
     protected static string $resource = ModelIntegrationResource::class;
 

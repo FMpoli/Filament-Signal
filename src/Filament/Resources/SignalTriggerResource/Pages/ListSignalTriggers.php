@@ -6,7 +6,7 @@ use Voodflow\Voodflow\Filament\Resources\TriggerResource;
 use Filament\Actions\Action;
 use Filament\Resources\Pages\ListRecords;
 
-class ListSignalTriggers extends ListRecords
+class ListTriggers extends ListRecords
 {
     protected static string $resource = TriggerResource::class;
 

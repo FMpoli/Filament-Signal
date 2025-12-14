@@ -6,7 +6,7 @@ use Voodflow\Voodflow\Filament\Resources\WorkflowResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 
-class ListSignalWorkflows extends ListRecords
+class ListWorkflows extends ListRecords
 {
     protected static string $resource = WorkflowResource::class;
 

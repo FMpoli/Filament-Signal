@@ -5,7 +5,7 @@ namespace Voodflow\Voodflow\Filament\Resources\TemplateResource\Pages;
 use Voodflow\Voodflow\Filament\Resources\TemplateResource;
 use Filament\Resources\Pages\ListRecords;
 
-class ListSignalTemplates extends ListRecords
+class ListTemplates extends ListRecords
 {
     protected static string $resource = TemplateResource::class;
 

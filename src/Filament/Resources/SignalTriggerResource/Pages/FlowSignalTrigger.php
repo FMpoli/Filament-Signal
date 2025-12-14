@@ -10,7 +10,7 @@ use Filament\Resources\Pages\EditRecord;
 use Filament\Schemas\Schema;
 use Filament\Support\Enums\Width;
 
-class FlowSignalTrigger extends EditRecord
+class FlowTrigger extends EditRecord
 {
     protected static string $resource = TriggerResource::class;
 

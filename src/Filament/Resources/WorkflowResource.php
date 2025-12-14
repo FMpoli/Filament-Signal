@@ -135,11 +135,11 @@ class WorkflowResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListSignalWorkflows::route('/'),
-            'create' => Pages\CreateSignalWorkflow::route('/create'),
-            'view' => Pages\ViewSignalWorkflow::route('/{record}'),
-            'edit' => Pages\EditSignalWorkflow::route('/{record}/edit'),
-            'flow' => Pages\FlowSignalWorkflow::route('/{record}/flow'),
+            'index' => Pages\ListWorkflows::route('/'),
+            'create' => Pages\CreateWorkflow::route('/create'),
+            'view' => Pages\ViewWorkflow::route('/{record}'),
+            'edit' => Pages\EditWorkflow::route('/{record}/edit'),
+            'flow' => Pages\FlowWorkflow::route('/{record}/flow'),
         ];
     }
 }
