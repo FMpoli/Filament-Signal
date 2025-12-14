@@ -4,24 +4,24 @@ namespace Voodflow\Voodflow\Filament\Resources;
 
 use BackedEnum;
 use Voodflow\Voodflow\Filament\Resources\TemplateResource\Pages;
-use Voodflow\Voodflow\Models\SignalTemplate;
+use Voodflow\Voodflow\Models\Template;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms;
+use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Section;
-use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Support\Str;
 
 class TemplateResource extends Resource
 {
-    protected static ?string $model = SignalTemplate::class;
+    protected static ?string $model = Template::class;
 
-    protected static BackedEnum | string | null $navigationIcon = 'heroicon-o-envelope';
+    protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-envelope';
 
     public static function getNavigationGroup(): ?string
     {
@@ -42,7 +42,7 @@ class TemplateResource extends Resource
                         ->label(__('voodflow::signal.fields.name'))
                         ->required()
                         ->live(onBlur: true)
-                        ->afterStateUpdated(fn ($state, callable $set) => $set('slug', Str::slug($state))),
+                        ->afterStateUpdated(fn($state, callable $set) => $set('slug', Str::slug($state))),
                     Forms\Components\TextInput::make('slug')
                         ->label(__('voodflow::signal.fields.slug'))
                         ->required()
