@@ -71,20 +71,20 @@ class VoodflowServiceProvider extends PackageServiceProvider
 
     public function packageRegistered(): void
     {
-        $this->app->singleton(SignalWebhookTemplateRegistry::class, fn (): SignalWebhookTemplateRegistry => new SignalWebhookTemplateRegistry);
-        $this->app->singleton(SignalEventRegistry::class, fn (): SignalEventRegistry => new SignalEventRegistry);
-        $this->app->singleton(SignalModelRegistry::class, fn (): SignalModelRegistry => new SignalModelRegistry);
-        $this->app->singleton(ReverseRelationRegistry::class, fn (): ReverseRelationRegistry => new ReverseRelationRegistry);
-        $this->app->singleton(ReverseRelationRegistrar::class, fn ($app): ReverseRelationRegistrar => new ReverseRelationRegistrar(
+        $this->app->singleton(SignalWebhookTemplateRegistry::class, fn(): SignalWebhookTemplateRegistry => new SignalWebhookTemplateRegistry);
+        $this->app->singleton(SignalEventRegistry::class, fn(): SignalEventRegistry => new SignalEventRegistry);
+        $this->app->singleton(SignalModelRegistry::class, fn(): SignalModelRegistry => new SignalModelRegistry);
+        $this->app->singleton(ReverseRelationRegistry::class, fn(): ReverseRelationRegistry => new ReverseRelationRegistry);
+        $this->app->singleton(ReverseRelationRegistrar::class, fn($app): ReverseRelationRegistrar => new ReverseRelationRegistrar(
             $app->make(ReverseRelationRegistry::class)
         ));
-        $this->app->singleton(ReverseRelationWarmup::class, fn ($app): ReverseRelationWarmup => new ReverseRelationWarmup(
+        $this->app->singleton(ReverseRelationWarmup::class, fn($app): ReverseRelationWarmup => new ReverseRelationWarmup(
             $app->make(SignalEventRegistry::class),
             $app->make(SignalPayloadFieldAnalyzer::class),
             $app->make(SignalModelRegistry::class),
             $app->make(ReverseRelationRegistrar::class)
         ));
-        $this->app->singleton(SignalEloquentEventMap::class, fn (): SignalEloquentEventMap => new SignalEloquentEventMap);
+        $this->app->singleton(SignalEloquentEventMap::class, fn(): SignalEloquentEventMap => new SignalEloquentEventMap);
     }
 
     public function packageBooted(): void
@@ -142,13 +142,13 @@ class VoodflowServiceProvider extends PackageServiceProvider
 
     protected function bootModelIntegrations(): void
     {
-        if (! class_exists(SignalModelIntegration::class)) {
+        if (!class_exists(SignalModelIntegration::class)) {
             return;
         }
 
         try {
             $table = config('signal.table_names.model_integrations', 'signal_model_integrations');
-            if (! Schema::hasTable($table)) {
+            if (!Schema::hasTable($table)) {
                 return;
             }
         } catch (\Throwable $exception) {
@@ -210,8 +210,10 @@ class VoodflowServiceProvider extends PackageServiceProvider
     protected function getCommands(): array
     {
         return [
-            \Base33\FilamentSignal\Console\Commands\FilamentSignalCommand::class,
-            \Base33\FilamentSignal\Console\Commands\MakeSignalNodeCommand::class,
+            // TODO Phase 2: Uncomment after renaming command files
+            // \Voodflow\Voodflow\Console\Commands\VoodflowCommand::class,
+            // \Voodflow\Voodflow\Console\Commands\MakeVoodflowNodeCommand::class,
+            // \Voodflow\Voodflow\Console\Commands\DebugVoodflow::class,
         ];
     }
 

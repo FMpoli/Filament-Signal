@@ -1,12 +1,12 @@
 <?php
 
-use Base33\FilamentSignal\Actions\LogActionHandler;
-use Base33\FilamentSignal\Actions\WebhookActionHandler;
-use Base33\FilamentSignal\Models\SignalEdge;
-use Base33\FilamentSignal\Models\SignalExecution;
-use Base33\FilamentSignal\Models\SignalExecutionNode;
-use Base33\FilamentSignal\Models\SignalNode;
-use Base33\FilamentSignal\Models\SignalWorkflow;
+use Voodflow\Voodflow\Actions\LogActionHandler;
+use Voodflow\Voodflow\Actions\WebhookActionHandler;
+use Voodflow\Voodflow\Models\SignalEdge;
+use Voodflow\Voodflow\Models\SignalExecution;
+use Voodflow\Voodflow\Models\SignalExecutionNode;
+use Voodflow\Voodflow\Models\SignalNode;
+use Voodflow\Voodflow\Models\SignalWorkflow;
 
 return [
     'auto_discover_events' => env('FILAMENT_SIGNAL_AUTO_DISCOVER_EVENTS', false),
@@ -33,12 +33,16 @@ return [
     ],
 
     'table_names' => [
-        'workflows' => 'signal_workflows',
-        'nodes' => 'signal_nodes',
-        'edges' => 'signal_edges',
-        'executions' => 'signal_executions',
-        'execution_nodes' => 'signal_execution_nodes',
-        'model_integrations' => 'signal_model_integrations',
+        'workflows' => 'voodflow_workflows',      // era signal_workflows
+        'nodes' => 'voodflow_nodes',              // era signal_nodes
+        'edges' => 'voodflow_edges',              // era signal_edges
+        'executions' => 'voodflow_executions',    // era signal_executions
+        'execution_nodes' => 'voodflow_execution_nodes',
+        'model_integrations' => 'voodflow_model_integrations',
+        'triggers' => 'voodflow_triggers',
+        'actions' => 'voodflow_actions',
+        'templates' => 'voodflow_templates',
+        'action_logs' => 'voodflow_action_logs',
     ],
 
     'editor' => [

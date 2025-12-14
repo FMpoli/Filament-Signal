@@ -37,9 +37,9 @@ class SignalModelIntegration extends Model
 
     protected static function booted(): void
     {
-        static::saved(fn (self $integration) => $integration->refreshSignalRegistrations());
-        static::deleted(fn (self $integration) => $integration->unregisterFromSignal());
-        static::forceDeleted(fn (self $integration) => $integration->unregisterFromSignal());
+        static::saved(fn(self $integration) => $integration->refreshSignalRegistrations());
+        static::deleted(fn(self $integration) => $integration->unregisterFromSignal());
+        static::forceDeleted(fn(self $integration) => $integration->unregisterFromSignal());
     }
 
     public function refreshSignalRegistrations(): void
@@ -48,10 +48,10 @@ class SignalModelIntegration extends Model
         $this->registerOnBoot();
 
         // IMPORTANTE: Ricarica i listener degli eventi dopo aver registrato nuovi eventi
-        // Questo è necessario perché SignalEventRegistrar::register() viene chiamato solo all'avvio
+        // Questo è necessario perché EventRegistrar::register() viene chiamato solo all'avvio
         // e se aggiungiamo una nuova Model Integration dopo l'avvio, i listener non vengono ricaricati
         if (app()->isBooted()) {
-            app(\Base33\FilamentSignal\Services\SignalEventRegistrar::class)->register();
+            app(\Voodflow\Voodflow\Services\EventRegistrar::class)->register();
         }
     }
 
@@ -59,12 +59,12 @@ class SignalModelIntegration extends Model
     {
         $fields = $this->getNormalizedFields();
 
-        if (! empty($fields)) {
-            FilamentSignal::registerModelFields($this->model_class, $fields, $this->getAlias());
+        if (!empty($fields)) {
+            Voodflow::registerModelFields($this->model_class, $fields, $this->getAlias());
         }
 
         foreach ($this->getEloquentEventDescriptors() as $descriptor) {
-            FilamentSignal::registerEvent(
+            Voodflow::registerEvent(
                 $descriptor['event'],
                 $descriptor['label'],
                 $descriptor['description'],
@@ -72,14 +72,14 @@ class SignalModelIntegration extends Model
             );
 
             app(SignalEloquentEventMap::class)->register($descriptor['event'], [
-                'model_class' => $this->model_class,
-                'alias' => $descriptor['alias'],
-                'operation' => $descriptor['operation'],
+                'model' => $this->model_class,
+                'event_key' => $descriptor['event'],
             ]);
         }
 
         foreach ($this->getCustomEventDescriptors() as $descriptor) {
-            FilamentSignal::registerEvent(
+            // Register custom events without model association
+            Voodflow::registerEvent(
                 $descriptor['event'],
                 $descriptor['label'],
                 $descriptor['description'],
@@ -130,7 +130,7 @@ class SignalModelIntegration extends Model
 
         foreach ($essential as $field) {
             $fieldName = $field['field'] ?? null;
-            if (! $fieldName) {
+            if (!$fieldName) {
                 continue;
             }
 
@@ -150,7 +150,7 @@ class SignalModelIntegration extends Model
 
             if ($mode === 'reverse') {
                 $descriptor = $relation['relation_descriptor'] ?? null;
-                if (! $descriptor) {
+                if (!$descriptor) {
                     continue;
                 }
 
@@ -165,7 +165,7 @@ class SignalModelIntegration extends Model
             }
 
             $name = $relation['name'] ?? null;
-            if (! $name) {
+            if (!$name) {
                 continue;
             }
 
@@ -189,7 +189,7 @@ class SignalModelIntegration extends Model
 
         foreach ($fields as $field) {
             $fieldName = $field['field'] ?? null;
-            if (! $fieldName) {
+            if (!$fieldName) {
                 continue;
             }
 
@@ -248,7 +248,7 @@ class SignalModelIntegration extends Model
 
         foreach ($this->custom_events ?? [] as $event) {
             $class = $event['class'] ?? null;
-            if (! $class) {
+            if (!$class) {
                 continue;
             }
 
