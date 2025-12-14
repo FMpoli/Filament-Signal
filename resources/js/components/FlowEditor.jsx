@@ -75,17 +75,55 @@ function FlowCanvas({ initialNodes, initialEdges, initialViewport, livewireId, e
     const [colorMode, setColorMode] = useState(getThemeFromFilament);
 
     // Watch for Filament theme changes
+    // NOTE: Filament does NOT dispatch dark-mode-toggled event (verified via browser test)
+    // Must use polling instead
     useEffect(() => {
         if (typeof window === 'undefined') return;
 
-        // Listen to Filament's dark-mode-toggled event
-        const handleThemeToggle = (event) => {
-            const newMode = event.detail; // 'light' or 'dark'
-            setColorMode(newMode);
-            console.log('[Voodflow] Theme toggled to:', newMode);
+        let prevTheme = localStorage.getItem('theme');
+        let intervalId;
+
+        // Poll localStorage - only when page is visible
+        const startPolling = () => {
+            intervalId = setInterval(() => {
+                const currentTheme = localStorage.getItem('theme');
+                if (currentTheme !== prevTheme) {
+                    prevTheme = currentTheme;
+                    const newMode = getThemeFromFilament();
+                    setColorMode(newMode);
+                    console.log('[Voodflow] Theme changed to:', newMode, '(from localStorage)');
+                }
+            }, 200); // Fast polling for instant feedback
         };
 
-        window.addEventListener('dark-mode-toggled', handleThemeToggle);
+        const stopPolling = () => {
+            if (intervalId) {
+                clearInterval(intervalId);
+                intervalId = null;
+            }
+        };
+
+        // Handle page visibility changes
+        const handleVisibilityChange = () => {
+            if (document.hidden) {
+                stopPolling();
+            } else {
+                // Check immediately when page becomes visible
+                const currentTheme = localStorage.getItem('theme');
+                if (currentTheme !== prevTheme) {
+                    prevTheme = currentTheme;
+                    const newMode = getThemeFromFilament();
+                    setColorMode(newMode);
+                }
+                startPolling();
+            }
+        };
+
+        // Start polling
+        startPolling();
+
+        // Pause polling when tab not visible
+        document.addEventListener('visibilitychange', handleVisibilityChange);
 
         // Also listen to system theme changes (when Filament theme is 'system')
         const handleMediaChange = (e) => {
@@ -103,12 +141,13 @@ function FlowCanvas({ initialNodes, initialEdges, initialViewport, livewireId, e
         }
 
         return () => {
-            window.removeEventListener('dark-mode-toggled', handleThemeToggle);
+            stopPolling();
+            document.removeEventListener('visibilitychange', handleVisibilityChange);
             if (mediaQuery.removeEventListener) {
                 mediaQuery.removeEventListener('change', handleMediaChange);
             }
         };
-    }, []);
+    }, [getThemeFromFilament]);
 
 
     const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes.map(n => {
