@@ -58,35 +58,66 @@ function FlowCanvas({ initialNodes, initialEdges, initialViewport, livewireId, e
         return list;
     }, [availableNodesMap]);
 
-    // Detect theme from system preference (Filament's default behavior)
-    // Filament uses prefers-color-scheme media query, not .dark class
-    const [colorMode, setColorMode] = useState(() => {
-        if (typeof window !== 'undefined') {
+    // Detect theme from Filament's localStorage (key: 'theme')
+    // Values: 'dark', 'light', 'system'
+    const getThemeFromFilament = () => {
+        if (typeof window === 'undefined') return 'light';
+
+        const savedTheme = localStorage.getItem('theme');
+
+        // If theme is 'system' or not set, use prefers-color-scheme
+        if (savedTheme === 'system' || !savedTheme) {
             return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
         }
-        return 'light';
-    });
 
-    // Watch for system theme changes
+        // Otherwise use the saved theme directly
+        return savedTheme === 'dark' ? 'dark' : 'light';
+    };
+
+    const [colorMode, setColorMode] = useState(getThemeFromFilament);
+
+    // Watch for Filament theme changes via localStorage
     useEffect(() => {
         if (typeof window === 'undefined') return;
 
-        const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-        const handleChange = (e) => {
-            setColorMode(e.matches ? 'dark' : 'light');
-            console.log('[Voodflow] Theme changed to:', e.matches ? 'dark' : 'light');
+        const handleStorageChange = (e) => {
+            // Listen for changes to 'theme' key
+            if (e.key === 'theme') {
+                const newTheme = getThemeFromFilament();
+                setColorMode(newTheme);
+                console.log('[Voodflow] Theme changed via localStorage to:', newTheme);
+            }
         };
 
-        // Modern browsers
+        const handleMediaChange = (e) => {
+            // Only react to media changes if theme is 'system'
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'system' || !savedTheme) {
+                const newTheme = e.matches ? 'dark' : 'light';
+                setColorMode(newTheme);
+                console.log('[Voodflow] System theme changed to:', newTheme);
+            }
+        };
+
+        // Listen for localStorage changes (when theme is changed in Filament)
+        window.addEventListener('storage', handleStorageChange);
+
+        // Listen for system theme changes (only relevant when theme is 'system')
+        const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
         if (mediaQuery.addEventListener) {
-            mediaQuery.addEventListener('change', handleChange);
-            return () => mediaQuery.removeEventListener('change', handleChange);
+            mediaQuery.addEventListener('change', handleMediaChange);
+        } else if (mediaQuery.addListener) {
+            mediaQuery.addListener(handleMediaChange);
         }
-        // Fallback for older browsers
-        else if (mediaQuery.addListener) {
-            mediaQuery.addListener(handleChange);
-            return () => mediaQuery.removeListener(handleChange);
-        }
+
+        return () => {
+            window.removeEventListener('storage', handleStorageChange);
+            if (mediaQuery.removeEventListener) {
+                mediaQuery.removeEventListener('change', handleMediaChange);
+            } else if (mediaQuery.removeListener) {
+                mediaQuery.removeListener(handleMediaChange);
+            }
+        };
     }, []);
 
 
