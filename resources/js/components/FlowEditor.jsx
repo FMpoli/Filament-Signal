@@ -57,6 +57,31 @@ function FlowCanvas({ initialNodes, initialEdges, initialViewport, livewireId, e
         return list;
     }, [availableNodesMap]);
 
+    // Detect dark mode from Filament (checks for .dark class on html or body)
+    const [colorMode, setColorMode] = useState(() => {
+        if (typeof window !== 'undefined') {
+            return document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+        }
+        return 'light';
+    });
+
+    // Watch for theme changes
+    useEffect(() => {
+        const handleThemeChange = () => {
+            const isDark = document.documentElement.classList.contains('dark');
+            setColorMode(isDark ? 'dark' : 'light');
+        };
+
+        // Use MutationObserver to detect class changes on html element
+        const observer = new MutationObserver(handleThemeChange);
+        observer.observe(document.documentElement, {
+            attributes: true,
+            attributeFilter: ['class']
+        });
+
+        return () => observer.disconnect();
+    }, []);
+
     const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes.map(n => {
         const baseData = {
             ...n.data,
@@ -376,6 +401,7 @@ function FlowCanvas({ initialNodes, initialEdges, initialViewport, livewireId, e
                 onMoveEnd={onMoveEnd}
                 defaultViewport={initialViewport}
                 fitView={!initialViewport || (initialViewport.x === 0 && initialViewport.y === 0 && initialViewport.zoom === 1)}
+                colorMode={colorMode}
             >
                 <Background variant="dots" gap={12} size={1} />
                 <Controls />

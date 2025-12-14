@@ -27,23 +27,3 @@
 .fs-label {
     @apply text-[11px] text-slate-500 dark:text-slate-400 font-semibold mb-1 block uppercase tracking-wider;
 }
-
-/* React Flow Light/Dark Mode Support */
-.react-flow__pane {
-    background-color: #f8fafc;
-    /* Light mode - slate-50 */
-}
-
-.dark .react-flow__pane {
-    background-color: #0f172a;
-    /* Dark mode - slate-900 */
-}
-
-.react-flow__background {
-    /* Light mode dots */
-}
-
-.dark .react-flow__background circle {
-    fill: #334155 !important;
-    /* Dark mode dots - slate-700 */
-}
