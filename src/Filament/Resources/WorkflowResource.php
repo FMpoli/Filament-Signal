@@ -27,7 +27,7 @@ class WorkflowResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return __('filament-signal::signal.plugin.navigation.group');
+        return __('voodflow::signal.plugin.navigation.group');
     }
 
     public static function infolist(Schema $schema): Schema
@@ -42,7 +42,7 @@ class WorkflowResource extends Resource
                         ->heading(fn(Workflow $record) => $record->name)
                         ->schema([
                             TextEntry::make('description')
-                                ->label(__('filament-signal::signal.fields.description'))
+                                ->label(__('voodflow::signal.fields.description'))
                                 ->placeholder('—')
                                 ->visible(fn(Workflow $record) => !empty($record->description))
                                 ->columnSpanFull(),

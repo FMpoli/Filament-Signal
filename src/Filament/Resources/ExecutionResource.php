@@ -20,7 +20,7 @@ class ExecutionResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return __('filament-signal::signal.plugin.navigation.group');
+        return __('voodflow::signal.plugin.navigation.group');
     }
 
     public static function getNavigationLabel(): string

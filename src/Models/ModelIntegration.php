@@ -228,11 +228,11 @@ class ModelIntegration extends Model
                 'operation' => $operation,
                 'alias' => $this->getAlias(),
                 'label' => "{$this->name} • " . $this->readableOperation($operation),
-                'description' => __('filament-signal::signal.model_integrations.events.eloquent_description', [
+                'description' => __('voodflow::signal.model_integrations.events.eloquent_description', [
                     'model' => $this->name,
                     'operation' => $this->readableOperation($operation),
                 ]),
-                'group' => __('filament-signal::signal.model_integrations.groups.eloquent'),
+                'group' => __('voodflow::signal.model_integrations.groups.eloquent'),
             ];
         }
 
@@ -266,10 +266,10 @@ class ModelIntegration extends Model
     protected function readableOperation(string $operation): string
     {
         return match ($operation) {
-            'created' => __('filament-signal::signal.model_integrations.operations.created'),
-            'updated' => __('filament-signal::signal.model_integrations.operations.updated'),
-            'deleted' => __('filament-signal::signal.model_integrations.operations.deleted'),
-            'restored' => __('filament-signal::signal.model_integrations.operations.restored'),
+            'created' => __('voodflow::signal.model_integrations.operations.created'),
+            'updated' => __('voodflow::signal.model_integrations.operations.updated'),
+            'deleted' => __('voodflow::signal.model_integrations.operations.deleted'),
+            'restored' => __('voodflow::signal.model_integrations.operations.restored'),
             default => Str::headline($operation),
         };
     }

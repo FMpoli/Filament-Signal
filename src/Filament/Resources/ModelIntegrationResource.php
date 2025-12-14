@@ -40,12 +40,12 @@ class ModelIntegrationResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return __('filament-signal::signal.plugin.navigation.group');
+        return __('voodflow::signal.plugin.navigation.group');
     }
 
     public static function getNavigationLabel(): string
     {
-        return __('filament-signal::signal.plugin.navigation.integrations');
+        return __('voodflow::signal.plugin.navigation.integrations');
     }
 
     public static function form(Schema $schema): Schema
@@ -54,15 +54,15 @@ class ModelIntegrationResource extends Resource
             ->columns(12)
             ->components([
                 Group::make([
-                    Section::make(__('filament-signal::signal.model_integrations.sections.details'))
+                    Section::make(__('voodflow::signal.model_integrations.sections.details'))
                         ->icon('heroicon-o-cube')
                         ->compact()
                         ->schema([
                             Forms\Components\TextInput::make('name')
-                                ->label(__('filament-signal::signal.fields.name'))
+                                ->label(__('voodflow::signal.fields.name'))
                                 ->required(),
                             Forms\Components\Select::make('model_class')
-                                ->label(__('filament-signal::signal.model_integrations.fields.model_class'))
+                                ->label(__('voodflow::signal.model_integrations.fields.model_class'))
                                 ->required()
                                 ->unique(ModelIntegration::class, 'model_class', ignoreRecord: true)
                                 ->searchable()
@@ -82,10 +82,10 @@ class ModelIntegrationResource extends Resource
                                     }
                                 }),
                             Forms\Components\TextInput::make('model_alias')
-                                ->label(__('filament-signal::signal.model_integrations.fields.model_alias'))
-                                ->helperText(__('filament-signal::signal.model_integrations.helpers.model_alias')),
+                                ->label(__('voodflow::signal.model_integrations.fields.model_alias'))
+                                ->helperText(__('voodflow::signal.model_integrations.helpers.model_alias')),
                         ])->columns(1),
-                    Section::make(__('filament-signal::signal.model_integrations.sections.eloquent'))
+                    Section::make(__('voodflow::signal.model_integrations.sections.eloquent'))
                         ->icon('heroicon-o-heart')
                         ->compact()
                         ->schema([
@@ -99,39 +99,39 @@ class ModelIntegrationResource extends Resource
 
                         ->tabs([
                             Tab::make('essential_fields')
-                                ->label(__('filament-signal::signal.model_integrations.fields.essential_fields'))
+                                ->label(__('voodflow::signal.model_integrations.fields.essential_fields'))
                                 ->icon('heroicon-o-list-bullet')
                                 ->schema([
                                     Forms\Components\Repeater::make('fields.essential')
                                         ->compact()
-                                        ->label(__('filament-signal::signal.model_integrations.fields.essential_fields'))
+                                        ->label(__('voodflow::signal.model_integrations.fields.essential_fields'))
                                         ->itemLabel(fn(array $state): ?string => ($state['field'] ?? ''))
                                         ->schema([
                                             Forms\Components\Select::make('field')
-                                                ->label(__('filament-signal::signal.model_integrations.fields.field_name'))
+                                                ->label(__('voodflow::signal.model_integrations.fields.field_name'))
                                                 ->required()
                                                 ->options(fn(Get $get): array => static::getModelFieldOptions(static::resolveModelClass($get)))
                                                 ->reactive()
                                                 ->searchable()
                                                 ->preload(),
                                             Forms\Components\TextInput::make('label')
-                                                ->label(__('filament-signal::signal.model_integrations.fields.field_label')),
+                                                ->label(__('voodflow::signal.model_integrations.fields.field_label')),
                                         ])
                                         ->default([])
-                                        ->addActionLabel(__('filament-signal::signal.model_integrations.actions.add_field'))
+                                        ->addActionLabel(__('voodflow::signal.model_integrations.actions.add_field'))
                                         ->reorderable()
                                         ->collapsed(),
                                 ]),
                             Tab::make('relations')
-                                ->label(__('filament-signal::signal.model_integrations.fields.relations'))
+                                ->label(__('voodflow::signal.model_integrations.fields.relations'))
                                 ->icon('heroicon-o-circle-stack')
                                 ->schema([
                                     Forms\Components\Repeater::make('fields.relations')
-                                        ->label(__('filament-signal::signal.model_integrations.fields.relations'))
+                                        ->label(__('voodflow::signal.model_integrations.fields.relations'))
                                         ->itemLabel(fn(array $state): ?string => ($state['name'] ?? ''))
                                         ->schema([
                                             Forms\Components\Select::make('name')
-                                                ->label(__('filament-signal::signal.model_integrations.fields.relation_name'))
+                                                ->label(__('voodflow::signal.model_integrations.fields.relation_name'))
                                                 ->options(fn(Get $get): array => static::getRelationOptions(static::resolveModelClass($get)))
                                                 ->searchable()
                                                 ->preload()
@@ -154,15 +154,15 @@ class ModelIntegrationResource extends Resource
                                             Forms\Components\Hidden::make('relation_mode')->default('direct'),
                                             Forms\Components\Hidden::make('relation_descriptor'),
                                             Forms\Components\TextInput::make('alias')
-                                                ->label(__('filament-signal::signal.model_integrations.fields.relation_alias'))
+                                                ->label(__('voodflow::signal.model_integrations.fields.relation_alias'))
                                                 ->placeholder('loans_sent')
-                                                ->helperText(__('filament-signal::signal.model_integrations.helpers.relation_alias')),
+                                                ->helperText(__('voodflow::signal.model_integrations.helpers.relation_alias')),
                                             Forms\Components\Repeater::make('fields')
-                                                ->label(__('filament-signal::signal.model_integrations.fields.relation_fields'))
+                                                ->label(__('voodflow::signal.model_integrations.fields.relation_fields'))
                                                 ->itemLabel(fn(array $state): ?string => ($state['field'] ?? ''))
                                                 ->schema([
                                                     Forms\Components\Select::make('field')
-                                                        ->label(__('filament-signal::signal.model_integrations.fields.field_name'))
+                                                        ->label(__('voodflow::signal.model_integrations.fields.field_name'))
                                                         ->options(fn(Get $get): array => static::getRelationFieldOptions($get))
                                                         ->required()
                                                         ->live()
@@ -174,16 +174,16 @@ class ModelIntegrationResource extends Resource
                                                             $get('../../name');
                                                         }),
                                                     Forms\Components\TextInput::make('label')
-                                                        ->label(__('filament-signal::signal.model_integrations.fields.field_label')),
+                                                        ->label(__('voodflow::signal.model_integrations.fields.field_label')),
                                                 ])
                                                 ->default([])
-                                                ->addActionLabel(__('filament-signal::signal.model_integrations.actions.add_field'))
+                                                ->addActionLabel(__('voodflow::signal.model_integrations.actions.add_field'))
 
                                                 ->reorderable()
                                                 ->columnSpan(2)
                                                 ->collapsed(),
                                             Forms\Components\Select::make('expand')
-                                                ->label(__('filament-signal::signal.model_integrations.fields.expand_relations'))
+                                                ->label(__('voodflow::signal.model_integrations.fields.expand_relations'))
                                                 ->multiple()
                                                 ->options(fn(Get $get): array => static::getRelationExpandOptions($get))
                                                 ->reactive()
@@ -193,30 +193,30 @@ class ModelIntegrationResource extends Resource
                                         ])
                                         ->columns(2)
                                         ->default([])
-                                        ->addActionLabel(__('filament-signal::signal.model_integrations.actions.add_relation'))
+                                        ->addActionLabel(__('voodflow::signal.model_integrations.actions.add_relation'))
                                         ->reorderable()
                                         ->collapsed(),
                                 ]),
                             Tab::make('custom_events')
-                                ->label(__('filament-signal::signal.model_integrations.fields.custom_events'))
+                                ->label(__('voodflow::signal.model_integrations.fields.custom_events'))
                                 ->icon('heroicon-o-bolt')
                                 ->schema([
                                     Forms\Components\Repeater::make('custom_events')
-                                        ->label(__('filament-signal::signal.model_integrations.fields.custom_events'))
+                                        ->label(__('voodflow::signal.model_integrations.fields.custom_events'))
                                         ->schema([
                                             Forms\Components\TextInput::make('class')
-                                                ->label(__('filament-signal::signal.model_integrations.fields.event_class'))
+                                                ->label(__('voodflow::signal.model_integrations.fields.event_class'))
                                                 ->required(),
                                             Forms\Components\TextInput::make('label')
-                                                ->label(__('filament-signal::signal.fields.name')),
+                                                ->label(__('voodflow::signal.fields.name')),
                                             Forms\Components\TextInput::make('group')
-                                                ->label(__('filament-signal::signal.model_integrations.fields.event_group')),
+                                                ->label(__('voodflow::signal.model_integrations.fields.event_group')),
                                             Forms\Components\Textarea::make('description')
-                                                ->label(__('filament-signal::signal.model_integrations.fields.event_description'))
+                                                ->label(__('voodflow::signal.model_integrations.fields.event_description'))
                                                 ->rows(2),
                                         ])
                                         ->default([])
-                                        ->addActionLabel(__('filament-signal::signal.model_integrations.actions.add_event'))
+                                        ->addActionLabel(__('voodflow::signal.model_integrations.actions.add_event'))
                                         ->collapsed(),
                                 ]),
                         ]),
@@ -230,25 +230,25 @@ class ModelIntegrationResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('name')
-                    ->label(__('filament-signal::signal.fields.name'))
+                    ->label(__('voodflow::signal.fields.name'))
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('model_class')
-                    ->label(__('filament-signal::signal.model_integrations.fields.model_class'))
+                    ->label(__('voodflow::signal.model_integrations.fields.model_class'))
                     ->copyable()
                     ->copyMessage(__('filament::components/copyable.messages.copied'))
                     ->copyMessageDuration(1500)
                     ->wrap()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('model_alias')
-                    ->label(__('filament-signal::signal.model_integrations.fields.model_alias'))
+                    ->label(__('voodflow::signal.model_integrations.fields.model_alias'))
                     ->placeholder('—'),
                 Tables\Columns\TextColumn::make('eloquent_events')
-                    ->label(__('filament-signal::signal.model_integrations.fields.eloquent_events'))
+                    ->label(__('voodflow::signal.model_integrations.fields.eloquent_events'))
                     ->formatStateUsing(fn($state) => collect($state ?? [])->map(fn($event) => self::eloquentEventOptions()[$event] ?? $event)->implode(', '))
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('updated_at')
-                    ->label(__('filament-signal::signal.fields.updated_at'))
+                    ->label(__('voodflow::signal.fields.updated_at'))
                     ->dateTime(),
             ])
             ->actions([
@@ -277,10 +277,10 @@ class ModelIntegrationResource extends Resource
     protected static function eloquentEventOptions(): array
     {
         return [
-            'created' => __('filament-signal::signal.model_integrations.operations.created'),
-            'updated' => __('filament-signal::signal.model_integrations.operations.updated'),
-            'deleted' => __('filament-signal::signal.model_integrations.operations.deleted'),
-            'restored' => __('filament-signal::signal.model_integrations.operations.restored'),
+            'created' => __('voodflow::signal.model_integrations.operations.created'),
+            'updated' => __('voodflow::signal.model_integrations.operations.updated'),
+            'deleted' => __('voodflow::signal.model_integrations.operations.deleted'),
+            'restored' => __('voodflow::signal.model_integrations.operations.restored'),
         ];
     }
 
@@ -304,7 +304,7 @@ class ModelIntegrationResource extends Resource
 
         foreach (app(ReverseRelationRegistry::class)->for($modelClass) as $descriptor) {
             $key = 'reverse::' . $descriptor['key'];
-            $options[$key] = $descriptor['label'] . ' · ' . __('filament-signal::signal.model_integrations.labels.reverse');
+            $options[$key] = $descriptor['label'] . ' · ' . __('voodflow::signal.model_integrations.labels.reverse');
         }
 
         return $options;

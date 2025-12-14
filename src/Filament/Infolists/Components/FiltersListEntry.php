@@ -6,5 +6,5 @@ use Filament\Infolists\Components\Entry;
 
 class FiltersListEntry extends Entry
 {
-    protected string $view = 'filament-signal::infolists.entries.filters-list';
+    protected string $view = 'voodflow::infolists.entries.filters-list';
 }

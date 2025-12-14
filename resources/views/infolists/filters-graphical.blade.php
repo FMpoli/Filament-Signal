@@ -7,7 +7,7 @@
 <div class="space-y-3">
     @if(empty($filters))
         <div class="text-sm text-gray-500 dark:text-gray-400">
-            {{ __('filament-signal::signal.fields.no_filters_configured') }} ({{ __('filament-signal::signal.fields.runs_always') }})
+            {{ __('voodflow::signal.fields.no_filters_configured') }} ({{ __('voodflow::signal.fields.runs_always') }})
         </div>
     @else
         @foreach($filters as $index => $filter)

@@ -26,7 +26,7 @@ class ListTriggers extends ListRecords
                     return redirect()->to(static::getResource()::getUrl('flow', ['record' => $trigger]));
                 }),
             Action::make('create')
-                ->label(__('filament-signal::signal.actions.create'))
+                ->label(__('voodflow::signal.actions.create'))
                 ->url(static::getResource()::getUrl('create'))
                 ->icon('heroicon-o-plus')
                 ->button(),

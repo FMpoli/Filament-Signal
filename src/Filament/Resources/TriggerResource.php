@@ -41,7 +41,7 @@ class TriggerResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return __('filament-signal::signal.plugin.navigation.group');
+        return __('voodflow::signal.plugin.navigation.group');
     }
 
     public static function infolist(Schema $schema): Schema
@@ -64,7 +64,7 @@ class TriggerResource extends Resource
                             $statusLabel = ucfirst($record->status);
 
                             return new \Illuminate\Support\HtmlString(
-                                view('filament-signal::infolists.section-header', [
+                                view('voodflow::infolists.section-header', [
                                     'name' => $record->name,
                                     'status' => $statusLabel,
                                     'statusColor' => $statusColor,
@@ -74,13 +74,13 @@ class TriggerResource extends Resource
                         ->compact()
                         ->schema([
                             TextEntry::make('description')
-                                ->label(__('filament-signal::signal.fields.description'))
+                                ->label(__('voodflow::signal.fields.description'))
                                 ->hiddenLabel()
                                 ->placeholder('—')
                                 ->visible(fn(SignalTrigger $record) => !empty($record->description))
                                 ->columnSpanFull(),
                             TextEntry::make('event_display_name')
-                                ->label(__('filament-signal::signal.fields.event_source'))
+                                ->label(__('voodflow::signal.fields.event_source'))
                                 ->icon('heroicon-o-sparkles')
                                 ->state(function (SignalTrigger $record): string {
                                     $eventClassOptions = Voodflow::eventOptions();
@@ -98,29 +98,29 @@ class TriggerResource extends Resource
                                     return $displayName;
                                 }),
                             TextEntry::make('event_class')
-                                ->label(__('filament-signal::signal.fields.event_class'))
+                                ->label(__('voodflow::signal.fields.event_class'))
                                 ->icon('heroicon-o-code-bracket')
                                 ->copyable()
-                                ->copyMessage(__('filament-signal::signal.fields.copied')),
+                                ->copyMessage(__('voodflow::signal.fields.copied')),
                         ])
                         ->columns(2),
-                    Section::make(__('filament-signal::signal.fields.execution_pipeline'))
+                    Section::make(__('voodflow::signal.fields.execution_pipeline'))
                         ->icon('heroicon-o-bolt')
                         ->schema([
                             ActionsListEntry::make('actions')
-                                ->label(__('filament-signal::signal.fields.actions'))
+                                ->label(__('voodflow::signal.fields.actions'))
                                 ->hiddenLabel()
                                 ->state(fn(SignalTrigger $record) => $record->actions->toArray()),
                         ]),
                 ])
                     ->columnSpan(8),
                 Group::make([
-                    Section::make(__('filament-signal::signal.fields.filter_logic'))
+                    Section::make(__('voodflow::signal.fields.filter_logic'))
                         ->icon('heroicon-o-funnel')
                         ->compact()
                         ->schema([
                             FiltersListEntry::make('filters')
-                                ->label(__('filament-signal::signal.fields.filters'))
+                                ->label(__('voodflow::signal.fields.filters'))
                                 ->hiddenLabel()
                                 ->state(function (SignalTrigger $record): array {
                                     $filters = $record->filters ?? [];
@@ -151,7 +151,7 @@ class TriggerResource extends Resource
 
     public static function getNavigationLabel(): string
     {
-        return __('filament-signal::signal.plugin.navigation.rules');
+        return __('voodflow::signal.plugin.navigation.rules');
     }
 
     public static function form(Schema $schema): Schema
@@ -160,7 +160,7 @@ class TriggerResource extends Resource
             ->columns(12)
             ->components([
                 Group::make([
-                    Section::make(__('filament-signal::signal.sections.trigger_details'))
+                    Section::make(__('voodflow::signal.sections.trigger_details'))
                         ->icon('heroicon-o-adjustments-horizontal')
                         ->compact()
                         ->secondary()
@@ -172,25 +172,25 @@ class TriggerResource extends Resource
                                 ])
                                 ->schema([
                                     Forms\Components\TextInput::make('name')
-                                        ->label(__('filament-signal::signal.fields.name'))
+                                        ->label(__('voodflow::signal.fields.name'))
                                         ->required(),
                                     Forms\Components\Select::make('status')
-                                        ->label(__('filament-signal::signal.fields.status'))
+                                        ->label(__('voodflow::signal.fields.status'))
                                         ->options([
-                                            SignalTrigger::STATUS_DRAFT => __('filament-signal::signal.options.status.draft'),
-                                            SignalTrigger::STATUS_ACTIVE => __('filament-signal::signal.options.status.active'),
-                                            SignalTrigger::STATUS_DISABLED => __('filament-signal::signal.options.status.disabled'),
+                                            SignalTrigger::STATUS_DRAFT => __('voodflow::signal.options.status.draft'),
+                                            SignalTrigger::STATUS_ACTIVE => __('voodflow::signal.options.status.active'),
+                                            SignalTrigger::STATUS_DISABLED => __('voodflow::signal.options.status.disabled'),
                                         ])
                                         ->default(SignalTrigger::STATUS_DRAFT)
                                         ->required(),
                                     Forms\Components\Select::make('event_class')
-                                        ->label(__('filament-signal::signal.fields.event_class'))
+                                        ->label(__('voodflow::signal.fields.event_class'))
                                         ->options(self::getEventClassOptions())
                                         ->searchable()
                                         ->preload()
                                         ->required()
                                         ->live()
-                                        ->helperText(__('filament-signal::signal.helpers.event_class'))
+                                        ->helperText(__('voodflow::signal.helpers.event_class'))
                                         ->getSearchResultsUsing(function (string $search): array {
                                             $options = self::getEventClassOptions();
                                             $results = [];
@@ -218,45 +218,45 @@ class TriggerResource extends Resource
                                         })
                                         ->columnSpanFull(),
                                     Forms\Components\Select::make('metadata.webhook_template')
-                                        ->label(__('filament-signal::signal.fields.webhook_template'))
-                                        ->placeholder(__('filament-signal::signal.placeholders.webhook_template'))
+                                        ->label(__('voodflow::signal.fields.webhook_template'))
+                                        ->placeholder(__('voodflow::signal.placeholders.webhook_template'))
                                         ->options(self::getWebhookTemplateOptions())
                                         ->searchable()
                                         ->preload()
                                         ->live()
-                                        ->helperText(__('filament-signal::signal.helpers.webhook_template'))
+                                        ->helperText(__('voodflow::signal.helpers.webhook_template'))
                                         ->afterStateUpdated(function ($state, callable $set): void {
                                             static::applyWebhookTemplate($state, $set);
                                         })
                                         ->hidden()
                                         ->columnSpanFull(),
                                     Forms\Components\Textarea::make('description')
-                                        ->label(__('filament-signal::signal.fields.description'))
+                                        ->label(__('voodflow::signal.fields.description'))
                                         ->rows(3)
                                         ->columnSpanFull(),
                                 ]),
                         ]),
-                    Section::make(__('filament-signal::signal.sections.trigger_conditions'))
+                    Section::make(__('voodflow::signal.sections.trigger_conditions'))
                         ->icon('heroicon-o-funnel')
                         ->compact()
                         ->schema([
                             Forms\Components\Select::make('match_type')
-                                ->label(__('filament-signal::signal.fields.match_type'))
+                                ->label(__('voodflow::signal.fields.match_type'))
                                 ->options([
-                                    SignalTrigger::MATCH_ALL => __('filament-signal::signal.options.match_type.all'),
-                                    SignalTrigger::MATCH_ANY => __('filament-signal::signal.options.match_type.any'),
+                                    SignalTrigger::MATCH_ALL => __('voodflow::signal.options.match_type.all'),
+                                    SignalTrigger::MATCH_ANY => __('voodflow::signal.options.match_type.any'),
                                 ])
                                 ->default(SignalTrigger::MATCH_ALL),
                             Builder::make('filters')
                                 ->label(function (Get $get): string {
                                     $filters = $get('filters');
                                     if (blank($filters) || (is_array($filters) && empty($filters))) {
-                                        return __('filament-signal::signal.fields.no_filters_configured');
+                                        return __('voodflow::signal.fields.no_filters_configured');
                                     }
 
-                                    return __('filament-signal::signal.fields.filters');
+                                    return __('voodflow::signal.fields.filters');
                                 })
-                                ->addActionLabel(__('filament-signal::signal.actions.add_filter'))
+                                ->addActionLabel(__('voodflow::signal.actions.add_filter'))
                                 ->live()
                                 ->blocks(static::getFilterBlocks())
 
@@ -264,7 +264,7 @@ class TriggerResource extends Resource
                         ]),
                 ])->columnSpan(4),
                 Group::make([
-                    Section::make(__('filament-signal::signal.sections.trigger_actions'))
+                    Section::make(__('voodflow::signal.sections.trigger_actions'))
                         ->icon('heroicon-o-bolt')
                         ->compact()
                         ->schema([
@@ -280,7 +280,7 @@ class TriggerResource extends Resource
                                             // Trova l'item appena clonato (quello senza ID o con ID null)
                                             foreach ($state as $id => $data) {
                                                 if ($id !== $itemId && (!isset($data['id']) || $data['id'] === null)) {
-                                                    $copySuffix = __('filament-signal::signal.actions.copy_suffix');
+                                                    $copySuffix = __('voodflow::signal.actions.copy_suffix');
 
                                                     // Aggiungi "(Copy)" al nome se non è già presente
                                                     if (isset($data['name']) && !str_ends_with($data['name'], $copySuffix)) {
@@ -329,8 +329,8 @@ class TriggerResource extends Resource
                                             $isActive = $itemData['is_active'] ?? true;
 
                                             return $isActive
-                                                ? __('filament-signal::signal.actions.deactivate_action')
-                                                : __('filament-signal::signal.actions.activate_action');
+                                                ? __('voodflow::signal.actions.deactivate_action')
+                                                : __('voodflow::signal.actions.activate_action');
                                         })
                                         ->action(function (array $arguments, Repeater $component): void {
                                             $state = $component->getState();
@@ -344,28 +344,28 @@ class TriggerResource extends Resource
                                         }),
                                 ])
                                 ->relationship('actions')
-                                ->label(__('filament-signal::signal.fields.actions'))
+                                ->label(__('voodflow::signal.fields.actions'))
                                 ->hiddenLabel()
                                 ->orderColumn('execution_order')
                                 ->schema(static::actionRepeaterSchema())
                                 ->columns(1)
                                 ->collapsible()
                                 ->collapsed()
-                                ->addActionLabel(__('filament-signal::signal.actions.add_action'))
+                                ->addActionLabel(__('voodflow::signal.actions.add_action'))
                                 ->itemLabel(function (array $state): ?string {
                                     $order = $state['execution_order'] ?? 1;
                                     $type = strtoupper($state['action_type'] ?? '');
                                     $name = $state['name'] ?? '';
 
                                     if ($name) {
-                                        return __('filament-signal::signal.actions.item_label', [
+                                        return __('voodflow::signal.actions.item_label', [
                                             'order' => $order,
                                             'type' => $type,
                                             'name' => $name,
                                         ]);
                                     }
 
-                                    return __('filament-signal::signal.actions.item_label_no_name', [
+                                    return __('voodflow::signal.actions.item_label_no_name', [
                                         'order' => $order,
                                         'type' => $type,
                                     ]);
@@ -484,14 +484,14 @@ class TriggerResource extends Resource
     {
         return [
             Forms\Components\TextInput::make('name')
-                ->label(__('filament-signal::signal.fields.name'))
+                ->label(__('voodflow::signal.fields.name'))
                 ->required(),
             Forms\Components\TextInput::make('execution_order')
-                ->label(__('filament-signal::signal.fields.execution_order'))
+                ->label(__('voodflow::signal.fields.execution_order'))
                 ->numeric()
                 ->default(1),
             Forms\Components\Select::make('action_type')
-                ->label(__('filament-signal::signal.fields.action_type'))
+                ->label(__('voodflow::signal.fields.action_type'))
                 ->options(self::getActionTypeOptions())
                 ->required()
                 ->live()
@@ -557,36 +557,36 @@ class TriggerResource extends Resource
                 ->visible(fn(Get $get): bool => $get('action_type') === 'webhook')
                 ->schema([
                     Forms\Components\TextInput::make('configuration.url')
-                        ->label(__('filament-signal::signal.fields.endpoint_url'))
+                        ->label(__('voodflow::signal.fields.endpoint_url'))
                         ->url()
                         ->required(fn(Get $get): bool => $get('action_type') === 'webhook')
                         ->columnSpanFull(),
                     Forms\Components\Select::make('configuration.method')
-                        ->label(__('filament-signal::signal.fields.http_method'))
+                        ->label(__('voodflow::signal.fields.http_method'))
                         ->options([
-                            'POST' => __('filament-signal::signal.options.http_method.POST'),
-                            'PUT' => __('filament-signal::signal.options.http_method.PUT'),
-                            'PATCH' => __('filament-signal::signal.options.http_method.PATCH'),
-                            'DELETE' => __('filament-signal::signal.options.http_method.DELETE'),
+                            'POST' => __('voodflow::signal.options.http_method.POST'),
+                            'PUT' => __('voodflow::signal.options.http_method.PUT'),
+                            'PATCH' => __('voodflow::signal.options.http_method.PATCH'),
+                            'DELETE' => __('voodflow::signal.options.http_method.DELETE'),
                         ])
                         ->default('POST'),
                     Forms\Components\Select::make('configuration.body')
-                        ->label(__('filament-signal::signal.fields.payload_mode'))
+                        ->label(__('voodflow::signal.fields.payload_mode'))
                         ->options([
-                            'payload' => __('filament-signal::signal.options.payload_mode.payload'),
-                            'event' => __('filament-signal::signal.options.payload_mode.event'),
+                            'payload' => __('voodflow::signal.options.payload_mode.payload'),
+                            'event' => __('voodflow::signal.options.payload_mode.event'),
                         ])
                         ->default('event')
                         ->required(),
                     Forms\Components\TextInput::make('configuration.secret')
-                        ->label(__('filament-signal::signal.fields.signing_secret'))
+                        ->label(__('voodflow::signal.fields.signing_secret'))
                         ->password()
                         ->revealable()
                         ->default(fn() => config('voodflow.webhook.secret') ?: Str::random(40))
-                        ->helperText(__('filament-signal::signal.helpers.signing_secret'))
+                        ->helperText(__('voodflow::signal.helpers.signing_secret'))
                         ->columnSpan(2),
                 ]),
-            Section::make(__('filament-signal::signal.sections.webhook_configuration_advanced'))
+            Section::make(__('voodflow::signal.sections.webhook_configuration_advanced'))
                 ->collapsible()
                 ->collapsed()
                 ->visible(false) // Temporaneamente nascosto - riattivare quando necessario
@@ -599,67 +599,67 @@ class TriggerResource extends Resource
                         ])
                         ->schema([
                             Forms\Components\TextInput::make('configuration.queue')
-                                ->label(__('filament-signal::signal.fields.queue'))
-                                ->placeholder(__('filament-signal::signal.placeholders.default')),
+                                ->label(__('voodflow::signal.fields.queue'))
+                                ->placeholder(__('voodflow::signal.placeholders.default')),
                             Forms\Components\TextInput::make('configuration.connection')
-                                ->label(__('filament-signal::signal.fields.queue_connection')),
+                                ->label(__('voodflow::signal.fields.queue_connection')),
                             Forms\Components\TextInput::make('configuration.timeout')
-                                ->label(__('filament-signal::signal.fields.timeout_seconds'))
+                                ->label(__('voodflow::signal.fields.timeout_seconds'))
                                 ->numeric()
                                 ->minValue(1),
                             Forms\Components\TextInput::make('configuration.tries')
-                                ->label(__('filament-signal::signal.fields.max_attempts'))
+                                ->label(__('voodflow::signal.fields.max_attempts'))
                                 ->numeric()
                                 ->minValue(1)
-                                ->placeholder(__('filament-signal::signal.placeholders.max_attempts_example')),
+                                ->placeholder(__('voodflow::signal.placeholders.max_attempts_example')),
                             Forms\Components\TextInput::make('configuration.backoff_strategy')
-                                ->label(__('filament-signal::signal.fields.backoff_strategy_class')),
+                                ->label(__('voodflow::signal.fields.backoff_strategy_class')),
                             Forms\Components\Toggle::make('configuration.throw_exception_on_failure')
-                                ->label(__('filament-signal::signal.fields.throw_on_failure'))
+                                ->label(__('voodflow::signal.fields.throw_on_failure'))
                                 ->default(false),
                             Forms\Components\Toggle::make('configuration.dispatch_sync')
-                                ->label(__('filament-signal::signal.fields.dispatch_synchronously'))
-                                ->helperText(__('filament-signal::signal.helpers.dispatch_sync')),
+                                ->label(__('voodflow::signal.fields.dispatch_synchronously'))
+                                ->helperText(__('voodflow::signal.helpers.dispatch_sync')),
                             Forms\Components\TagsInput::make('configuration.tags')
-                                ->label(__('filament-signal::signal.fields.horizon_tags'))
-                                ->placeholder(__('filament-signal::signal.placeholders.tag'))
+                                ->label(__('voodflow::signal.fields.horizon_tags'))
+                                ->placeholder(__('voodflow::signal.placeholders.tag'))
                                 ->columnSpan([
                                     'default' => 1,
                                     '@md' => 2,
                                     '@xl' => 1,
                                 ]),
                             Forms\Components\KeyValue::make('configuration.headers')
-                                ->label(__('filament-signal::signal.fields.headers'))
-                                ->keyLabel(__('filament-signal::signal.fields.header'))
-                                ->valueLabel(__('filament-signal::signal.fields.value'))
-                                ->addActionLabel(__('filament-signal::signal.fields.add_header'))
+                                ->label(__('voodflow::signal.fields.headers'))
+                                ->keyLabel(__('voodflow::signal.fields.header'))
+                                ->valueLabel(__('voodflow::signal.fields.value'))
+                                ->addActionLabel(__('voodflow::signal.fields.add_header'))
                                 ->columnSpan([
                                     'default' => 1,
                                     '@md' => 2,
                                     '@xl' => 2,
                                 ]),
                             Forms\Components\KeyValue::make('configuration.meta')
-                                ->label(__('filament-signal::signal.fields.meta'))
-                                ->keyLabel(__('filament-signal::signal.fields.key'))
-                                ->valueLabel(__('filament-signal::signal.fields.value'))
-                                ->addActionLabel(__('filament-signal::signal.fields.add_meta'))
+                                ->label(__('voodflow::signal.fields.meta'))
+                                ->keyLabel(__('voodflow::signal.fields.key'))
+                                ->valueLabel(__('voodflow::signal.fields.value'))
+                                ->addActionLabel(__('voodflow::signal.fields.add_meta'))
                                 ->columnSpan([
                                     'default' => 1,
                                     '@md' => 2,
                                     '@xl' => 3,
                                 ]),
                             Forms\Components\TextInput::make('configuration.proxy')
-                                ->label(__('filament-signal::signal.fields.proxy'))
-                                ->placeholder(__('filament-signal::signal.placeholders.proxy'))
+                                ->label(__('voodflow::signal.fields.proxy'))
+                                ->placeholder(__('voodflow::signal.placeholders.proxy'))
                                 ->columnSpan([
                                     'default' => 1,
                                     '@md' => 2,
                                     '@xl' => 3,
                                 ]),
                             Forms\Components\TextInput::make('configuration.job')
-                                ->label(__('filament-signal::signal.fields.custom_job_class')),
+                                ->label(__('voodflow::signal.fields.custom_job_class')),
                             Forms\Components\TextInput::make('configuration.signer')
-                                ->label(__('filament-signal::signal.fields.custom_signer_class')),
+                                ->label(__('voodflow::signal.fields.custom_signer_class')),
                         ]),
                 ]),
         ];
@@ -680,10 +680,10 @@ class TriggerResource extends Resource
                 ->visible(fn(Get $get): bool => $get('action_type') === 'log')
                 ->schema([
                     Forms\Components\Select::make('configuration.body')
-                        ->label(__('filament-signal::signal.fields.payload_mode'))
+                        ->label(__('voodflow::signal.fields.payload_mode'))
                         ->options([
-                            'payload' => __('filament-signal::signal.options.payload_mode.payload'),
-                            'event' => __('filament-signal::signal.options.payload_mode.event'),
+                            'payload' => __('voodflow::signal.options.payload_mode.payload'),
+                            'event' => __('voodflow::signal.options.payload_mode.event'),
                         ])
                         ->default('payload')
                         ->required(),
@@ -695,7 +695,7 @@ class TriggerResource extends Resource
 
                 ->schema([
                     Text::make('log_info')
-                        ->content(__('filament-signal::signal.helpers.log_info')),
+                        ->content(__('voodflow::signal.helpers.log_info')),
                 ])
                 ->visible(fn(Get $get): bool => $get('action_type') === 'log')
                 ->columnSpanFull(),
@@ -779,8 +779,8 @@ class TriggerResource extends Resource
     public static function getPayloadConfigurationSchema(): array
     {
         return [
-            Section::make(__('filament-signal::signal.sections.payload_configuration'))
-                ->description(__('filament-signal::signal.helpers.payload_configuration'))
+            Section::make(__('voodflow::signal.sections.payload_configuration'))
+                ->description(__('voodflow::signal.helpers.payload_configuration'))
                 ->compact()
                 ->icon('heroicon-o-circle-stack')
                 ->columnSpanFull()
@@ -808,7 +808,7 @@ class TriggerResource extends Resource
 
                     $components = [
                         Forms\Components\CheckboxList::make('configuration.payload_config.include_fields')
-                            ->label(__('filament-signal::signal.fields.essential_fields'))
+                            ->label(__('voodflow::signal.fields.essential_fields'))
                             ->options(function (Get $get) use ($findEventClass): array {
                                 $eventClass = $findEventClass($get);
                                 if (!$eventClass) {
@@ -958,7 +958,7 @@ class TriggerResource extends Resource
                                 }
 
                                 $components[] = Forms\Components\CheckboxList::make($formKey)
-                                    ->label(__('filament-signal::signal.fields.relation_prefix') . ': ' . $relation['label'])
+                                    ->label(__('voodflow::signal.fields.relation_prefix') . ': ' . $relation['label'])
                                     ->options($options)
                                     ->columns(2)
                                     ->gridDirection('row')
@@ -1002,7 +1002,7 @@ class TriggerResource extends Resource
         return collect(config('voodflow.action_handlers', []))
             ->keys()
             ->mapWithKeys(function (string $type) {
-                $translationKey = "filament-signal::signal.action_types.{$type}";
+                $translationKey = "voodflow::signal.action_types.{$type}";
                 $translated = __($translationKey);
 
                 // Se la traduzione non esiste (restituisce la chiave stessa), usa ucfirst come fallback
@@ -1018,15 +1018,15 @@ class TriggerResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('name')
-                    ->label(__('filament-signal::signal.fields.name'))
+                    ->label(__('voodflow::signal.fields.name'))
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('event_class')
-                    ->label(__('filament-signal::signal.fields.event_class'))
+                    ->label(__('voodflow::signal.fields.event_class'))
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('status')
-                    ->label(__('filament-signal::signal.fields.status'))
+                    ->label(__('voodflow::signal.fields.status'))
                     ->badge()
                     ->colors([
                         'secondary' => SignalTrigger::STATUS_DRAFT,
@@ -1035,18 +1035,18 @@ class TriggerResource extends Resource
                     ]),
                 Tables\Columns\TextColumn::make('actions_count')
                     ->counts('actions')
-                    ->label(__('filament-signal::signal.fields.actions')),
+                    ->label(__('voodflow::signal.fields.actions')),
                 Tables\Columns\TextColumn::make('updated_at')
-                    ->label(__('filament-signal::signal.fields.updated_at'))
+                    ->label(__('voodflow::signal.fields.updated_at'))
                     ->dateTime(),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('status')
-                    ->label(__('filament-signal::signal.fields.status'))
+                    ->label(__('voodflow::signal.fields.status'))
                     ->options([
-                        SignalTrigger::STATUS_DRAFT => __('filament-signal::signal.options.status.draft'),
-                        SignalTrigger::STATUS_ACTIVE => __('filament-signal::signal.options.status.active'),
-                        SignalTrigger::STATUS_DISABLED => __('filament-signal::signal.options.status.disabled'),
+                        SignalTrigger::STATUS_DRAFT => __('voodflow::signal.options.status.draft'),
+                        SignalTrigger::STATUS_ACTIVE => __('voodflow::signal.options.status.active'),
+                        SignalTrigger::STATUS_DISABLED => __('voodflow::signal.options.status.disabled'),
                     ]),
             ])
             ->actions([
@@ -1057,25 +1057,25 @@ class TriggerResource extends Resource
                     ->url(fn(SignalTrigger $record): string => static::getUrl('edit', ['record' => $record]))
                     ->openUrlInNewTab(false),
                 Action::make('flow')
-                    ->label(__('filament-signal::signal.actions.flow_view'))
+                    ->label(__('voodflow::signal.actions.flow_view'))
                     ->icon('heroicon-o-squares-2x2')
                     ->color('info')
                     ->url(fn(SignalTrigger $record): string => static::getUrl('flow', ['record' => $record]))
                     ->openUrlInNewTab(false),
                 Action::make('clone')
-                    ->label(__('filament-signal::signal.actions.clone'))
+                    ->label(__('voodflow::signal.actions.clone'))
                     ->icon('heroicon-o-document-duplicate')
                     ->color('gray')
                     ->requiresConfirmation()
-                    ->modalHeading(__('filament-signal::signal.actions.clone_trigger'))
-                    ->modalDescription(__('filament-signal::signal.actions.clone_trigger_description'))
+                    ->modalHeading(__('voodflow::signal.actions.clone_trigger'))
+                    ->modalDescription(__('voodflow::signal.actions.clone_trigger_description'))
                     ->action(function (SignalTrigger $record) {
                         // Replica solo gli attributi fillable, escludendo attributi virtuali come actions_count
                         $cloned = new SignalTrigger;
                         $cloned->fill($record->only($record->getFillable()));
 
                         // Aggiungi "(Copy)" al nome se non è già presente
-                        $copySuffix = __('filament-signal::signal.actions.copy_suffix');
+                        $copySuffix = __('voodflow::signal.actions.copy_suffix');
                         $cloned->name = str_ends_with($record->name, $copySuffix)
                             ? $record->name . $copySuffix
                             : $record->name . $copySuffix;
@@ -1092,7 +1092,7 @@ class TriggerResource extends Resource
                             $clonedAction->trigger_id = $cloned->id;
 
                             // Aggiungi "(Copy)" al nome dell'azione se non è già presente
-                            $copySuffix = __('filament-signal::signal.actions.copy_suffix');
+                            $copySuffix = __('voodflow::signal.actions.copy_suffix');
                             $clonedAction->name = str_ends_with($action->name, $copySuffix)
                                 ? $action->name . $copySuffix
                                 : $action->name . $copySuffix;
@@ -1101,7 +1101,7 @@ class TriggerResource extends Resource
                         }
 
                         \Filament\Notifications\Notification::make()
-                            ->title(__('filament-signal::signal.actions.clone_success'))
+                            ->title(__('voodflow::signal.actions.clone_success'))
                             ->success()
                             ->send();
 
@@ -1122,154 +1122,154 @@ class TriggerResource extends Resource
     {
         return [
             Block::make('equals')
-                ->label(static::getFilterBlockLabel('equals', __('filament-signal::signal.options.filter_blocks.equals')))
+                ->label(static::getFilterBlockLabel('equals', __('voodflow::signal.options.filter_blocks.equals')))
                 ->schema([
                     Forms\Components\Select::make('field')
-                        ->label(__('filament-signal::signal.fields.field'))
+                        ->label(__('voodflow::signal.fields.field'))
                         ->options(fn(Get $get): array => static::getFilterFieldOptions($get))
                         ->searchable()
                         ->preload()
                         ->required()
                         ->live(),
                     Forms\Components\TextInput::make('value')
-                        ->label(__('filament-signal::signal.fields.value'))
+                        ->label(__('voodflow::signal.fields.value'))
                         ->required()
                         ->live(),
                 ])->columns(1),
             Block::make('not_equals')
-                ->label(static::getFilterBlockLabel('not_equals', __('filament-signal::signal.options.filter_blocks.not_equals')))
+                ->label(static::getFilterBlockLabel('not_equals', __('voodflow::signal.options.filter_blocks.not_equals')))
                 ->schema([
                     Forms\Components\Select::make('field')
-                        ->label(__('filament-signal::signal.fields.field'))
+                        ->label(__('voodflow::signal.fields.field'))
                         ->options(fn(Get $get): array => static::getFilterFieldOptions($get))
                         ->searchable()
                         ->preload()
                         ->required()
                         ->live(),
                     Forms\Components\TextInput::make('value')
-                        ->label(__('filament-signal::signal.fields.value'))
+                        ->label(__('voodflow::signal.fields.value'))
                         ->required()
                         ->live(),
                 ])->columns(1),
             Block::make('contains')
-                ->label(static::getFilterBlockLabel('contains', __('filament-signal::signal.options.filter_blocks.contains')))
+                ->label(static::getFilterBlockLabel('contains', __('voodflow::signal.options.filter_blocks.contains')))
                 ->schema([
                     Forms\Components\Select::make('field')
-                        ->label(__('filament-signal::signal.fields.field'))
+                        ->label(__('voodflow::signal.fields.field'))
                         ->options(fn(Get $get): array => static::getFilterFieldOptions($get))
                         ->searchable()
                         ->preload()
                         ->required()
                         ->live(),
                     Forms\Components\TextInput::make('value')
-                        ->label(__('filament-signal::signal.fields.value'))
+                        ->label(__('voodflow::signal.fields.value'))
                         ->required()
                         ->live(),
                 ])->columns(1),
             Block::make('not_contains')
-                ->label(static::getFilterBlockLabel('not_contains', __('filament-signal::signal.options.filter_blocks.not_contains')))
+                ->label(static::getFilterBlockLabel('not_contains', __('voodflow::signal.options.filter_blocks.not_contains')))
                 ->schema([
                     Forms\Components\Select::make('field')
-                        ->label(__('filament-signal::signal.fields.field'))
+                        ->label(__('voodflow::signal.fields.field'))
                         ->options(fn(Get $get): array => static::getFilterFieldOptions($get))
                         ->searchable()
                         ->preload()
                         ->required()
                         ->live(),
                     Forms\Components\TextInput::make('value')
-                        ->label(__('filament-signal::signal.fields.value'))
+                        ->label(__('voodflow::signal.fields.value'))
                         ->required()
                         ->live(),
                 ])->columns(1),
             Block::make('greater_than')
-                ->label(static::getFilterBlockLabel('greater_than', __('filament-signal::signal.options.filter_blocks.greater_than')))
+                ->label(static::getFilterBlockLabel('greater_than', __('voodflow::signal.options.filter_blocks.greater_than')))
                 ->schema([
                     Forms\Components\Select::make('field')
-                        ->label(__('filament-signal::signal.fields.field'))
+                        ->label(__('voodflow::signal.fields.field'))
                         ->options(fn(Get $get): array => static::getFilterFieldOptions($get))
                         ->searchable()
                         ->preload()
                         ->required()
                         ->live(),
                     Forms\Components\TextInput::make('value')
-                        ->label(__('filament-signal::signal.fields.value'))
+                        ->label(__('voodflow::signal.fields.value'))
                         ->required()
                         ->live(),
                 ])->columns(1),
             Block::make('greater_than_or_equal')
-                ->label(static::getFilterBlockLabel('greater_than_or_equal', __('filament-signal::signal.options.filter_blocks.greater_than_or_equal')))
+                ->label(static::getFilterBlockLabel('greater_than_or_equal', __('voodflow::signal.options.filter_blocks.greater_than_or_equal')))
                 ->schema([
                     Forms\Components\Select::make('field')
-                        ->label(__('filament-signal::signal.fields.field'))
+                        ->label(__('voodflow::signal.fields.field'))
                         ->options(fn(Get $get): array => static::getFilterFieldOptions($get))
                         ->searchable()
                         ->preload()
                         ->required()
                         ->live(),
                     Forms\Components\TextInput::make('value')
-                        ->label(__('filament-signal::signal.fields.value'))
+                        ->label(__('voodflow::signal.fields.value'))
                         ->required()
                         ->live(),
                 ])->columns(1),
             Block::make('less_than')
-                ->label(static::getFilterBlockLabel('less_than', __('filament-signal::signal.options.filter_blocks.less_than')))
+                ->label(static::getFilterBlockLabel('less_than', __('voodflow::signal.options.filter_blocks.less_than')))
                 ->schema([
                     Forms\Components\Select::make('field')
-                        ->label(__('filament-signal::signal.fields.field'))
+                        ->label(__('voodflow::signal.fields.field'))
                         ->options(fn(Get $get): array => static::getFilterFieldOptions($get))
                         ->searchable()
                         ->preload()
                         ->required()
                         ->live(),
                     Forms\Components\TextInput::make('value')
-                        ->label(__('filament-signal::signal.fields.value'))
+                        ->label(__('voodflow::signal.fields.value'))
                         ->required()
                         ->live(),
                 ])->columns(1),
             Block::make('less_than_or_equal')
-                ->label(static::getFilterBlockLabel('less_than_or_equal', __('filament-signal::signal.options.filter_blocks.less_than_or_equal')))
+                ->label(static::getFilterBlockLabel('less_than_or_equal', __('voodflow::signal.options.filter_blocks.less_than_or_equal')))
                 ->schema([
                     Forms\Components\Select::make('field')
-                        ->label(__('filament-signal::signal.fields.field'))
+                        ->label(__('voodflow::signal.fields.field'))
                         ->options(fn(Get $get): array => static::getFilterFieldOptions($get))
                         ->searchable()
                         ->preload()
                         ->required()
                         ->live(),
                     Forms\Components\TextInput::make('value')
-                        ->label(__('filament-signal::signal.fields.value'))
+                        ->label(__('voodflow::signal.fields.value'))
                         ->required()
                         ->live(),
                 ])->columns(1),
             Block::make('in')
-                ->label(static::getFilterBlockLabel('in', __('filament-signal::signal.options.filter_blocks.in')))
+                ->label(static::getFilterBlockLabel('in', __('voodflow::signal.options.filter_blocks.in')))
                 ->schema([
                     Forms\Components\Select::make('field')
-                        ->label(__('filament-signal::signal.fields.field'))
+                        ->label(__('voodflow::signal.fields.field'))
                         ->options(fn(Get $get): array => static::getFilterFieldOptions($get))
                         ->searchable()
                         ->preload()
                         ->required()
                         ->live(),
                     Forms\Components\Textarea::make('value')
-                        ->label(__('filament-signal::signal.fields.value'))
-                        ->helperText(__('filament-signal::signal.helpers.filter_in_value'))
+                        ->label(__('voodflow::signal.fields.value'))
+                        ->helperText(__('voodflow::signal.helpers.filter_in_value'))
                         ->required()
                         ->live(),
                 ])->columns(1),
             Block::make('not_in')
-                ->label(static::getFilterBlockLabel('not_in', __('filament-signal::signal.options.filter_blocks.not_in')))
+                ->label(static::getFilterBlockLabel('not_in', __('voodflow::signal.options.filter_blocks.not_in')))
                 ->schema([
                     Forms\Components\Select::make('field')
-                        ->label(__('filament-signal::signal.fields.field'))
+                        ->label(__('voodflow::signal.fields.field'))
                         ->options(fn(Get $get): array => static::getFilterFieldOptions($get))
                         ->searchable()
                         ->preload()
                         ->required()
                         ->live(),
                     Forms\Components\Textarea::make('value')
-                        ->label(__('filament-signal::signal.fields.value'))
-                        ->helperText(__('filament-signal::signal.helpers.filter_in_value'))
+                        ->label(__('voodflow::signal.fields.value'))
+                        ->helperText(__('voodflow::signal.helpers.filter_in_value'))
                         ->required()
                         ->live(),
                 ])->columns(1),

@@ -14,7 +14,7 @@ class FlowTrigger extends EditRecord
 {
     protected static string $resource = TriggerResource::class;
 
-    protected string $view = 'filament-signal::resources.signal-trigger-resource.pages.flow';
+    protected string $view = 'voodflow::resources.signal-trigger-resource.pages.flow';
 
     public function form(Schema $schema): Schema
     {
@@ -23,7 +23,7 @@ class FlowTrigger extends EditRecord
 
     public function getView(): string
     {
-        return 'filament-signal::resources.signal-trigger-resource.pages.flow';
+        return 'voodflow::resources.signal-trigger-resource.pages.flow';
     }
 
     public function getTitle(): string
@@ -33,7 +33,7 @@ class FlowTrigger extends EditRecord
 
     public function getHeading(): string
     {
-        return $this->record->name ?? __('filament-signal::signal.actions.flow_view');
+        return $this->record->name ?? __('voodflow::signal.actions.flow_view');
     }
 
     public function getMaxContentWidth(): Width | string | null
@@ -54,7 +54,7 @@ class FlowTrigger extends EditRecord
     public function editTriggerAction(): Action
     {
         return Action::make('editTrigger')
-            ->label(__('filament-signal::signal.actions.edit_trigger'))
+            ->label(__('voodflow::signal.actions.edit_trigger'))
             ->record($this->record)
             ->fillForm($this->record->toArray())
             ->slideOver()
@@ -80,7 +80,7 @@ class FlowTrigger extends EditRecord
     public function editFiltersAction(): Action
     {
         return Action::make('editFilters')
-            ->label(__('filament-signal::signal.actions.edit_filters'))
+            ->label(__('voodflow::signal.actions.edit_filters'))
             ->record($this->record)
             ->fillForm($this->record->toArray())
             ->slideOver()

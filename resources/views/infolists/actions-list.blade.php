@@ -20,7 +20,7 @@
                 </div>
                 <div class="ms-auto flex flex-wrap items-center gap-4 text-gray-600 dark:text-gray-300">
                     <span>
-                        {{ __('filament-signal::signal.fields.execution_order') }}:
+                        {{ __('voodflow::signal.fields.execution_order') }}:
                         <span class="font-semibold">{{ $action['execution_order'] ?? '-' }}</span>
                     </span>
                     @if ($action['action_type'] === 'webhook')
@@ -40,7 +40,7 @@
 
             <div class="mt-4 text-sm text-gray-600 dark:text-gray-300">
                 <div class="mb-2 font-semibold">
-                    {{ __('filament-signal::signal.fields.configuration') }}
+                    {{ __('voodflow::signal.fields.configuration') }}
                 </div>
                 @if (blank($configuration))
                     <div class="italic text-gray-400 dark:text-gray-500">—</div>

@@ -22,7 +22,7 @@ class FlowWorkflow extends Page implements HasActions, HasForms
 
     protected static string $resource = WorkflowResource::class;
 
-    protected string $view = 'filament-signal::resources.signal-trigger-resource.pages.flow';
+    protected string $view = 'voodflow::resources.signal-trigger-resource.pages.flow';
 
     public Workflow $record;
 

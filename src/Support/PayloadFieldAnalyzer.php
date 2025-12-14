@@ -707,13 +707,13 @@ class PayloadFieldAnalyzer
         // Prova prima con le traduzioni standard del package Signal
         $translatedLabel = null;
         if ($fieldKey === 'currentStatus') {
-            $translatedLabel = trans('filament-signal::signal.fields.current_status');
+            $translatedLabel = trans('voodflow::signal.fields.current_status');
         } elseif ($fieldKey === 'previousStatus') {
-            $translatedLabel = trans('filament-signal::signal.fields.previous_status');
+            $translatedLabel = trans('voodflow::signal.fields.previous_status');
         }
 
         // Se non c'è traduzione standard, prova a trovare la traduzione nel namespace dell'evento
-        if (!$translatedLabel || $translatedLabel === "filament-signal::signal.fields.{$fieldKey}") {
+        if (!$translatedLabel || $translatedLabel === "voodflow::signal.fields.{$fieldKey}") {
             $eventNamespace = substr($eventClass, 0, strrpos($eventClass, '\\'));
             $packageName = $this->getPackageNameFromNamespace($eventNamespace);
 

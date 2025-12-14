@@ -29,9 +29,9 @@ use Spatie\LaravelPackageTools\PackageServiceProvider;
 
 class VoodflowServiceProvider extends PackageServiceProvider
 {
-    public static string $name = 'filament-signal';
+    public static string $name = 'voodflow';
 
-    public static string $viewNamespace = 'filament-signal';
+    public static string $viewNamespace = 'voodflow';
 
     public function configurePackage(Package $package): void
     {

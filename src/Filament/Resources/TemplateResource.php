@@ -25,12 +25,12 @@ class TemplateResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return __('filament-signal::signal.plugin.navigation.group');
+        return __('voodflow::signal.plugin.navigation.group');
     }
 
     public static function getNavigationLabel(): string
     {
-        return __('filament-signal::signal.plugin.navigation.templates');
+        return __('voodflow::signal.plugin.navigation.templates');
     }
 
     public static function form(Schema $schema): Schema
@@ -39,31 +39,31 @@ class TemplateResource extends Resource
             Section::make()
                 ->schema([
                     Forms\Components\TextInput::make('name')
-                        ->label(__('filament-signal::signal.fields.name'))
+                        ->label(__('voodflow::signal.fields.name'))
                         ->required()
                         ->live(onBlur: true)
                         ->afterStateUpdated(fn ($state, callable $set) => $set('slug', Str::slug($state))),
                     Forms\Components\TextInput::make('slug')
-                        ->label(__('filament-signal::signal.fields.slug'))
+                        ->label(__('voodflow::signal.fields.slug'))
                         ->required()
                         ->unique(SignalTemplate::class, 'slug', ignoreRecord: true),
                     Forms\Components\TextInput::make('subject')
-                        ->label(__('filament-signal::signal.fields.subject'))
+                        ->label(__('voodflow::signal.fields.subject'))
                         ->columnSpanFull(),
                     Forms\Components\Toggle::make('is_active')
-                        ->label(__('filament-signal::signal.fields.status'))
+                        ->label(__('voodflow::signal.fields.status'))
                         ->default(true),
                 ])
                 ->columns(1),
-            Section::make(__('filament-signal::signal.sections.template_content'))
+            Section::make(__('voodflow::signal.sections.template_content'))
                 ->schema([
                     Forms\Components\RichEditor::make('content_html')
-                        ->label(__('filament-signal::signal.fields.content_html'))
+                        ->label(__('voodflow::signal.fields.content_html'))
                         ->required()
 
                         ->toolbarButtons(config('voodflow.editor.tiptap.toolbar_buttons')),
                     Forms\Components\Textarea::make('content_text')
-                        ->label(__('filament-signal::signal.fields.content_text'))
+                        ->label(__('voodflow::signal.fields.content_text'))
                         ->rows(4),
                 ])
                 ->columns(1),
@@ -75,19 +75,19 @@ class TemplateResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('name')
-                    ->label(__('filament-signal::signal.fields.name'))
+                    ->label(__('voodflow::signal.fields.name'))
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('slug')
-                    ->label(__('filament-signal::signal.fields.slug'))
+                    ->label(__('voodflow::signal.fields.slug'))
                     ->copyable()
                     ->sortable(),
                 Tables\Columns\IconColumn::make('is_active')
-                    ->label(__('filament-signal::signal.fields.status'))
+                    ->label(__('voodflow::signal.fields.status'))
                     ->boolean(),
                 Tables\Columns\TextColumn::make('updated_at')
                     ->dateTime()
-                    ->label(__('filament-signal::signal.fields.updated_at')),
+                    ->label(__('voodflow::signal.fields.updated_at')),
             ])
             ->actions([
                 ViewAction::make()->slideOver(),
