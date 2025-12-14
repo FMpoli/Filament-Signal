@@ -6,7 +6,7 @@ use BackedEnum;
 use Voodflow\Voodflow\Filament\Infolists\Components\ActionsListEntry;
 use Voodflow\Voodflow\Filament\Infolists\Components\FiltersListEntry;
 use Voodflow\Voodflow\Filament\Resources\SignalTriggerResource\Pages;
-use Voodflow\Voodflow\FilamentSignal;
+use Voodflow\Voodflow\Voodflow;
 use Voodflow\Voodflow\Models\SignalTrigger;
 use Voodflow\Voodflow\Support\SignalPayloadFieldAnalyzer;
 use Voodflow\Voodflow\Support\SignalWebhookTemplateRegistry;
@@ -37,7 +37,7 @@ class SignalTriggerResource extends Resource
 {
     protected static ?string $model = SignalTrigger::class;
 
-    protected static BackedEnum | string | null $navigationIcon = 'heroicon-o-sparkles';
+    protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-sparkles';
 
     public static function getNavigationGroup(): ?string
     {
@@ -77,13 +77,13 @@ class SignalTriggerResource extends Resource
                                 ->label(__('filament-signal::signal.fields.description'))
                                 ->hiddenLabel()
                                 ->placeholder('—')
-                                ->visible(fn (SignalTrigger $record) => ! empty($record->description))
+                                ->visible(fn(SignalTrigger $record) => !empty($record->description))
                                 ->columnSpanFull(),
                             TextEntry::make('event_display_name')
                                 ->label(__('filament-signal::signal.fields.event_source'))
                                 ->icon('heroicon-o-sparkles')
                                 ->state(function (SignalTrigger $record): string {
-                                    $eventClassOptions = FilamentSignal::eventOptions();
+                                    $eventClassOptions = Voodflow::eventOptions();
                                     $displayName = $eventClassOptions[$record->event_class] ?? class_basename($record->event_class);
 
                                     if ($displayName === class_basename($record->event_class)) {
@@ -110,7 +110,7 @@ class SignalTriggerResource extends Resource
                             ActionsListEntry::make('actions')
                                 ->label(__('filament-signal::signal.fields.actions'))
                                 ->hiddenLabel()
-                                ->state(fn (SignalTrigger $record) => $record->actions->toArray()),
+                                ->state(fn(SignalTrigger $record) => $record->actions->toArray()),
                         ]),
                 ])
                     ->columnSpan(8),
@@ -208,7 +208,7 @@ class SignalTriggerResource extends Resource
                                             return $results;
                                         })
                                         ->getOptionLabelUsing(function (?string $value): ?string {
-                                            if (! $value) {
+                                            if (!$value) {
                                                 return null;
                                             }
 
@@ -271,7 +271,7 @@ class SignalTriggerResource extends Resource
                             Repeater::make('actions')
                                 ->cloneable()
                                 ->cloneAction(
-                                    fn ($action) => $action
+                                    fn($action) => $action
                                         ->after(function (array $arguments, Repeater $component): void {
                                             // Dopo che Filament ha clonato l'item, personalizzalo
                                             $state = $component->getState();
@@ -279,11 +279,11 @@ class SignalTriggerResource extends Resource
 
                                             // Trova l'item appena clonato (quello senza ID o con ID null)
                                             foreach ($state as $id => $data) {
-                                                if ($id !== $itemId && (! isset($data['id']) || $data['id'] === null)) {
+                                                if ($id !== $itemId && (!isset($data['id']) || $data['id'] === null)) {
                                                     $copySuffix = __('filament-signal::signal.actions.copy_suffix');
 
                                                     // Aggiungi "(Copy)" al nome se non è già presente
-                                                    if (isset($data['name']) && ! str_ends_with($data['name'], $copySuffix)) {
+                                                    if (isset($data['name']) && !str_ends_with($data['name'], $copySuffix)) {
                                                         $state[$id]['name'] = $data['name'] . $copySuffix;
                                                     }
 
@@ -304,7 +304,7 @@ class SignalTriggerResource extends Resource
                                     if (isset($data['configuration']) && is_string($data['configuration'])) {
                                         $data['configuration'] = json_decode($data['configuration'], true) ?? [];
                                     }
-                                    if (! isset($data['configuration']) || ! is_array($data['configuration'])) {
+                                    if (!isset($data['configuration']) || !is_array($data['configuration'])) {
                                         $data['configuration'] = [];
                                     }
 
@@ -338,7 +338,7 @@ class SignalTriggerResource extends Resource
 
                                             if (isset($state[$itemId])) {
                                                 $currentActive = $state[$itemId]['is_active'] ?? true;
-                                                $state[$itemId]['is_active'] = ! $currentActive;
+                                                $state[$itemId]['is_active'] = !$currentActive;
                                                 $component->state($state);
                                             }
                                         }),
@@ -399,13 +399,13 @@ class SignalTriggerResource extends Resource
         ];
 
         // Eventi registrati dai plugin (con nome e gruppo)
-        $registeredOptions = FilamentSignal::eventOptions();
+        $registeredOptions = Voodflow::eventOptions();
         $options = array_merge($options, $registeredOptions);
 
         // Eventi dal config
         $configuredEvents = config('signal.registered_events', []);
         foreach ($configuredEvents as $eventClass) {
-            if (is_string($eventClass) && ! isset($options[$eventClass])) {
+            if (is_string($eventClass) && !isset($options[$eventClass])) {
                 // Se non è già registrato con un nome, usa il nome della classe
                 $shortName = class_basename($eventClass);
                 $options[$eventClass] = $shortName;
@@ -423,7 +423,7 @@ class SignalTriggerResource extends Resource
                 ->toArray();
 
             foreach ($databaseEvents as $eventClass) {
-                if (! isset($options[$eventClass])) {
+                if (!isset($options[$eventClass])) {
                     // Se non è già presente, usa il nome della classe
                     $shortName = class_basename($eventClass);
                     $options[$eventClass] = $shortName;
@@ -443,7 +443,7 @@ class SignalTriggerResource extends Resource
     {
         $template = app(SignalWebhookTemplateRegistry::class)->find($templateId);
 
-        if (! $template) {
+        if (!$template) {
             return;
         }
 
@@ -508,7 +508,7 @@ class SignalTriggerResource extends Resource
      */
     public static function getActionTypeSchema(?string $actionType): array
     {
-        if (! $actionType) {
+        if (!$actionType) {
             return [];
         }
 
@@ -554,12 +554,12 @@ class SignalTriggerResource extends Resource
                     '@md' => 2,
                     '@xl' => 2,
                 ])
-                ->visible(fn (Get $get): bool => $get('action_type') === 'webhook')
+                ->visible(fn(Get $get): bool => $get('action_type') === 'webhook')
                 ->schema([
                     Forms\Components\TextInput::make('configuration.url')
                         ->label(__('filament-signal::signal.fields.endpoint_url'))
                         ->url()
-                        ->required(fn (Get $get): bool => $get('action_type') === 'webhook')
+                        ->required(fn(Get $get): bool => $get('action_type') === 'webhook')
                         ->columnSpanFull(),
                     Forms\Components\Select::make('configuration.method')
                         ->label(__('filament-signal::signal.fields.http_method'))
@@ -582,7 +582,7 @@ class SignalTriggerResource extends Resource
                         ->label(__('filament-signal::signal.fields.signing_secret'))
                         ->password()
                         ->revealable()
-                        ->default(fn () => config('signal.webhook.secret') ?: Str::random(40))
+                        ->default(fn() => config('signal.webhook.secret') ?: Str::random(40))
                         ->helperText(__('filament-signal::signal.helpers.signing_secret'))
                         ->columnSpan(2),
                 ]),
@@ -677,7 +677,7 @@ class SignalTriggerResource extends Resource
                     '@md' => 2,
                     '@xl' => 2,
                 ])
-                ->visible(fn (Get $get): bool => $get('action_type') === 'log')
+                ->visible(fn(Get $get): bool => $get('action_type') === 'log')
                 ->schema([
                     Forms\Components\Select::make('configuration.body')
                         ->label(__('filament-signal::signal.fields.payload_mode'))
@@ -697,7 +697,7 @@ class SignalTriggerResource extends Resource
                     Text::make('log_info')
                         ->content(__('filament-signal::signal.helpers.log_info')),
                 ])
-                ->visible(fn (Get $get): bool => $get('action_type') === 'log')
+                ->visible(fn(Get $get): bool => $get('action_type') === 'log')
                 ->columnSpanFull(),
         ];
     }
@@ -752,7 +752,7 @@ class SignalTriggerResource extends Resource
     {
         $set('configuration.method', 'POST');
         $set('configuration.body', 'event');
-        if (! config('signal.webhook.secret')) {
+        if (!config('signal.webhook.secret')) {
             $set('configuration.secret', Str::random(40));
         }
     }
@@ -811,7 +811,7 @@ class SignalTriggerResource extends Resource
                             ->label(__('filament-signal::signal.fields.essential_fields'))
                             ->options(function (Get $get) use ($findEventClass): array {
                                 $eventClass = $findEventClass($get);
-                                if (! $eventClass) {
+                                if (!$eventClass) {
                                     return [];
                                 }
 
@@ -850,7 +850,7 @@ class SignalTriggerResource extends Resource
                             ->afterStateHydrated(function ($state, callable $set, Get $get) use ($findEventClass) {
                                 // Pulisci i valori non validi quando viene caricato lo stato
                                 $eventClass = $findEventClass($get);
-                                if (! $eventClass || ! is_array($state)) {
+                                if (!$eventClass || !is_array($state)) {
                                     return;
                                 }
 
@@ -864,7 +864,7 @@ class SignalTriggerResource extends Resource
                                         $parts = explode('.', $field);
                                         if (count($parts) === 2) {
                                             $fieldName = $parts[1];
-                                            if (! in_array($fieldName, ['created_at', 'updated_at', 'attachments'])) {
+                                            if (!in_array($fieldName, ['created_at', 'updated_at', 'attachments'])) {
                                                 $validFields[] = $field;
                                             }
                                         } else {
@@ -881,7 +881,7 @@ class SignalTriggerResource extends Resource
                             ->afterStateUpdated(function ($state, callable $set, Get $get) use ($findEventClass) {
                                 // Pulisci i valori che non sono più nelle opzioni disponibili quando cambia l'evento
                                 $eventClass = $findEventClass($get);
-                                if (! $eventClass || ! is_array($state)) {
+                                if (!$eventClass || !is_array($state)) {
                                     return;
                                 }
 
@@ -895,7 +895,7 @@ class SignalTriggerResource extends Resource
                                         $parts = explode('.', $field);
                                         if (count($parts) === 2) {
                                             $fieldName = $parts[1];
-                                            if (! in_array($fieldName, ['created_at', 'updated_at', 'attachments'])) {
+                                            if (!in_array($fieldName, ['created_at', 'updated_at', 'attachments'])) {
                                                 $validFields[] = $field;
                                             }
                                         } else {
@@ -917,7 +917,7 @@ class SignalTriggerResource extends Resource
                         $analyzer = app(SignalPayloadFieldAnalyzer::class);
                         $analysis = $analyzer->analyzeEvent($eventClass);
 
-                        if (! empty($analysis['relations'])) {
+                        if (!empty($analysis['relations'])) {
                             foreach ($analysis['relations'] as $relation) {
                                 $fieldOptions = $relation['field_options'] ?? [];
                                 if (empty($fieldOptions)) {
@@ -979,7 +979,7 @@ class SignalTriggerResource extends Resource
                                         }
                                     })
                                     ->afterStateUpdated(function ($state, callable $set) use ($options, $formKey): void {
-                                        if (! is_array($state)) {
+                                        if (!is_array($state)) {
                                             return;
                                         }
 
@@ -1051,16 +1051,16 @@ class SignalTriggerResource extends Resource
             ])
             ->actions([
                 ViewAction::make()
-                    ->url(fn (SignalTrigger $record): string => static::getUrl('view', ['record' => $record]))
+                    ->url(fn(SignalTrigger $record): string => static::getUrl('view', ['record' => $record]))
                     ->openUrlInNewTab(false),
                 EditAction::make()
-                    ->url(fn (SignalTrigger $record): string => static::getUrl('edit', ['record' => $record]))
+                    ->url(fn(SignalTrigger $record): string => static::getUrl('edit', ['record' => $record]))
                     ->openUrlInNewTab(false),
                 Action::make('flow')
                     ->label(__('filament-signal::signal.actions.flow_view'))
                     ->icon('heroicon-o-squares-2x2')
                     ->color('info')
-                    ->url(fn (SignalTrigger $record): string => static::getUrl('flow', ['record' => $record]))
+                    ->url(fn(SignalTrigger $record): string => static::getUrl('flow', ['record' => $record]))
                     ->openUrlInNewTab(false),
                 Action::make('clone')
                     ->label(__('filament-signal::signal.actions.clone'))
@@ -1126,7 +1126,7 @@ class SignalTriggerResource extends Resource
                 ->schema([
                     Forms\Components\Select::make('field')
                         ->label(__('filament-signal::signal.fields.field'))
-                        ->options(fn (Get $get): array => static::getFilterFieldOptions($get))
+                        ->options(fn(Get $get): array => static::getFilterFieldOptions($get))
                         ->searchable()
                         ->preload()
                         ->required()
@@ -1141,7 +1141,7 @@ class SignalTriggerResource extends Resource
                 ->schema([
                     Forms\Components\Select::make('field')
                         ->label(__('filament-signal::signal.fields.field'))
-                        ->options(fn (Get $get): array => static::getFilterFieldOptions($get))
+                        ->options(fn(Get $get): array => static::getFilterFieldOptions($get))
                         ->searchable()
                         ->preload()
                         ->required()
@@ -1156,7 +1156,7 @@ class SignalTriggerResource extends Resource
                 ->schema([
                     Forms\Components\Select::make('field')
                         ->label(__('filament-signal::signal.fields.field'))
-                        ->options(fn (Get $get): array => static::getFilterFieldOptions($get))
+                        ->options(fn(Get $get): array => static::getFilterFieldOptions($get))
                         ->searchable()
                         ->preload()
                         ->required()
@@ -1171,7 +1171,7 @@ class SignalTriggerResource extends Resource
                 ->schema([
                     Forms\Components\Select::make('field')
                         ->label(__('filament-signal::signal.fields.field'))
-                        ->options(fn (Get $get): array => static::getFilterFieldOptions($get))
+                        ->options(fn(Get $get): array => static::getFilterFieldOptions($get))
                         ->searchable()
                         ->preload()
                         ->required()
@@ -1186,7 +1186,7 @@ class SignalTriggerResource extends Resource
                 ->schema([
                     Forms\Components\Select::make('field')
                         ->label(__('filament-signal::signal.fields.field'))
-                        ->options(fn (Get $get): array => static::getFilterFieldOptions($get))
+                        ->options(fn(Get $get): array => static::getFilterFieldOptions($get))
                         ->searchable()
                         ->preload()
                         ->required()
@@ -1201,7 +1201,7 @@ class SignalTriggerResource extends Resource
                 ->schema([
                     Forms\Components\Select::make('field')
                         ->label(__('filament-signal::signal.fields.field'))
-                        ->options(fn (Get $get): array => static::getFilterFieldOptions($get))
+                        ->options(fn(Get $get): array => static::getFilterFieldOptions($get))
                         ->searchable()
                         ->preload()
                         ->required()
@@ -1216,7 +1216,7 @@ class SignalTriggerResource extends Resource
                 ->schema([
                     Forms\Components\Select::make('field')
                         ->label(__('filament-signal::signal.fields.field'))
-                        ->options(fn (Get $get): array => static::getFilterFieldOptions($get))
+                        ->options(fn(Get $get): array => static::getFilterFieldOptions($get))
                         ->searchable()
                         ->preload()
                         ->required()
@@ -1231,7 +1231,7 @@ class SignalTriggerResource extends Resource
                 ->schema([
                     Forms\Components\Select::make('field')
                         ->label(__('filament-signal::signal.fields.field'))
-                        ->options(fn (Get $get): array => static::getFilterFieldOptions($get))
+                        ->options(fn(Get $get): array => static::getFilterFieldOptions($get))
                         ->searchable()
                         ->preload()
                         ->required()
@@ -1246,7 +1246,7 @@ class SignalTriggerResource extends Resource
                 ->schema([
                     Forms\Components\Select::make('field')
                         ->label(__('filament-signal::signal.fields.field'))
-                        ->options(fn (Get $get): array => static::getFilterFieldOptions($get))
+                        ->options(fn(Get $get): array => static::getFilterFieldOptions($get))
                         ->searchable()
                         ->preload()
                         ->required()
@@ -1262,7 +1262,7 @@ class SignalTriggerResource extends Resource
                 ->schema([
                     Forms\Components\Select::make('field')
                         ->label(__('filament-signal::signal.fields.field'))
-                        ->options(fn (Get $get): array => static::getFilterFieldOptions($get))
+                        ->options(fn(Get $get): array => static::getFilterFieldOptions($get))
                         ->searchable()
                         ->preload()
                         ->required()
@@ -1324,7 +1324,7 @@ class SignalTriggerResource extends Resource
                 }
 
                 // Se non trovato, prova a ottenere dal record corrente (modo edit)
-                if (! $eventClass) {
+                if (!$eventClass) {
                     try {
                         $record = request()->route('record');
                         if ($record && method_exists($record, 'getAttribute')) {
@@ -1451,7 +1451,7 @@ class SignalTriggerResource extends Resource
 
                 // Ottieni il nome reale del campo dal database se disponibile
                 $realFieldName = $field;
-                if (! empty($realColumnNames) && count($parts) === 2) {
+                if (!empty($realColumnNames) && count($parts) === 2) {
                     $theoreticalFieldName = $parts[1];
                     foreach ($realColumnNames as $realColumn) {
                         if (str_ends_with($theoreticalFieldName, '_id')) {
@@ -1485,7 +1485,7 @@ class SignalTriggerResource extends Resource
             }
 
             // Aggiungi anche i campi delle relazioni
-            if (! empty($analysis['relations'])) {
+            if (!empty($analysis['relations'])) {
                 foreach ($analysis['relations'] as $relation) {
                     $fieldOptions = $relation['field_options'] ?? [];
                     if (empty($fieldOptions)) {
@@ -1547,10 +1547,10 @@ class SignalTriggerResource extends Resource
                     if ($realForeignKeyName && $parentProperty) {
                         $idFieldPath = "{$parentProperty}.{$realForeignKeyName}";
                         $relationLabel = $relation['label'] ?? $relationName;
-                        if (! isset($options[$idFieldPath])) {
+                        if (!isset($options[$idFieldPath])) {
                             $options[$idFieldPath] = "{$relationLabel} → ID";
                         }
-                    } elseif (isset($relation['id_field']) && ! isset($options[$relation['id_field']])) {
+                    } elseif (isset($relation['id_field']) && !isset($options[$relation['id_field']])) {
                         $relationLabel = $relation['label'] ?? $alias;
                         $options[$relation['id_field']] = "{$relationLabel} → ID";
                     }
@@ -1607,9 +1607,9 @@ class SignalTriggerResource extends Resource
 
                 // Determina il tipo del campo
                 $type = $data['type'] ?? 'string';
-                
+
                 // Normalizza i tipi per il frontend
-                $normalizedType = match(strtolower($type)) {
+                $normalizedType = match (strtolower($type)) {
                     'datetime', 'date', 'timestamp', 'carbon' => 'date',
                     'int', 'integer', 'bigint', 'smallint' => 'number',
                     'float', 'double', 'decimal' => 'number',
@@ -1624,7 +1624,7 @@ class SignalTriggerResource extends Resource
             }
 
             // Campi delle relazioni
-            if (! empty($analysis['relations'])) {
+            if (!empty($analysis['relations'])) {
                 foreach ($analysis['relations'] as $relation) {
                     $fieldOptions = $relation['field_options'] ?? [];
                     if (empty($fieldOptions)) {
@@ -1656,7 +1656,7 @@ class SignalTriggerResource extends Resource
                         }
 
                         $relationLabel = $relation['label'] ?? $relationName;
-                        
+
                         // Per relazioni, determina il tipo dal nome campo
                         $type = 'string';
                         if (str_ends_with($fieldKey, '_at') || $fieldKey === 'date') {
@@ -1664,7 +1664,7 @@ class SignalTriggerResource extends Resource
                         } elseif (str_ends_with($fieldKey, '_id') || $fieldKey === 'id') {
                             $type = 'number';
                         }
-                        
+
                         $options[$fieldPath] = [
                             'label' => "{$relationLabel} → {$formattedLabel}",
                             'type' => $type,
@@ -1705,7 +1705,7 @@ class SignalTriggerResource extends Resource
         foreach ($paths as $path) {
             try {
                 $value = $get($path);
-                if ($value && is_string($value) && ! empty($value)) {
+                if ($value && is_string($value) && !empty($value)) {
                     $eventClass = $value;
 
                     break;
@@ -1717,7 +1717,7 @@ class SignalTriggerResource extends Resource
         }
 
         // Se non trovato, prova a ottenere dal record corrente (modo edit)
-        if (! $eventClass) {
+        if (!$eventClass) {
             try {
                 $record = $get('record');
                 if ($record) {
@@ -1735,7 +1735,7 @@ class SignalTriggerResource extends Resource
         }
 
         // Se ancora non trovato, prova a ottenere dalla richiesta (modo create)
-        if (! $eventClass) {
+        if (!$eventClass) {
             try {
                 // Prova dal form state della richiesta
                 $requestData = request()->input('data');
@@ -1747,7 +1747,7 @@ class SignalTriggerResource extends Resource
             }
         }
 
-        if (! $eventClass) {
+        if (!$eventClass) {
             return [];
         }
 
@@ -1805,7 +1805,7 @@ class SignalTriggerResource extends Resource
 
                 // Ottieni il nome reale del campo dal database se disponibile
                 $realFieldName = $field;
-                if (! empty($realColumnNames) && count($parts) === 2) {
+                if (!empty($realColumnNames) && count($parts) === 2) {
                     $theoreticalFieldName = $parts[1];
                     // Cerca il campo reale nel database (potrebbe essere diverso, es: author_id vs blog_author_id)
                     foreach ($realColumnNames as $realColumn) {
@@ -1845,7 +1845,7 @@ class SignalTriggerResource extends Resource
             }
 
             // Aggiungi anche i campi delle relazioni (come nella payload configuration)
-            if (! empty($analysis['relations'])) {
+            if (!empty($analysis['relations'])) {
                 foreach ($analysis['relations'] as $relation) {
                     $fieldOptions = $relation['field_options'] ?? [];
                     if (empty($fieldOptions)) {
@@ -1914,10 +1914,10 @@ class SignalTriggerResource extends Resource
                     if ($realForeignKeyName && $parentProperty) {
                         $idFieldPath = "{$parentProperty}.{$realForeignKeyName}";
                         $relationLabel = $relation['label'] ?? $relationName;
-                        if (! isset($options[$idFieldPath])) {
+                        if (!isset($options[$idFieldPath])) {
                             $options[$idFieldPath] = "{$relationLabel} → ID";
                         }
-                    } elseif (isset($relation['id_field']) && ! isset($options[$relation['id_field']])) {
+                    } elseif (isset($relation['id_field']) && !isset($options[$relation['id_field']])) {
                         $relationLabel = $relation['label'] ?? $alias;
                         $options[$relation['id_field']] = "{$relationLabel} → ID";
                     }
