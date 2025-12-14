@@ -4,7 +4,7 @@ namespace Voodflow\Voodflow\Filament\Resources;
 
 use BackedEnum;
 use Voodflow\Voodflow\Filament\Resources\SignalModelIntegrationResource\Pages;
-use Voodflow\Voodflow\Models\SignalModelIntegration;
+use Voodflow\Voodflow\Models\ModelIntegration;
 use Voodflow\Voodflow\Support\ReverseRelationRegistry;
 use Voodflow\Voodflow\Support\SignalModelRegistry;
 use Filament\Actions\BulkActionGroup;
@@ -32,7 +32,7 @@ use ReflectionMethod;
 
 class SignalModelIntegrationResource extends Resource
 {
-    protected static ?string $model = SignalModelIntegration::class;
+    protected static ?string $model = ModelIntegration::class;
 
     protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-link';
 
@@ -64,7 +64,7 @@ class SignalModelIntegrationResource extends Resource
                             Forms\Components\Select::make('model_class')
                                 ->label(__('filament-signal::signal.model_integrations.fields.model_class'))
                                 ->required()
-                                ->unique(SignalModelIntegration::class, 'model_class', ignoreRecord: true)
+                                ->unique(ModelIntegration::class, 'model_class', ignoreRecord: true)
                                 ->searchable()
                                 ->preload()
                                 ->options(fn() => static::getAvailableModelOptions())

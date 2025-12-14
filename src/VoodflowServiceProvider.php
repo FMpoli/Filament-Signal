@@ -3,7 +3,7 @@
 namespace Voodflow\Voodflow;
 
 
-use Voodflow\Voodflow\Models\SignalModelIntegration;
+use Voodflow\Voodflow\Models\ModelIntegration;
 use Voodflow\Voodflow\Services\SignalEventRegistrar;
 use Voodflow\Voodflow\Support\ReverseRelationRegistrar;
 use Voodflow\Voodflow\Support\ReverseRelationRegistry;
@@ -155,7 +155,7 @@ class VoodflowServiceProvider extends PackageServiceProvider
             return;
         }
 
-        SignalModelIntegration::query()->get()->each->registerOnBoot();
+        ModelIntegration::query()->get()->each->registerOnBoot();
     }
 
     protected function registerConfiguredWebhookTemplates(): void

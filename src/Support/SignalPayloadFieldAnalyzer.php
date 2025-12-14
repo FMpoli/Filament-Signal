@@ -33,7 +33,7 @@ class SignalPayloadFieldAnalyzer
             return $this->analyzeEloquentEvent($eventClass);
         }
 
-        if (! class_exists($eventClass)) {
+        if (!class_exists($eventClass)) {
             return ['fields' => [], 'relations' => []];
         }
 
@@ -49,7 +49,7 @@ class SignalPayloadFieldAnalyzer
             $mainModelClass = null;
             foreach ($properties as $property) {
                 $type = $property->getType();
-                if ($type && $type instanceof \ReflectionNamedType && ! $type->isBuiltin()) {
+                if ($type && $type instanceof \ReflectionNamedType && !$type->isBuiltin()) {
                     $typeClass = $type->getName();
                     if (is_subclass_of($typeClass, Model::class)) {
                         $mainModelProperty = $property->getName();
@@ -66,7 +66,7 @@ class SignalPayloadFieldAnalyzer
                 $type = $property->getType();
 
                 // Se è un modello, controlla se ha HasSignal
-                if ($type && $type instanceof \ReflectionNamedType && ! $type->isBuiltin()) {
+                if ($type && $type instanceof \ReflectionNamedType && !$type->isBuiltin()) {
                     $typeClass = $type->getName();
 
                     if (is_subclass_of($typeClass, Model::class)) {
@@ -126,13 +126,13 @@ class SignalPayloadFieldAnalyzer
     ): void {
         foreach ($reverseRelations as $reverseConfig) {
             $descriptorKey = $reverseConfig['descriptor'] ?? null;
-            if (! $descriptorKey) {
+            if (!$descriptorKey) {
                 continue;
             }
 
             $descriptor = $this->reverseRegistry->find($descriptorKey);
 
-            if (! $descriptor) {
+            if (!$descriptor) {
                 continue;
             }
 
@@ -233,13 +233,13 @@ class SignalPayloadFieldAnalyzer
 
     protected function analyzeEloquentEvent(string $eventName): array
     {
-        if (! preg_match('/eloquent\.[a-z_]+:\s*(.+)$/i', $eventName, $matches)) {
+        if (!preg_match('/eloquent\.[a-z_]+:\s*(.+)$/i', $eventName, $matches)) {
             return ['fields' => [], 'relations' => []];
         }
 
         $modelClass = trim($matches[1]);
 
-        if (! class_exists($modelClass) || ! is_subclass_of($modelClass, Model::class)) {
+        if (!class_exists($modelClass) || !is_subclass_of($modelClass, Model::class)) {
             return ['fields' => [], 'relations' => []];
         }
 
@@ -317,12 +317,12 @@ class SignalPayloadFieldAnalyzer
                 // Aggiungi i campi delle relazioni annidate (ricorsivamente)
                 // Solo se il modello implementa HasSignal (non da Model Integration)
                 // Per Model Integration, usiamo solo i campi esplicitamente configurati
-                if ($relatedModelClass && ! empty($expand)) {
+                if ($relatedModelClass && !empty($expand)) {
                     $isFromModelIntegration = $this->isModelFromIntegration($modelClass);
 
                     // Se non è da Model Integration, aggiungi ricorsivamente i campi delle relazioni in expand
                     // Se è da Model Integration, usa solo i campi configurati (già in fieldOptions)
-                    if (! $isFromModelIntegration) {
+                    if (!$isFromModelIntegration) {
                         $relatedModelFields = $this->modelRegistry->getFields($relatedModelClass);
                         if ($relatedModelFields && isset($relatedModelFields['relations'])) {
                             // Filtra solo le relazioni che sono in expand
@@ -344,7 +344,7 @@ class SignalPayloadFieldAnalyzer
                             }
 
                             // Processa ricorsivamente solo le relazioni in expand
-                            if (! empty($nestedRelations)) {
+                            if (!empty($nestedRelations)) {
                                 $this->collectNestedRelationFieldsForDirect(
                                     $nestedRelations,
                                     $relatedModelClass,
@@ -380,7 +380,7 @@ class SignalPayloadFieldAnalyzer
             }
         }
 
-        if (! empty($reverseRelations)) {
+        if (!empty($reverseRelations)) {
             $this->processReverseRelations($propertyName, $modelClass, $reverseRelations, $relations);
         }
     }
@@ -431,7 +431,7 @@ class SignalPayloadFieldAnalyzer
      */
     protected function getFieldType(?\ReflectionType $type, string $name): string
     {
-        if (! $type) {
+        if (!$type) {
             return 'mixed';
         }
 
@@ -465,7 +465,7 @@ class SignalPayloadFieldAnalyzer
      */
     protected function getModelFields(string $modelClass): array
     {
-        if (! class_exists($modelClass) || ! is_subclass_of($modelClass, Model::class)) {
+        if (!class_exists($modelClass) || !is_subclass_of($modelClass, Model::class)) {
             return [];
         }
 
@@ -496,7 +496,7 @@ class SignalPayloadFieldAnalyzer
      */
     protected function getRelatedModelClassFromRelation(string $modelClass, string $relationName): ?string
     {
-        if (! class_exists($modelClass) || ! is_subclass_of($modelClass, Model::class)) {
+        if (!class_exists($modelClass) || !is_subclass_of($modelClass, Model::class)) {
             return null;
         }
 
@@ -504,7 +504,7 @@ class SignalPayloadFieldAnalyzer
             $model = new $modelClass;
 
             // Verifica se il metodo di relazione esiste
-            if (! method_exists($model, $relationName)) {
+            if (!method_exists($model, $relationName)) {
                 return null;
             }
 
@@ -713,7 +713,7 @@ class SignalPayloadFieldAnalyzer
         }
 
         // Se non c'è traduzione standard, prova a trovare la traduzione nel namespace dell'evento
-        if (! $translatedLabel || $translatedLabel === "filament-signal::signal.fields.{$fieldKey}") {
+        if (!$translatedLabel || $translatedLabel === "filament-signal::signal.fields.{$fieldKey}") {
             $eventNamespace = substr($eventClass, 0, strrpos($eventClass, '\\'));
             $packageName = $this->getPackageNameFromNamespace($eventNamespace);
 
@@ -735,7 +735,7 @@ class SignalPayloadFieldAnalyzer
         }
 
         // Fallback: genera label automatico
-        if (! $translatedLabel || str_starts_with($translatedLabel, 'filament-')) {
+        if (!$translatedLabel || str_starts_with($translatedLabel, 'filament-')) {
             $translatedLabel = $this->getFieldLabel($fieldKey);
         }
 
@@ -784,7 +784,7 @@ class SignalPayloadFieldAnalyzer
 
     protected function defaultReverseAlias(?array $descriptor): string
     {
-        if (! $descriptor) {
+        if (!$descriptor) {
             return 'relatedModels';
         }
 
@@ -879,14 +879,14 @@ class SignalPayloadFieldAnalyzer
             $relationFields = $relationConfig['fields'] ?? [];
             $relatedModelClass = $this->getRelatedModelClassFromRelation($modelClass, $relationName);
 
-            if (! $relatedModelClass) {
+            if (!$relatedModelClass) {
                 continue;
             }
 
             $currentPath = $basePath === '' ? $relationName : "{$basePath}.{$relationName}";
 
             // Aggiungi i campi della relazione principale (es: unit.inventory_code o unit.model.name)
-            if (! empty($relationFields)) {
+            if (!empty($relationFields)) {
                 $nestedFieldOptions = $this->formatFieldOptions($relationFields, $relatedModelClass);
                 foreach ($nestedFieldOptions as $fieldKey => $fieldLabel) {
                     $fullKey = "{$baseAlias}.{$currentPath}.{$fieldKey}";
@@ -897,7 +897,7 @@ class SignalPayloadFieldAnalyzer
             }
 
             // Se ci sono relazioni annidate da espandere, processale ricorsivamente
-            if (! empty($relationExpand)) {
+            if (!empty($relationExpand)) {
                 $relatedModelFields = $this->modelRegistry->getFields($relatedModelClass);
 
                 // Se il modello correlato ha relazioni configurate, processale
@@ -921,7 +921,7 @@ class SignalPayloadFieldAnalyzer
                     }
 
                     // Processa ricorsivamente
-                    if (! empty($nestedRelations)) {
+                    if (!empty($nestedRelations)) {
                         $this->collectNestedRelationFieldsForReverse(
                             $nestedRelations,
                             $relatedModelClass,
@@ -974,14 +974,14 @@ class SignalPayloadFieldAnalyzer
             $relationFields = $relationConfig['fields'] ?? [];
             $relatedModelClass = $this->getRelatedModelClassFromRelation($modelClass, $relationName);
 
-            if (! $relatedModelClass) {
+            if (!$relatedModelClass) {
                 continue;
             }
 
             $currentPath = $basePath === '' ? $relationName : "{$basePath}.{$relationName}";
 
             // Aggiungi i campi della relazione principale (es: unit.inventory_code o unit.model.name)
-            if (! empty($relationFields)) {
+            if (!empty($relationFields)) {
                 $nestedFieldOptions = $this->formatFieldOptions($relationFields, $relatedModelClass);
                 foreach ($nestedFieldOptions as $fieldKey => $fieldLabel) {
                     // Costruisci il fullKey:
@@ -1010,7 +1010,7 @@ class SignalPayloadFieldAnalyzer
             }
 
             // Se ci sono relazioni annidate da espandere, processale ricorsivamente
-            if (! empty($relationExpand)) {
+            if (!empty($relationExpand)) {
                 $relatedModelFields = $this->modelRegistry->getFields($relatedModelClass);
 
                 // Se il modello correlato ha relazioni configurate, processale
@@ -1034,7 +1034,7 @@ class SignalPayloadFieldAnalyzer
                     }
 
                     // Processa ricorsivamente
-                    if (! empty($nestedRelations)) {
+                    if (!empty($nestedRelations)) {
                         $this->collectNestedRelationFieldsForDirect(
                             $nestedRelations,
                             $relatedModelClass,
@@ -1077,7 +1077,7 @@ class SignalPayloadFieldAnalyzer
         }
 
         // Verifica se esiste un record SignalModelIntegration per questo modello
-        $integration = \Base33\FilamentSignal\Models\SignalModelIntegration::where('model_class', $modelClass)
+        $integration = \Voodflow\Voodflow\Models\ModelIntegration::where('model_class', $modelClass)
             ->whereNull('deleted_at')
             ->first();
 
