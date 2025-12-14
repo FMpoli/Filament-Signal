@@ -3,7 +3,7 @@
 namespace Voodflow\Voodflow\Filament\Resources\SignalWorkflowResource\Pages;
 
 use Voodflow\Voodflow\Filament\Resources\SignalWorkflowResource;
-use Voodflow\Voodflow\Models\SignalWorkflow;
+use Voodflow\Voodflow\Models\Workflow;
 use Filament\Actions\Action;
 use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\Contracts\HasActions;
@@ -24,9 +24,9 @@ class FlowSignalWorkflow extends Page implements HasActions, HasForms
 
     protected string $view = 'filament-signal::resources.signal-trigger-resource.pages.flow';
 
-    public SignalWorkflow $record;
+    public Workflow $record;
 
-    public function mount(SignalWorkflow $record): void
+    public function mount(Workflow $record): void
     {
         $this->record = $record;
     }
