@@ -142,7 +142,7 @@ class VoodflowServiceProvider extends PackageServiceProvider
 
     protected function bootModelIntegrations(): void
     {
-        if (!class_exists(SignalModelIntegration::class)) {
+        if (!class_exists(ModelIntegration::class)) {
             return;
         }
 
