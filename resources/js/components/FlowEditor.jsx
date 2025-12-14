@@ -23,13 +23,14 @@ import EmptyCanvasState from './EmptyCanvasState';
 import ContextMenu from './ContextMenu';
 
 const nodeTypes = {
-    // Legacy support
+    // Current types (after removing base33_ prefix)
     trigger: TriggerNode,
     filter: FilterNode,
     filter_pro: FilterProNode,
-    sendWebhook: SendWebhookNode,
+    send_webhook: SendWebhookNode,
+    conditional: ConditionalNode,
 
-    // Namespaced types (Best Practice)
+    // Legacy namespaced types (for backwards compatibility with old data)
     base33_trigger: TriggerNode,
     base33_filter: FilterNode,
     base33_filter_pro: FilterProNode,
