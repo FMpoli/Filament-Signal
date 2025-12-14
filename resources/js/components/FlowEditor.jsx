@@ -43,7 +43,7 @@ function FlowCanvas({ initialNodes, initialEdges, initialViewport, livewireId, e
     const availableNodesList = useMemo(() => {
         if (!availableNodesMap) return [];
         const list = Object.values(availableNodesMap)
-            .filter(node => node.metadata?.positioning?.input === true)
+            // Don't filter by input - we want ALL nodes including triggers
             .map(node => ({
                 id: node.className, // Unique identifier instead of just type
                 type: node.type, // Visual component type (trigger, filter, etc)
@@ -51,7 +51,8 @@ function FlowCanvas({ initialNodes, initialEdges, initialViewport, livewireId, e
                 icon: (node.metadata?.icon || 'circle').replace('heroicon-o-', ''),
                 color: node.metadata?.color || 'gray',
                 group: node.metadata?.group || 'Custom',
-                positioning: node.metadata?.positioning || {}
+                positioning: node.metadata?.positioning || {},
+                metadata: node.metadata // Include full metadata
             }));
         return list;
     }, [availableNodesMap]);
