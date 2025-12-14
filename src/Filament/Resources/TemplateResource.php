@@ -46,7 +46,7 @@ class TemplateResource extends Resource
                     Forms\Components\TextInput::make('slug')
                         ->label(__('voodflow::signal.fields.slug'))
                         ->required()
-                        ->unique(SignalTemplate::class, 'slug', ignoreRecord: true),
+                        ->unique(Template::class, 'slug', ignoreRecord: true),
                     Forms\Components\TextInput::make('subject')
                         ->label(__('voodflow::signal.fields.subject'))
                         ->columnSpanFull(),
