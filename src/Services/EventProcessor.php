@@ -9,11 +9,12 @@ use Voodflow\Voodflow\Support\SignalPayloadFactory;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 
-class SignalEventProcessor
+class EventProcessor
 {
     public function __construct(
         protected SignalPayloadFactory $payloadFactory,
-    ) {}
+    ) {
+    }
 
     public function handle(object $event): void
     {
@@ -55,7 +56,7 @@ class SignalEventProcessor
 
         foreach ($triggers as $trigger) {
             // Controlla se il trigger passa i filtri configurati
-            if (! $trigger->passesFilters($payload)) {
+            if (!$trigger->passesFilters($payload)) {
                 Log::info("Signal: Trigger [{$trigger->id}] did not pass filters", [
                     'trigger_id' => $trigger->id,
                     'trigger_name' => $trigger->name,
@@ -72,7 +73,7 @@ class SignalEventProcessor
 
             if ($useSync) {
                 // Esegui immediatamente senza coda
-                $trigger->load(['actions' => fn ($query) => $query->active()->orderBy('execution_order')->with('template')]);
+                $trigger->load(['actions' => fn($query) => $query->active()->orderBy('execution_order')->with('template')]);
                 $executor = app(SignalActionExecutor::class);
 
                 foreach ($trigger->actions as $action) {
@@ -94,7 +95,7 @@ class SignalEventProcessor
         return SignalTrigger::query()
             ->active()
             ->where('event_class', $eventClass)
-            ->with(['actions' => fn ($query) => $query->active()->orderBy('execution_order')])
+            ->with(['actions' => fn($query) => $query->active()->orderBy('execution_order')])
             ->get();
     }
 }

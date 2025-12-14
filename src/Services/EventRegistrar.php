@@ -13,14 +13,15 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Throwable;
 
-class SignalEventRegistrar
+class EventRegistrar
 {
     public function __construct(
         protected Dispatcher $dispatcher,
         protected SignalEventProcessor $processor,
         protected SignalEventRegistry $eventRegistry,
         protected SignalEloquentEventMap $eloquentEventMap
-    ) {}
+    ) {
+    }
 
     public function register(): void
     {
@@ -58,7 +59,7 @@ class SignalEventRegistrar
 
                 $event = $this->wrapEventPayload($eventName, $payload);
 
-                if (! $event) {
+                if (!$event) {
                     Log::info('Signal: Event wrapped to null, skipping', [
                         'event_name' => $eventName,
                     ]);
@@ -81,7 +82,7 @@ class SignalEventRegistrar
         if (Str::startsWith($eventName, 'eloquent.')) {
             $model = $payload[0] ?? null;
 
-            if (! $model instanceof Model) {
+            if (!$model instanceof Model) {
                 return null;
             }
 

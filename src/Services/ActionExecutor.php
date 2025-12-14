@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Log;
 use InvalidArgumentException;
 use Throwable;
 
-class SignalActionExecutor
+class ActionExecutor
 {
     /**
      * @param  array<string, class-string<SignalActionHandler>>  $handlers
@@ -92,7 +92,7 @@ class SignalActionExecutor
     {
         $class = Arr::get($this->handlers, $type);
 
-        if (! $class) {
+        if (!$class) {
             throw new InvalidArgumentException(sprintf(
                 'No Signal handler registered for action type [%s].',
                 $type
@@ -101,7 +101,7 @@ class SignalActionExecutor
 
         $handler = App::make($class);
 
-        if (! $handler instanceof SignalActionHandler) {
+        if (!$handler instanceof SignalActionHandler) {
             throw new InvalidArgumentException(sprintf(
                 'Handler [%s] must implement %s.',
                 $class,
