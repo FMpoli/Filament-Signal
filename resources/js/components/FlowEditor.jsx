@@ -57,15 +57,7 @@ function FlowCanvas({ initialNodes, initialEdges, initialViewport, livewireId, e
         return list;
     }, [availableNodesMap]);
 
-    // TEMPORARY: Force light mode until we understand Filament's theme system
-    // Filament doesn't use .dark class on html element
-    const [colorMode, setColorMode] = useState('light');
 
-    // TODO: Investigate Filament's actual theme detection mechanism
-    // For now, always use light mode
-    useEffect(() => {
-        console.log('[Voodflow] Forcing light mode - Filament theme detection TBD');
-    }, []);
 
     const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes.map(n => {
         const baseData = {
