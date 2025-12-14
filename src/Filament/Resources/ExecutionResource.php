@@ -18,8 +18,6 @@ class ExecutionResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
-    protected static ?string $navigationGroup = 'Voodflow';
-
     public static function getNavigationGroup(): ?string
     {
         return __('voodflow::signal.plugin.navigation.group');
