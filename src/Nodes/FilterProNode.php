@@ -19,7 +19,7 @@ class FilterProNode implements NodeInterface
      */
     public static function type(): string
     {
-        return 'base33_filter_pro';
+        return 'filter_pro';
     }
 
     /**
@@ -70,11 +70,11 @@ class FilterProNode implements NodeInterface
     public function execute(array $input, array $config): array
     {
         // TODO: Implement your node logic here
-        
+
         // Example:
         // $result = $this->doSomething($input, $config);
         // return ['success' => true, 'data' => $result];
-        
+
         return $input;
     }
 
@@ -87,13 +87,13 @@ class FilterProNode implements NodeInterface
     public function validate(array $config): array
     {
         $errors = [];
-        
+
         // TODO: Add your validation logic here
         // Example:
         // if (empty($config['required_field'])) {
         //     $errors[] = 'Required field is missing';
         // }
-        
+
         return $errors;
     }
 }

@@ -17,7 +17,7 @@ class FilterNode implements NodeInterface
      */
     public static function type(): string
     {
-        return 'base33_filter';
+        return 'filter';
     }
 
     /**
@@ -72,7 +72,7 @@ class FilterNode implements NodeInterface
         // Return input if it passes filters, or empty/null if it fails?
         // Or throw exception to stop flow?
         // Usually filters just stop propagation if condition met.
-        
+
         return $input;
     }
 
@@ -85,12 +85,12 @@ class FilterNode implements NodeInterface
     public function validate(array $config): array
     {
         $errors = [];
-        
+
         // Example validation
         // if (empty($config['filters'])) {
         //     $errors[] = 'At least one filter condition is required';
         // }
-        
+
         return $errors;
     }
 }

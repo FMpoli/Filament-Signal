@@ -8,7 +8,7 @@ class ConditionalNode implements NodeInterface
 {
     public static function type(): string
     {
-        return 'base33_conditional';
+        return 'conditional';
     }
 
     public static function name(): string

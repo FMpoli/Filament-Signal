@@ -19,7 +19,7 @@ class SendWebhookNode implements NodeInterface
      */
     public static function type(): string
     {
-        return 'base33_send_webhook';
+        return 'send_webhook';
     }
 
     /**
@@ -77,7 +77,7 @@ class SendWebhookNode implements NodeInterface
         // 2. Build payload from input based on config['fields']
         // 3. Send request to config['url'] with config['method']
         // 4. Return ['success' => true/false] to determine next branch
-        
+
         return $input;
     }
 
@@ -90,7 +90,7 @@ class SendWebhookNode implements NodeInterface
     public function validate(array $config): array
     {
         $errors = [];
-        
+
         // Check required fields
         if (empty($config['url'])) {
             $errors[] = 'URL is required';
@@ -99,7 +99,7 @@ class SendWebhookNode implements NodeInterface
         if (empty($config['method'])) {
             $errors[] = 'HTTP Method is required';
         }
-        
+
         return $errors;
     }
 }
