@@ -1087,7 +1087,7 @@ class TriggerResource extends Resource
                         // Clona anche le azioni associate
                         foreach ($record->actions as $action) {
                             // Replica solo gli attributi fillable, escludendo attributi virtuali
-                            $clonedAction = new \Base33\FilamentSignal\Models\SignalAction;
+                            $clonedAction = new \Voodflow\Voodflow\Models\SignalAction;
                             $clonedAction->fill($action->only($action->getFillable()));
                             $clonedAction->trigger_id = $cloned->id;
 

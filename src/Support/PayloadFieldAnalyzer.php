@@ -1072,7 +1072,7 @@ class PayloadFieldAnalyzer
     protected function isModelFromIntegration(string $modelClass): bool
     {
         // Verifica se il modello implementa HasSignal
-        if (is_subclass_of($modelClass, \Base33\FilamentSignal\Contracts\HasSignal::class)) {
+        if (is_subclass_of($modelClass, \Voodflow\Voodflow\Contracts\HasSignal::class)) {
             return false;
         }
 

@@ -22,7 +22,7 @@ class FlowWorkflow extends Page implements HasActions, HasForms
 
     protected static string $resource = WorkflowResource::class;
 
-    protected string $view = 'voodflow::resources.signal-trigger-resource.pages.flow';
+    protected string $view = 'voodflow::resources.trigger-resource.pages.flow';
 
     public Workflow $record;
 
@@ -559,7 +559,7 @@ class FlowWorkflow extends Page implements HasActions, HasForms
                             return null;
                         }
 
-                        $options = \Base33\FilamentSignal\Filament\Resources\TriggerResource::getEventClassOptions();
+                        $options = \Voodflow\Voodflow\Filament\Resources\TriggerResource::getEventClassOptions();
 
                         return $options[$value] ?? class_basename($value);
                     }),

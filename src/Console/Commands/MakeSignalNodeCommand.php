@@ -306,7 +306,7 @@ class NodeRegistry
     {
         return [
             // Add your nodes here:
-            // '{{NAME}}' => \Base33\FilamentSignal\Nodes\{{NAME}}Node::class,
+            // '{{NAME}}' => \Voodflow\Voodflow\Nodes\{{NAME}}Node::class,
         ];
     }
 
