@@ -59,7 +59,7 @@
          ">
         <div id="react-flow-container" style="width: 100%; height: calc(100vh - 300px); min-height: 600px;"
             data-nodes='{!! $nodesJson !!}' data-edges='{!! $edgesJson !!}' data-viewport='{!! $viewportJson !!}'
-            data-event-options='@json(\Voodflow\Voodflow\Filament\Resources\SignalTriggerResource::getEventClassOptions())'
+            data-event-options='@json(\Voodflow\Voodflow\Filament\Resources\TriggerResource::getEventClassOptions())'
             data-filter-fields-map='{!! $filterFieldsMapJson !!}' data-available-nodes='{!! $availableNodesJson !!}'
             data-livewire-id="{{ $this->getId() }}" wire:ignore></div>
     </div>

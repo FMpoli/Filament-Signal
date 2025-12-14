@@ -47,7 +47,7 @@
                         $eventClass = $record->event_class ?? null;
                         if ($eventClass) {
                             // Usa la stessa funzione helper del form per ottenere il label formattato
-                            $fieldOptions = \Voodflow\Voodflow\Filament\Resources\SignalTriggerResource::getFilterFieldOptionsForEvent($eventClass);
+                            $fieldOptions = \Voodflow\Voodflow\Filament\Resources\TriggerResource::getFilterFieldOptionsForEvent($eventClass);
                             if (isset($fieldOptions[$fieldKey])) {
                                 $field = $fieldOptions[$fieldKey];
                             } else {

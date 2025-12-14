@@ -6,7 +6,7 @@
     // Se non trovato, prova anche con getEventClassOptions
     if ($eventDisplayName === class_basename($record->event_class)) {
         try {
-            $allOptions = \Voodflow\Voodflow\Filament\Resources\SignalTriggerResource::getEventClassOptions();
+            $allOptions = \Voodflow\Voodflow\Filament\Resources\TriggerResource::getEventClassOptions();
             $eventDisplayName = $allOptions[$record->event_class] ?? $eventDisplayName;
         } catch (\Throwable $e) {
             // Usa il nome della classe come fallback
