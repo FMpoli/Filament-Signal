@@ -72,6 +72,22 @@ const EmptyCanvasState = ({ availableNodes = [], onAddNode }) => {
             hover: 'hover:bg-blue-50 dark:hover:bg-blue-900/20',
             ring: 'ring-blue-500',
         },
+        warning: {
+            bg: 'bg-amber-500',
+            bgLight: 'bg-amber-100 dark:bg-amber-900/30',
+            border: 'border-amber-500',
+            text: 'text-amber-500',
+            hover: 'hover:bg-amber-50 dark:hover:bg-amber-900/20',
+            ring: 'ring-amber-500',
+        },
+        gray: {
+            bg: 'bg-gray-500',
+            bgLight: 'bg-gray-100 dark:bg-gray-900/30',
+            border: 'border-gray-500',
+            text: 'text-gray-500',
+            hover: 'hover:bg-gray-50 dark:hover:bg-gray-900/20',
+            ring: 'ring-gray-500',
+        },
     };
 
     return (
@@ -145,7 +161,7 @@ const EmptyCanvasState = ({ availableNodes = [], onAddNode }) => {
 
                         <div className="space-y-3">
                             {nodeOptions.map((option) => {
-                                const colors = colorClasses[option.color];
+                                const colors = colorClasses[option.color] || colorClasses.gray; // Fallback to gray
                                 return (
                                     <button
                                         key={option.type}
