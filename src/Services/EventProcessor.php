@@ -2,7 +2,7 @@
 
 namespace Voodflow\Voodflow\Services;
 
-use Voodflow\Voodflow\Contracts\SignalIdentifiableEvent;
+use Voodflow\Voodflow\Contracts\IdentifiableEvent;
 use Voodflow\Voodflow\Jobs\RunSignalTrigger;
 use Voodflow\Voodflow\Models\SignalTrigger;
 use Voodflow\Voodflow\Support\PayloadFactory;
@@ -21,13 +21,13 @@ class EventProcessor
         // Log diretto su file per debug
         try {
             $logFile = base_path('storage/logs/signal-debug.log');
-            $logMessage = date('Y-m-d H:i:s') . ' - SignalEventProcessor::handle called - Event class: ' . ($event instanceof SignalIdentifiableEvent ? $event->signalEventIdentifier() : get_class($event)) . "\n";
+            $logMessage = date('Y-m-d H:i:s') . ' - SignalEventProcessor::handle called - Event class: ' . ($event instanceof IdentifiableEvent ? $event->signalEventIdentifier() : get_class($event)) . "\n";
             @file_put_contents($logFile, $logMessage, FILE_APPEND);
         } catch (\Throwable $e) {
             // Ignora errori di scrittura
         }
 
-        $eventClass = $event instanceof SignalIdentifiableEvent
+        $eventClass = $event instanceof IdentifiableEvent
             ? $event->signalEventIdentifier()
             : $event::class;
 

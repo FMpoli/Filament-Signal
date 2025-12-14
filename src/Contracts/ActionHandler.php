@@ -5,7 +5,7 @@ namespace Voodflow\Voodflow\Contracts;
 use Voodflow\Voodflow\Models\SignalAction;
 use Voodflow\Voodflow\Models\SignalActionLog;
 
-interface SignalActionHandler
+interface ActionHandler
 {
     /**
      * Execute the configured action and return an optional response payload to log.

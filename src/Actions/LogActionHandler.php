@@ -2,14 +2,14 @@
 
 namespace Voodflow\Voodflow\Actions;
 
-use Voodflow\Voodflow\Contracts\SignalActionHandler;
+use Voodflow\Voodflow\Contracts\ActionHandler;
 use Voodflow\Voodflow\Models\SignalAction;
 use Voodflow\Voodflow\Models\SignalActionLog;
 use Voodflow\Voodflow\Support\PayloadConfigurator;
 use Voodflow\Voodflow\Support\PayloadFieldAnalyzer;
 use Illuminate\Support\Arr;
 
-class LogActionHandler implements SignalActionHandler
+class LogActionHandler implements ActionHandler
 {
     /**
      * Handle the log action. This action type is used to monitor specific logs.

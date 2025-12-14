@@ -3,12 +3,12 @@
 namespace Voodflow\Voodflow\Events;
 
 use Voodflow\Voodflow\Contracts\HasSignal;
-use Voodflow\Voodflow\Contracts\SignalIdentifiableEvent;
-use Voodflow\Voodflow\Contracts\SignalPayloadProvider;
+use Voodflow\Voodflow\Contracts\IdentifiableEvent;
+use Voodflow\Voodflow\Contracts\PayloadProvider;
 use Voodflow\Voodflow\Support\ModelRegistry;
 use Illuminate\Database\Eloquent\Model;
 
-class EloquentSignalEvent implements SignalIdentifiableEvent, SignalPayloadProvider
+class EloquentSignalEvent implements IdentifiableEvent, PayloadProvider
 {
     public function __construct(
         protected string $eventName,

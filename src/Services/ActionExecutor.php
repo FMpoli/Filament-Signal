@@ -2,7 +2,7 @@
 
 namespace Voodflow\Voodflow\Services;
 
-use Voodflow\Voodflow\Contracts\SignalActionHandler;
+use Voodflow\Voodflow\Contracts\ActionHandler;
 use Voodflow\Voodflow\Models\SignalAction;
 use Voodflow\Voodflow\Models\SignalActionLog;
 use Illuminate\Support\Arr;
@@ -14,7 +14,7 @@ use Throwable;
 class ActionExecutor
 {
     /**
-     * @param  array<string, class-string<SignalActionHandler>>  $handlers
+     * @param  array<string, class-string<ActionHandler>>  $handlers
      */
     public function __construct(
         protected array $handlers = []
@@ -88,7 +88,7 @@ class ActionExecutor
         ]);
     }
 
-    protected function resolveHandler(string $type): SignalActionHandler
+    protected function resolveHandler(string $type): ActionHandler
     {
         $class = Arr::get($this->handlers, $type);
 
@@ -101,11 +101,11 @@ class ActionExecutor
 
         $handler = App::make($class);
 
-        if (!$handler instanceof SignalActionHandler) {
+        if (!$handler instanceof ActionHandler) {
             throw new InvalidArgumentException(sprintf(
                 'Handler [%s] must implement %s.',
                 $class,
-                SignalActionHandler::class
+                ActionHandler::class
             ));
         }
 

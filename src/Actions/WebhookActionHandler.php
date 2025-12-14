@@ -2,7 +2,7 @@
 
 namespace Voodflow\Voodflow\Actions;
 
-use Voodflow\Voodflow\Contracts\SignalActionHandler;
+use Voodflow\Voodflow\Contracts\ActionHandler;
 use Voodflow\Voodflow\Models\SignalAction;
 use Voodflow\Voodflow\Models\SignalActionLog;
 use Voodflow\Voodflow\Support\PayloadConfigurator;
@@ -11,7 +11,7 @@ use Illuminate\Support\Arr;
 use InvalidArgumentException;
 use Spatie\WebhookServer\WebhookCall;
 
-class WebhookActionHandler implements SignalActionHandler
+class WebhookActionHandler implements ActionHandler
 {
     public function handle(SignalAction $action, array $payload, string $eventClass, ?SignalActionLog $log = null): ?array
     {

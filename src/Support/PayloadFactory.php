@@ -2,7 +2,7 @@
 
 namespace Voodflow\Voodflow\Support;
 
-use Voodflow\Voodflow\Contracts\SignalPayloadProvider;
+use Voodflow\Voodflow\Contracts\PayloadProvider;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
@@ -16,7 +16,7 @@ class PayloadFactory
      */
     public function fromEvent(object $event): array
     {
-        if ($event instanceof SignalPayloadProvider) {
+        if ($event instanceof PayloadProvider) {
             return $event->toSignalPayload();
         }
 

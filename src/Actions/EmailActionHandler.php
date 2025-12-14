@@ -2,7 +2,7 @@
 
 namespace Voodflow\Voodflow\Actions;
 
-use Voodflow\Voodflow\Contracts\SignalActionHandler;
+use Voodflow\Voodflow\Contracts\ActionHandler;
 use Voodflow\Voodflow\Models\SignalAction;
 use Voodflow\Voodflow\Models\SignalActionLog;
 use Illuminate\Support\Arr;
@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use InvalidArgumentException;
 
-class EmailActionHandler implements SignalActionHandler
+class EmailActionHandler implements ActionHandler
 {
     public function handle(SignalAction $action, array $payload, string $eventClass, ?SignalActionLog $log = null): ?array
     {
