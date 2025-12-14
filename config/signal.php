@@ -2,11 +2,11 @@
 
 use Voodflow\Voodflow\Actions\LogActionHandler;
 use Voodflow\Voodflow\Actions\WebhookActionHandler;
-use Voodflow\Voodflow\Models\SignalEdge;
-use Voodflow\Voodflow\Models\SignalExecution;
-use Voodflow\Voodflow\Models\SignalExecutionNode;
-use Voodflow\Voodflow\Models\SignalNode;
-use Voodflow\Voodflow\Models\SignalWorkflow;
+use Voodflow\Voodflow\Models\Edge;
+use Voodflow\Voodflow\Models\Execution;
+use Voodflow\Voodflow\Models\ExecutionNode;
+use Voodflow\Voodflow\Models\Node;
+use Voodflow\Voodflow\Models\Workflow;
 
 return [
     'auto_discover_events' => env('FILAMENT_SIGNAL_AUTO_DISCOVER_EVENTS', false),
@@ -25,11 +25,11 @@ return [
     ],
 
     'models' => [
-        'workflow' => SignalWorkflow::class,
-        'node' => SignalNode::class,
-        'edge' => SignalEdge::class,
-        'execution' => SignalExecution::class,
-        'execution_node' => SignalExecutionNode::class,
+        'workflow' => Workflow::class,
+        'node' => Node::class,
+        'edge' => Edge::class,
+        'execution' => Execution::class,
+        'execution_node' => ExecutionNode::class,
     ],
 
     'table_names' => [

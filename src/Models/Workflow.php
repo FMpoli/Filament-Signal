@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class SignalWorkflow extends Model
+class Workflow extends Model
 {
     use HasFactory;
 
@@ -28,16 +28,16 @@ class SignalWorkflow extends Model
 
     public function nodes(): HasMany
     {
-        return $this->hasMany(SignalNode::class, 'workflow_id');
+        return $this->hasMany(Node::class, 'workflow_id');
     }
 
     public function edges(): HasMany
     {
-        return $this->hasMany(SignalEdge::class, 'workflow_id');
+        return $this->hasMany(Edge::class, 'workflow_id');
     }
 
     public function executions(): HasMany
     {
-        return $this->hasMany(SignalExecution::class, 'workflow_id');
+        return $this->hasMany(Execution::class, 'workflow_id');
     }
 }

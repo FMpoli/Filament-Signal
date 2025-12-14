@@ -6,26 +6,31 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class SignalEdge extends Model
+class Node extends Model
 {
     use HasFactory;
 
     protected $fillable = [
         'workflow_id',
-        'edge_id',
-        'source_node_id',
-        'target_node_id',
-        'source_handle',
-        'target_handle',
+        'node_id',
+        'type',
+        'name',
+        'config',
+        'position',
+    ];
+
+    protected $casts = [
+        'config' => 'array',
+        'position' => 'array',
     ];
 
     public function getTable()
     {
-        return config('signal.table_names.edges', 'signal_edges');
+        return config('signal.table_names.nodes', 'signal_nodes');
     }
 
     public function workflow(): BelongsTo
     {
-        return $this->belongsTo(SignalWorkflow::class, 'workflow_id');
+        return $this->belongsTo(Workflow::class, 'workflow_id');
     }
 }
