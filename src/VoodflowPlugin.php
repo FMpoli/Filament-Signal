@@ -1,14 +1,14 @@
 <?php
 
-namespace Base33\FilamentSignal;
+namespace Voodflow\Voodflow;
 
-use Base33\FilamentSignal\Filament\Resources\SignalExecutionResource;
-use Base33\FilamentSignal\Filament\Resources\SignalModelIntegrationResource;
-use Base33\FilamentSignal\Filament\Resources\SignalWorkflowResource;
+use Voodflow\Voodflow\Filament\Resources\SignalExecutionResource;
+use Voodflow\Voodflow\Filament\Resources\SignalModelIntegrationResource;
+use Voodflow\Voodflow\Filament\Resources\SignalWorkflowResource;
 use Filament\Contracts\Plugin;
 use Filament\Panel;
 
-class FilamentSignalPlugin implements Plugin
+class VoodflowPlugin implements Plugin
 {
     public function getId(): string
     {

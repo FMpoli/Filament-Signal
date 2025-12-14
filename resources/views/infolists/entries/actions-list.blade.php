@@ -85,7 +85,7 @@
                             </div>
                             <div class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
                                 <x-filament::icon icon="heroicon-o-clock" class="w-4 h-4 shrink-0" />
-                                <span>{{ __('filament-signal::signal.fields.order') }}: <span class="font-semibold">{{ $order }}</span></span>
+                                <span>{{ __('voodflow::signal.fields.order') }}: <span class="font-semibold">{{ $order }}</span></span>
                             </div>
                         </div>
                     </div>
@@ -95,13 +95,13 @@
                         @if($isWebhook)
                             <div class="space-y-4">
                                 <h4 class="text-sm font-semibold text-gray-900 dark:text-gray-100">
-                                    {{ __('filament-signal::signal.fields.endpoint_destination') }}
+                                    {{ __('voodflow::signal.fields.endpoint_destination') }}
                                 </h4>
 
                                 <div class="space-y-3 text-sm">
                                     <div>
                                         <div class="mb-1 text-xs font-medium text-gray-500 dark:text-gray-400">
-                                            {{ __('filament-signal::signal.fields.endpoint_url') }}
+                                            {{ __('voodflow::signal.fields.endpoint_url') }}
                                         </div>
                                         <div class="flex items-center gap-2 rounded-lg bg-gray-50 px-3 py-2 dark:bg-gray-900/50">
                                             <x-filament::icon icon="heroicon-o-link" class="w-4 h-4 shrink-0 text-gray-400" />
@@ -110,18 +110,18 @@
                                     </div>
 
                                     <div>
-                                        <span class="font-medium text-gray-700 dark:text-gray-300">{{ __('filament-signal::signal.fields.http_method') }}:</span>
+                                        <span class="font-medium text-gray-700 dark:text-gray-300">{{ __('voodflow::signal.fields.http_method') }}:</span>
                                         <span class="ml-2 text-gray-600 dark:text-gray-400">{{ strtoupper($configuration['method'] ?? 'POST') }}</span>
                                     </div>
 
                                     <div class="flex items-center gap-2">
-                                        <span class="font-medium text-gray-700 dark:text-gray-300">{{ __('filament-signal::signal.fields.security') }}:</span>
+                                        <span class="font-medium text-gray-700 dark:text-gray-300">{{ __('voodflow::signal.fields.security') }}:</span>
                                         @if($configuration['verify_ssl'] ?? true)
                                             <x-filament::icon icon="heroicon-o-check-circle" class="w-4 h-4 text-green-500" />
-                                            <span class="text-sm text-gray-600 dark:text-gray-400">{{ __('filament-signal::signal.fields.ssl_on') }}</span>
+                                            <span class="text-sm text-gray-600 dark:text-gray-400">{{ __('voodflow::signal.fields.ssl_on') }}</span>
                                         @else
                                             <x-filament::icon icon="heroicon-o-x-circle" class="w-4 h-4 text-red-500" />
-                                            <span class="text-sm text-gray-600 dark:text-gray-400">{{ __('filament-signal::signal.fields.ssl_off') }}</span>
+                                            <span class="text-sm text-gray-600 dark:text-gray-400">{{ __('voodflow::signal.fields.ssl_off') }}</span>
                                         @endif
                                     </div>
                                 </div>
@@ -133,7 +133,7 @@
                             <div class="flex items-center gap-2">
                                 <x-filament::icon icon="heroicon-o-circle-stack" class="w-5 h-5 text-gray-400" />
                                 <h4 class="text-sm font-semibold text-gray-900 dark:text-gray-100">
-                                    {{ __('filament-signal::signal.fields.payload_data_mapping') }}
+                                    {{ __('voodflow::signal.fields.payload_data_mapping') }}
                                 </h4>
                             </div>
 
@@ -143,7 +143,7 @@
                                     <div class="flex items-center gap-2 mb-2">
                                         <x-filament::icon icon="heroicon-o-check-circle" class="w-4 h-4 text-green-500" />
                                         <span class="text-xs font-semibold tracking-wide text-gray-700 uppercase dark:text-gray-300">
-                                            {{ __('filament-signal::signal.fields.essential_fields') }}
+                                            {{ __('voodflow::signal.fields.essential_fields') }}
                                         </span>
                                     </div>
                                     <div class="flex flex-wrap gap-2">
@@ -162,7 +162,7 @@
                                     <div class="flex items-center gap-2 mb-2">
                                         <x-filament::icon icon="heroicon-o-link" class="w-4 h-4 text-gray-400" />
                                         <span class="text-xs font-semibold tracking-wide text-gray-700 uppercase dark:text-gray-300">
-                                            {{ __('filament-signal::signal.fields.relations') }}
+                                            {{ __('voodflow::signal.fields.relations') }}
                                         </span>
                                     </div>
                                     <div class="space-y-3">
@@ -195,7 +195,7 @@
 
                             @if(empty($includeFields) && empty($relationFields))
                                 <div class="text-sm italic text-gray-400 dark:text-gray-500">
-                                    {{ __('filament-signal::signal.fields.no_payload_configuration') }}
+                                    {{ __('voodflow::signal.fields.no_payload_configuration') }}
                                 </div>
                             @endif
                         </div>
@@ -205,7 +205,7 @@
 
             @if($loop->last)
                 <div class="text-xs font-medium text-gray-500 dark:text-gray-400">
-                    {{ __('filament-signal::signal.fields.end_of_pipeline') }}
+                    {{ __('voodflow::signal.fields.end_of_pipeline') }}
                 </div>
             @endif
         @empty

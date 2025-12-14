@@ -1,10 +1,10 @@
 <?php
 
-namespace Base33\FilamentSignal\Services;
+namespace Voodflow\Voodflow\Services;
 
-use Base33\FilamentSignal\Contracts\SignalActionHandler;
-use Base33\FilamentSignal\Models\SignalAction;
-use Base33\FilamentSignal\Models\SignalActionLog;
+use Voodflow\Voodflow\Contracts\SignalActionHandler;
+use Voodflow\Voodflow\Models\SignalAction;
+use Voodflow\Voodflow\Models\SignalActionLog;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Log;

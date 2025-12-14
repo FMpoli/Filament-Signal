@@ -1,8 +1,8 @@
 <?php
 
-namespace Base33\FilamentSignal\Filament\Resources\SignalTriggerResource\Pages;
+namespace Voodflow\Voodflow\Filament\Resources\SignalTriggerResource\Pages;
 
-use Base33\FilamentSignal\Filament\Resources\SignalTriggerResource;
+use Voodflow\Voodflow\Filament\Resources\SignalTriggerResource;
 use Filament\Actions\Action;
 use Filament\Forms;
 use Filament\Forms\Components\Builder;
@@ -104,7 +104,7 @@ class FlowSignalTrigger extends EditRecord
     {
         return Action::make('createAction')
             ->label('Add Action')
-            ->model(\Base33\FilamentSignal\Models\SignalAction::class)
+            ->model(\Voodflow\Voodflow\Models\SignalAction::class)
             ->slideOver()
             ->form(function () {
                 return [
@@ -117,7 +117,7 @@ class FlowSignalTrigger extends EditRecord
                 // configuration is inside data, but repeater schema returns a Grid.
                 // The structure of data depends on the schema.
                 // ActionRepeaterSchema returns components that write to: name, execution_order, action_type, configuration.
-                $action = new \Base33\FilamentSignal\Models\SignalAction($data);
+                $action = new \Voodflow\Voodflow\Models\SignalAction($data);
                 $action->trigger_id = $this->record->id;
                 $action->save();
                 $this->redirect(static::getResource()::getUrl('flow', ['record' => $this->record]));
@@ -130,7 +130,7 @@ class FlowSignalTrigger extends EditRecord
             ->label('Edit Action')
             ->slideOver()
             ->mountUsing(function ($form, array $arguments) {
-                $action = \Base33\FilamentSignal\Models\SignalAction::find($arguments['actionId'] ?? null);
+                $action = \Voodflow\Voodflow\Models\SignalAction::find($arguments['actionId'] ?? null);
                 if ($action) {
                     $data = $action->toArray();
                     $data['event_class'] = $this->record->event_class;
@@ -145,7 +145,7 @@ class FlowSignalTrigger extends EditRecord
                 ];
             })
             ->action(function (array $data, array $arguments) {
-                $action = \Base33\FilamentSignal\Models\SignalAction::find($arguments['actionId'] ?? null);
+                $action = \Voodflow\Voodflow\Models\SignalAction::find($arguments['actionId'] ?? null);
                 if ($action) {
                     $action->update($data);
                 }
@@ -162,7 +162,7 @@ class FlowSignalTrigger extends EditRecord
             if (($node['type'] ?? '') === 'action') {
                 $actionId = $node['data']['actionId'] ?? null;
                 if ($actionId) {
-                    $action = \Base33\FilamentSignal\Models\SignalAction::find($actionId);
+                    $action = \Voodflow\Voodflow\Models\SignalAction::find($actionId);
                     if ($action) {
                         $meta = $action->metadata ?? [];
                         $meta['position'] = $node['position'] ?? ['x' => 0, 'y' => 0];
@@ -183,7 +183,7 @@ class FlowSignalTrigger extends EditRecord
 
     public function deleteAction(int $actionId): void
     {
-        $action = \Base33\FilamentSignal\Models\SignalAction::find($actionId);
+        $action = \Voodflow\Voodflow\Models\SignalAction::find($actionId);
         if ($action) {
             $action->delete();
             $this->dispatch('flow-refresh');

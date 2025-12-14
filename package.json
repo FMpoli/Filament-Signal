@@ -2,14 +2,14 @@
     "private": true,
     "type": "module",
     "scripts": {
-        "dev:styles": "npx tailwindcss -i resources/css/index.css -o resources/dist/filament-signal.css --postcss --watch",
+        "dev:styles": "npx tailwindcss -i resources/css/index.css -o resources/dist/voodflow.css --postcss --watch",
         "dev:scripts": "node bin/build.js --dev",
-        "build:styles": "npx tailwindcss -i resources/css/index.css -o resources/dist/filament-signal.css --postcss --minify",
+        "build:styles": "npx tailwindcss -i resources/css/index.css -o resources/dist/voodflow.css --postcss --minify",
         "build:scripts": "node bin/build.js",
-        "purge": "filament-purge -i resources/dist/filament-signal.css -o resources/dist/filament-signal.css -v 3.x",
+        "purge": "filament-purge -i resources/dist/voodflow.css -o resources/dist/voodflow.css -v 3.x",
         "dev": "npm-run-all --parallel dev:*",
         "build": "npm-run-all build:*",
-        "postbuild": "mkdir -p ../../../public/js/base33/filament-signal && cp resources/dist/filament-signal.js ../../../public/js/base33/filament-signal/filament-signal-scripts.js && mkdir -p ../../../public/css/base33/filament-signal && cp resources/dist/filament-signal.css ../../../public/css/base33/filament-signal/filament-signal-styles.css && echo 'Assets copied to public directory'"
+        "postbuild": "mkdir -p ../../../public/js/voodflow/voodflow && cp resources/dist/voodflow.js ../../../public/js/voodflow/voodflow/voodflow-scripts.js && mkdir -p ../../../public/css/voodflow/voodflow && cp resources/dist/voodflow.css ../../../public/css/voodflow/voodflow/voodflow-styles.css && echo 'Assets copied to public directory'"
     },
     "devDependencies": {
         "@awcodes/filament-plugin-purge": "^1.1.1",

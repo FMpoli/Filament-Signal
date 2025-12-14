@@ -1,9 +1,9 @@
 <?php
 
-namespace Base33\FilamentSignal\Jobs;
+namespace Voodflow\Voodflow\Jobs;
 
-use Base33\FilamentSignal\Models\SignalTrigger;
-use Base33\FilamentSignal\Services\SignalActionExecutor;
+use Voodflow\Voodflow\Models\SignalTrigger;
+use Voodflow\Voodflow\Services\SignalActionExecutor;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;

@@ -3,7 +3,7 @@ import React from 'react';
 import { createRoot } from 'react-dom/client';
 import FlowEditor from './components/FlowEditor.jsx';
 
-window.mountSignalFlowEditor = (container) => {
+window.mountVoodflowEditor = (container) => {
     if (!container) return;
 
     // Prevent double mounting
@@ -80,6 +80,6 @@ window.mountSignalFlowEditor = (container) => {
 document.addEventListener('DOMContentLoaded', () => {
     const container = document.getElementById('react-flow-container');
     if (container) {
-        window.mountSignalFlowEditor(container);
+        window.mountVoodflowEditor(container);
     }
 });

@@ -1,6 +1,6 @@
 <?php
 
-namespace Base33\FilamentSignal\Testing;
+namespace Voodflow\Voodflow\Testing;
 
 use Livewire\Features\SupportTesting\Testable;
 

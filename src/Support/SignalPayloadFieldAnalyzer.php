@@ -1,6 +1,6 @@
 <?php
 
-namespace Base33\FilamentSignal\Support;
+namespace Voodflow\Voodflow\Support;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
@@ -1072,12 +1072,12 @@ class SignalPayloadFieldAnalyzer
     protected function isModelFromIntegration(string $modelClass): bool
     {
         // Verifica se il modello implementa HasSignal
-        if (is_subclass_of($modelClass, \Base33\FilamentSignal\Contracts\HasSignal::class)) {
+        if (is_subclass_of($modelClass, \Voodflow\Voodflow\Contracts\HasSignal::class)) {
             return false;
         }
 
         // Verifica se esiste un record SignalModelIntegration per questo modello
-        $integration = \Base33\FilamentSignal\Models\SignalModelIntegration::where('model_class', $modelClass)
+        $integration = \Voodflow\Voodflow\Models\SignalModelIntegration::where('model_class', $modelClass)
             ->whereNull('deleted_at')
             ->first();
 

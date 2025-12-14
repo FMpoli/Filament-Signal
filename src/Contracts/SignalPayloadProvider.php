@@ -1,6 +1,6 @@
 <?php
 
-namespace Base33\FilamentSignal\Contracts;
+namespace Voodflow\Voodflow\Contracts;
 
 /**
  * Permette a un evento di fornire manualmente il payload serializzato

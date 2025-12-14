@@ -1,20 +1,20 @@
 <?php
 
-namespace Base33\FilamentSignal;
+namespace Voodflow\Voodflow;
 
 
-use Base33\FilamentSignal\Models\SignalModelIntegration;
-use Base33\FilamentSignal\Services\SignalEventRegistrar;
-use Base33\FilamentSignal\Support\ReverseRelationRegistrar;
-use Base33\FilamentSignal\Support\ReverseRelationRegistry;
-use Base33\FilamentSignal\Support\ReverseRelationWarmup;
-use Base33\FilamentSignal\Support\SignalEloquentEventMap;
-use Base33\FilamentSignal\Support\SignalEventRegistry;
-use Base33\FilamentSignal\Support\SignalModelRegistry;
-use Base33\FilamentSignal\Support\SignalPayloadFieldAnalyzer;
-use Base33\FilamentSignal\Support\SignalWebhookTemplate;
-use Base33\FilamentSignal\Support\SignalWebhookTemplateRegistry;
-use Base33\FilamentSignal\Testing\TestsFilamentSignal;
+use Voodflow\Voodflow\Models\SignalModelIntegration;
+use Voodflow\Voodflow\Services\SignalEventRegistrar;
+use Voodflow\Voodflow\Support\ReverseRelationRegistrar;
+use Voodflow\Voodflow\Support\ReverseRelationRegistry;
+use Voodflow\Voodflow\Support\ReverseRelationWarmup;
+use Voodflow\Voodflow\Support\SignalEloquentEventMap;
+use Voodflow\Voodflow\Support\SignalEventRegistry;
+use Voodflow\Voodflow\Support\SignalModelRegistry;
+use Voodflow\Voodflow\Support\SignalPayloadFieldAnalyzer;
+use Voodflow\Voodflow\Support\SignalWebhookTemplate;
+use Voodflow\Voodflow\Support\SignalWebhookTemplateRegistry;
+use Voodflow\Voodflow\Testing\TestsFilamentSignal;
 use Filament\Support\Assets\Asset;
 use Filament\Support\Assets\Css;
 use Filament\Support\Assets\Js;
@@ -27,11 +27,11 @@ use Spatie\LaravelPackageTools\Commands\InstallCommand;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
 
-class FilamentSignalServiceProvider extends PackageServiceProvider
+class VoodflowServiceProvider extends PackageServiceProvider
 {
-    public static string $name = 'filament-signal';
+    public static string $name = 'voodflow';
 
-    public static string $viewNamespace = 'filament-signal';
+    public static string $viewNamespace = 'voodflow';
 
     public function configurePackage(Package $package): void
     {
@@ -47,10 +47,10 @@ class FilamentSignalServiceProvider extends PackageServiceProvider
                     ->publishConfigFile()
                     ->publishMigrations()
                     ->askToRunMigrations()
-                    ->askToStarRepoOnGitHub('base33/filament-signal');
+                    ->askToStarRepoOnGitHub('voodflow/voodflow');
             });
 
-        $configFileName = 'signal';
+        $configFileName = 'voodflow';
 
         if (file_exists($package->basePath("/../config/{$configFileName}.php"))) {
             $package->hasConfigFile($configFileName);
@@ -71,20 +71,20 @@ class FilamentSignalServiceProvider extends PackageServiceProvider
 
     public function packageRegistered(): void
     {
-        $this->app->singleton(SignalWebhookTemplateRegistry::class, fn (): SignalWebhookTemplateRegistry => new SignalWebhookTemplateRegistry);
-        $this->app->singleton(SignalEventRegistry::class, fn (): SignalEventRegistry => new SignalEventRegistry);
-        $this->app->singleton(SignalModelRegistry::class, fn (): SignalModelRegistry => new SignalModelRegistry);
-        $this->app->singleton(ReverseRelationRegistry::class, fn (): ReverseRelationRegistry => new ReverseRelationRegistry);
-        $this->app->singleton(ReverseRelationRegistrar::class, fn ($app): ReverseRelationRegistrar => new ReverseRelationRegistrar(
+        $this->app->singleton(SignalWebhookTemplateRegistry::class, fn(): SignalWebhookTemplateRegistry => new SignalWebhookTemplateRegistry);
+        $this->app->singleton(SignalEventRegistry::class, fn(): SignalEventRegistry => new SignalEventRegistry);
+        $this->app->singleton(SignalModelRegistry::class, fn(): SignalModelRegistry => new SignalModelRegistry);
+        $this->app->singleton(ReverseRelationRegistry::class, fn(): ReverseRelationRegistry => new ReverseRelationRegistry);
+        $this->app->singleton(ReverseRelationRegistrar::class, fn($app): ReverseRelationRegistrar => new ReverseRelationRegistrar(
             $app->make(ReverseRelationRegistry::class)
         ));
-        $this->app->singleton(ReverseRelationWarmup::class, fn ($app): ReverseRelationWarmup => new ReverseRelationWarmup(
+        $this->app->singleton(ReverseRelationWarmup::class, fn($app): ReverseRelationWarmup => new ReverseRelationWarmup(
             $app->make(SignalEventRegistry::class),
             $app->make(SignalPayloadFieldAnalyzer::class),
             $app->make(SignalModelRegistry::class),
             $app->make(ReverseRelationRegistrar::class)
         ));
-        $this->app->singleton(SignalEloquentEventMap::class, fn (): SignalEloquentEventMap => new SignalEloquentEventMap);
+        $this->app->singleton(SignalEloquentEventMap::class, fn(): SignalEloquentEventMap => new SignalEloquentEventMap);
     }
 
     public function packageBooted(): void
@@ -109,24 +109,24 @@ class FilamentSignalServiceProvider extends PackageServiceProvider
         if (app()->runningInConsole()) {
             foreach (app(Filesystem::class)->files(__DIR__ . '/../stubs/') as $file) {
                 $this->publishes([
-                    $file->getRealPath() => base_path("stubs/filament-signal/{$file->getFilename()}"),
-                ], 'filament-signal-stubs');
+                    $file->getRealPath() => base_path("stubs/voodflow/{$file->getFilename()}"),
+                ], 'voodflow-stubs');
             }
 
             // Publish JavaScript assets
-            $jsPath = __DIR__ . '/../resources/dist/filament-signal.js';
+            $jsPath = __DIR__ . '/../resources/dist/voodflow.js';
             if (file_exists($jsPath)) {
                 $this->publishes([
-                    $jsPath => public_path('js/base33/filament-signal/filament-signal-scripts.js'),
-                ], 'filament-signal-assets');
+                    $jsPath => public_path('js/voodflow/voodflow/voodflow-scripts.js'),
+                ], 'voodflow-assets');
             }
 
             // Publish CSS assets
-            $cssPath = __DIR__ . '/../resources/dist/filament-signal.css';
+            $cssPath = __DIR__ . '/../resources/dist/voodflow.css';
             if (file_exists($cssPath)) {
                 $this->publishes([
-                    $cssPath => public_path('css/base33/filament-signal/filament-signal-styles.css'),
-                ], 'filament-signal-assets');
+                    $cssPath => public_path('css/voodflow/voodflow/voodflow-styles.css'),
+                ], 'voodflow-assets');
             }
         }
 
@@ -142,13 +142,13 @@ class FilamentSignalServiceProvider extends PackageServiceProvider
 
     protected function bootModelIntegrations(): void
     {
-        if (! class_exists(SignalModelIntegration::class)) {
+        if (!class_exists(SignalModelIntegration::class)) {
             return;
         }
 
         try {
-            $table = config('signal.table_names.model_integrations', 'signal_model_integrations');
-            if (! Schema::hasTable($table)) {
+            $table = config('voodflow.table_names.model_integrations', 'voodflow_model_integrations');
+            if (!Schema::hasTable($table)) {
                 return;
             }
         } catch (\Throwable $exception) {
@@ -160,7 +160,7 @@ class FilamentSignalServiceProvider extends PackageServiceProvider
 
     protected function registerConfiguredWebhookTemplates(): void
     {
-        $templates = config('signal.webhook_templates', []);
+        $templates = config('voodflow.webhook_templates', []);
 
         if (empty($templates)) {
             return;
@@ -181,7 +181,7 @@ class FilamentSignalServiceProvider extends PackageServiceProvider
 
     protected function getAssetPackageName(): ?string
     {
-        return 'base33/filament-signal';
+        return 'voodflow/voodflow';
     }
 
     /**
@@ -191,14 +191,14 @@ class FilamentSignalServiceProvider extends PackageServiceProvider
     {
         $assets = [];
 
-        $cssPath = __DIR__ . '/../resources/dist/filament-signal.css';
+        $cssPath = __DIR__ . '/../resources/dist/voodflow.css';
         if (file_exists($cssPath)) {
-            $assets[] = Css::make('filament-signal-styles', $cssPath);
+            $assets[] = Css::make('voodflow-styles', $cssPath);
         }
 
-        $jsPath = __DIR__ . '/../resources/dist/filament-signal.js';
+        $jsPath = __DIR__ . '/../resources/dist/voodflow.js';
         if (file_exists($jsPath)) {
-            $assets[] = Js::make('filament-signal-scripts', $jsPath);
+            $assets[] = Js::make('voodflow-scripts', $jsPath);
         }
 
         return $assets;
@@ -210,8 +210,8 @@ class FilamentSignalServiceProvider extends PackageServiceProvider
     protected function getCommands(): array
     {
         return [
-            \Base33\FilamentSignal\Console\Commands\FilamentSignalCommand::class,
-            \Base33\FilamentSignal\Console\Commands\MakeSignalNodeCommand::class,
+            \Voodflow\Voodflow\Console\Commands\VoodflowCommand::class,
+            \Voodflow\Voodflow\Console\Commands\MakeVoodflowNodeCommand::class,
         ];
     }
 
@@ -245,7 +245,7 @@ class FilamentSignalServiceProvider extends PackageServiceProvider
     protected function getMigrations(): array
     {
         return [
-            'create_signal_table',
+            'create_voodflow_table',
         ];
     }
 }

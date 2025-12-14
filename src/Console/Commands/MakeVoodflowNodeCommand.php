@@ -1,11 +1,11 @@
 <?php
 
-namespace Base33\FilamentSignal\Console\Commands;
+namespace Voodflow\Voodflow\Console\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Str;
 
-class MakeSignalNodeCommand extends Command
+class MakeVoodflowNodeCommand extends Command
 {
     /**
      * The name and signature of the console command.
@@ -289,7 +289,7 @@ class MakeSignalNodeCommand extends Command
         $stub = <<<'PHP'
 <?php
 
-namespace Base33\FilamentSignal\Nodes;
+namespace Voodflow\Voodflow\Nodes;
 
 /**
  * Registry of available Signal workflow nodes.
@@ -306,7 +306,7 @@ class NodeRegistry
     {
         return [
             // Add your nodes here:
-            // '{{NAME}}' => \Base33\FilamentSignal\Nodes\{{NAME}}Node::class,
+            // '{{NAME}}' => \Voodflow\Voodflow\Nodes\{{NAME}}Node::class,
         ];
     }
 
@@ -544,9 +544,9 @@ JSX;
         return <<<'PHP'
 <?php
 
-namespace Base33\FilamentSignal\Nodes;
+namespace Voodflow\Voodflow\Nodes;
 
-use Base33\FilamentSignal\Contracts\NodeInterface;
+use Voodflow\Voodflow\Contracts\NodeInterface;
 
 /**
  * {{NAME}} Node Handler

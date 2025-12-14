@@ -1,6 +1,6 @@
 <?php
 
-namespace Base33\FilamentSignal\Nodes;
+namespace Voodflow\Voodflow\Nodes;
 
 /**
  * Registry of available Signal workflow nodes.
@@ -31,7 +31,7 @@ class NodeRegistry
 
             $fullClass = __NAMESPACE__ . '\\' . $filename;
 
-            if (class_exists($fullClass) && in_array(\Base33\FilamentSignal\Contracts\NodeInterface::class, class_implements($fullClass))) {
+            if (class_exists($fullClass) && in_array(\Voodflow\Voodflow\Contracts\NodeInterface::class, class_implements($fullClass))) {
                 // Key by Full Class Name to support multiple nodes of same type
                 $nodes[$fullClass] = $fullClass;
             }

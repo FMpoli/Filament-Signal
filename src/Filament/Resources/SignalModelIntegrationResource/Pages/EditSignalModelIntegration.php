@@ -1,8 +1,8 @@
 <?php
 
-namespace Base33\FilamentSignal\Filament\Resources\SignalModelIntegrationResource\Pages;
+namespace Voodflow\Voodflow\Filament\Resources\SignalModelIntegrationResource\Pages;
 
-use Base33\FilamentSignal\Filament\Resources\SignalModelIntegrationResource;
+use Voodflow\Voodflow\Filament\Resources\SignalModelIntegrationResource;
 use Filament\Resources\Pages\EditRecord;
 
 class EditSignalModelIntegration extends EditRecord

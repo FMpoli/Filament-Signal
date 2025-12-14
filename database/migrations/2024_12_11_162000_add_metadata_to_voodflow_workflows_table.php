@@ -8,14 +8,14 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::table('signal_workflows', function (Blueprint $table) {
+        Schema::table('voodflow_workflows', function (Blueprint $table) {
             $table->json('metadata')->nullable()->after('description');
         });
     }
 
     public function down(): void
     {
-        Schema::table('signal_workflows', function (Blueprint $table) {
+        Schema::table('voodflow_workflows', function (Blueprint $table) {
             $table->dropColumn('metadata');
         });
     }

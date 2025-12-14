@@ -1,8 +1,8 @@
 <?php
 
-namespace Base33\FilamentSignal\Nodes;
+namespace Voodflow\Voodflow\Nodes;
 
-use Base33\FilamentSignal\Contracts\NodeInterface;
+use Voodflow\Voodflow\Contracts\NodeInterface;
 
 /**
  * SendWebhook Node Handler

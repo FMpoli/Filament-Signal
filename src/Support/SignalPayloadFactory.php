@@ -1,8 +1,8 @@
 <?php
 
-namespace Base33\FilamentSignal\Support;
+namespace Voodflow\Voodflow\Support;
 
-use Base33\FilamentSignal\Contracts\SignalPayloadProvider;
+use Voodflow\Voodflow\Contracts\SignalPayloadProvider;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;

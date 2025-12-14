@@ -1,11 +1,11 @@
 <?php
 
-namespace Base33\FilamentSignal\Services;
+namespace Voodflow\Voodflow\Services;
 
-use Base33\FilamentSignal\Contracts\SignalIdentifiableEvent;
-use Base33\FilamentSignal\Jobs\RunSignalTrigger;
-use Base33\FilamentSignal\Models\SignalTrigger;
-use Base33\FilamentSignal\Support\SignalPayloadFactory;
+use Voodflow\Voodflow\Contracts\SignalIdentifiableEvent;
+use Voodflow\Voodflow\Jobs\RunSignalTrigger;
+use Voodflow\Voodflow\Models\SignalTrigger;
+use Voodflow\Voodflow\Support\SignalPayloadFactory;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 

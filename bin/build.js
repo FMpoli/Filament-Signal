@@ -46,5 +46,5 @@ const defaultOptions = {
 compile({
     ...defaultOptions,
     entryPoints: ['./resources/js/index.jsx'],
-    outfile: './resources/dist/filament-signal.js',
+    outfile: './resources/dist/voodflow.js',
 })

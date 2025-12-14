@@ -22,8 +22,8 @@
     }
 
     $matchTypeDisplay = $matchType === 'all'
-        ? __('filament-signal::signal.fields.all_conditions')
-        : __('filament-signal::signal.fields.any_condition');
+        ? __('voodflow::signal.fields.all_conditions')
+        : __('voodflow::signal.fields.any_condition');
 @endphp
 
 <x-dynamic-component
@@ -32,7 +32,7 @@
 >
     @if(blank($filters) || empty($filters))
         <div class="py-8 text-center text-sm text-gray-500 dark:text-gray-400">
-            {{ __('filament-signal::signal.fields.no_filters_configured') }}
+            {{ __('voodflow::signal.fields.no_filters_configured') }}
         </div>
     @else
         <div class="space-y-3">
@@ -94,16 +94,16 @@
                     }
 
                     $typeLabels = [
-                        'equals' => __('filament-signal::signal.options.filter_blocks.equals'),
-                        'not_equals' => __('filament-signal::signal.options.filter_blocks.not_equals'),
-                        'contains' => __('filament-signal::signal.options.filter_blocks.contains'),
-                        'not_contains' => __('filament-signal::signal.options.filter_blocks.not_contains'),
-                        'greater_than' => __('filament-signal::signal.options.filter_blocks.greater_than'),
-                        'greater_than_or_equal' => __('filament-signal::signal.options.filter_blocks.greater_than_or_equal'),
-                        'less_than' => __('filament-signal::signal.options.filter_blocks.less_than'),
-                        'less_than_or_equal' => __('filament-signal::signal.options.filter_blocks.less_than_or_equal'),
-                        'in' => __('filament-signal::signal.options.filter_blocks.in'),
-                        'not_in' => __('filament-signal::signal.options.filter_blocks.not_in'),
+                        'equals' => __('voodflow::signal.options.filter_blocks.equals'),
+                        'not_equals' => __('voodflow::signal.options.filter_blocks.not_equals'),
+                        'contains' => __('voodflow::signal.options.filter_blocks.contains'),
+                        'not_contains' => __('voodflow::signal.options.filter_blocks.not_contains'),
+                        'greater_than' => __('voodflow::signal.options.filter_blocks.greater_than'),
+                        'greater_than_or_equal' => __('voodflow::signal.options.filter_blocks.greater_than_or_equal'),
+                        'less_than' => __('voodflow::signal.options.filter_blocks.less_than'),
+                        'less_than_or_equal' => __('voodflow::signal.options.filter_blocks.less_than_or_equal'),
+                        'in' => __('voodflow::signal.options.filter_blocks.in'),
+                        'not_in' => __('voodflow::signal.options.filter_blocks.not_in'),
                     ];
                     $typeLabel = $typeLabels[$type] ?? ucfirst($type);
 
@@ -157,7 +157,7 @@
         {{-- Footer --}}
         <div class="mt-4 flex items-center justify-between rounded-lg bg-gray-100 px-4 py-3 dark:bg-gray-900">
             <span class="text-xs font-semibold uppercase tracking-wide text-gray-700 dark:text-gray-300">
-                {{ __('filament-signal::signal.fields.match_logic') }}
+                {{ __('voodflow::signal.fields.match_logic') }}
             </span>
             <div class="rounded bg-gray-200 px-3 py-1 text-xs font-bold uppercase text-gray-800 dark:bg-gray-700 dark:text-white">
                 {{ $matchTypeDisplay }}

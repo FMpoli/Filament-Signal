@@ -1,12 +1,12 @@
 <?php
 
-namespace Base33\FilamentSignal\Filament\Resources;
+namespace Voodflow\Voodflow\Filament\Resources;
 
 use BackedEnum;
-use Base33\FilamentSignal\Filament\Resources\SignalModelIntegrationResource\Pages;
-use Base33\FilamentSignal\Models\SignalModelIntegration;
-use Base33\FilamentSignal\Support\ReverseRelationRegistry;
-use Base33\FilamentSignal\Support\SignalModelRegistry;
+use Voodflow\Voodflow\Filament\Resources\SignalModelIntegrationResource\Pages;
+use Voodflow\Voodflow\Models\SignalModelIntegration;
+use Voodflow\Voodflow\Support\ReverseRelationRegistry;
+use Voodflow\Voodflow\Support\SignalModelRegistry;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;

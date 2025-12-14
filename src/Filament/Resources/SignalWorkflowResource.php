@@ -1,10 +1,10 @@
 <?php
 
-namespace Base33\FilamentSignal\Filament\Resources;
+namespace Voodflow\Voodflow\Filament\Resources;
 
 use BackedEnum;
-use Base33\FilamentSignal\Filament\Resources\SignalWorkflowResource\Pages;
-use Base33\FilamentSignal\Models\SignalWorkflow;
+use Voodflow\Voodflow\Filament\Resources\SignalWorkflowResource\Pages;
+use Voodflow\Voodflow\Models\SignalWorkflow;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;

@@ -1,6 +1,6 @@
 <?php
 
-namespace Base33\FilamentSignal\Support;
+namespace Voodflow\Voodflow\Support;
 
 /**
  * Registro per modelli che non implementano HasSignal ma vogliono esporre campi per segnali
@@ -40,7 +40,7 @@ class SignalModelRegistry
     public function getFields(string $modelClass): ?array
     {
         // Prima controlla se il modello implementa HasSignal
-        if (is_subclass_of($modelClass, \Base33\FilamentSignal\Contracts\HasSignal::class)) {
+        if (is_subclass_of($modelClass, \Voodflow\Voodflow\Contracts\HasSignal::class)) {
             $fields = $modelClass::getSignalFields();
             app(ReverseRelationRegistrar::class)->register($modelClass, $fields);
 

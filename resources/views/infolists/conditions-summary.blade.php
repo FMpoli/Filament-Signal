@@ -9,11 +9,11 @@
 
     $hasFilters = !blank($filters) && !empty($filters);
     $matchTypeLabel = $matchType === 'all'
-        ? __('filament-signal::signal.options.match_type.all')
-        : __('filament-signal::signal.options.match_type.any');
+        ? __('voodflow::signal.options.match_type.all')
+        : __('voodflow::signal.options.match_type.any');
     $matchTypeDescription = $matchType === 'all'
-        ? __('filament-signal::signal.fields.match_all_description')
-        : __('filament-signal::signal.fields.match_any_description');
+        ? __('voodflow::signal.fields.match_all_description')
+        : __('voodflow::signal.fields.match_any_description');
 @endphp
 
 <div class=">
@@ -31,8 +31,8 @@
 
         @if(!$hasFilters)
             <div class="text-sm text-gray-500 dark:text-gray-400">
-                {{ __('filament-signal::signal.fields.no_filters_configured') }}
-                <span class="text-gray-400 dark:text-gray-500">({{ __('filament-signal::signal.fields.runs_always') }})</span>
+                {{ __('voodflow::signal.fields.no_filters_configured') }}
+                <span class="text-gray-400 dark:text-gray-500">({{ __('voodflow::signal.fields.runs_always') }})</span>
             </div>
         @endif
     </div>
@@ -40,7 +40,7 @@
     {{-- Footer --}}
 
             <span class="text-xs font-semibold tracking-wide text-gray-600 uppercase dark:text-gray-400">
-                {{ __('filament-signal::signal.fields.total_actions') }}
+                {{ __('voodflow::signal.fields.total_actions') }}
             </span>
             <span class="text-xl font-bold text-gray-900 dark:text-gray-100">
                 {{ $totalActions }}

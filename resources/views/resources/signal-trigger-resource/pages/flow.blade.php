@@ -45,13 +45,13 @@
     <div class="fi-section-content-ctn rounded-xl bg-white p-6 shadow-sm ring-1 ring-gray-950/5 dark:bg-gray-900 dark:ring-white/10"
         x-data x-init="
              $nextTick(() => {
-                 if (window.mountSignalFlowEditor) {
-                     window.mountSignalFlowEditor(document.getElementById('react-flow-container'));
+                 if (window.mountVoodflowEditor) {
+                     window.mountVoodflowEditor(document.getElementById('react-flow-container'));
                  } else {
                      // Check if script is loaded, retry once
                      setTimeout(() => {
-                         if (window.mountSignalFlowEditor) {
-                              window.mountSignalFlowEditor(document.getElementById('react-flow-container'));
+                         if (window.mountVoodflowEditor) {
+                              window.mountVoodflowEditor(document.getElementById('react-flow-container'));
                          }
                      }, 500);
                  }

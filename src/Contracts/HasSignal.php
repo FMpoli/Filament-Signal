@@ -1,6 +1,6 @@
 <?php
 
-namespace Base33\FilamentSignal\Contracts;
+namespace Voodflow\Voodflow\Contracts;
 
 /**
  * Interfaccia per modelli che espongono campi disponibili per webhook/email
