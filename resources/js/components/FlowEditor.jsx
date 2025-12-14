@@ -74,24 +74,20 @@ function FlowCanvas({ initialNodes, initialEdges, initialViewport, livewireId, e
 
     const [colorMode, setColorMode] = useState(getThemeFromFilament);
 
-    // Watch for theme changes using multiple strategies
+    // Watch for Filament theme changes
     useEffect(() => {
         if (typeof window === 'undefined') return;
 
-        let prevTheme = localStorage.getItem('theme');
+        // Listen to Filament's dark-mode-toggled event
+        const handleThemeToggle = (event) => {
+            const newMode = event.detail; // 'light' or 'dark'
+            setColorMode(newMode);
+            console.log('[Voodflow] Theme toggled to:', newMode);
+        };
 
-        // Strategy 1: Poll localStorage (lightweight, every 500ms)
-        const pollInterval = setInterval(() => {
-            const currentTheme = localStorage.getItem('theme');
-            if (currentTheme !== prevTheme) {
-                prevTheme = currentTheme;
-                const newMode = getThemeFromFilament();
-                setColorMode(newMode);
-                console.log('[Voodflow] Theme changed to:', newMode);
-            }
-        }, 500);
+        window.addEventListener('dark-mode-toggled', handleThemeToggle);
 
-        // Strategy 2: Listen to system theme changes (when Filament theme is 'system')
+        // Also listen to system theme changes (when Filament theme is 'system')
         const handleMediaChange = (e) => {
             const savedTheme = localStorage.getItem('theme');
             if (savedTheme === 'system' || !savedTheme) {
@@ -107,12 +103,12 @@ function FlowCanvas({ initialNodes, initialEdges, initialViewport, livewireId, e
         }
 
         return () => {
-            clearInterval(pollInterval);
+            window.removeEventListener('dark-mode-toggled', handleThemeToggle);
             if (mediaQuery.removeEventListener) {
                 mediaQuery.removeEventListener('change', handleMediaChange);
             }
         };
-    }, [getThemeFromFilament]);
+    }, []);
 
 
     const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes.map(n => {
