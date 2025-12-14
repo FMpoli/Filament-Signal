@@ -456,6 +456,7 @@ function FlowCanvas({ initialNodes, initialEdges, initialViewport, livewireId, e
             )}
 
             <ReactFlow
+                key={`react-flow-${colorMode}`}
                 nodes={nodes}
                 edges={edges}
                 nodeTypes={nodeTypes}
