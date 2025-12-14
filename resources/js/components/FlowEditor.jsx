@@ -58,7 +58,61 @@ function FlowCanvas({ initialNodes, initialEdges, initialViewport, livewireId, e
         return list;
     }, [availableNodesMap]);
 
-    const [colorMode, setColorMode] = useState('system');
+    // Detect theme from Filament's localStorage
+    const getThemeFromFilament = useCallback(() => {
+        if (typeof window === 'undefined') return 'light';
+
+        const savedTheme = localStorage.getItem('theme');
+
+        // If theme is 'system' or not set, use prefers-color-scheme
+        if (savedTheme === 'system' || !savedTheme) {
+            return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        }
+
+        return savedTheme === 'dark' ? 'dark' : 'light';
+    }, []);
+
+    const [colorMode, setColorMode] = useState(getThemeFromFilament);
+
+    // Watch for theme changes using multiple strategies
+    useEffect(() => {
+        if (typeof window === 'undefined') return;
+
+        let prevTheme = localStorage.getItem('theme');
+
+        // Strategy 1: Poll localStorage (lightweight, every 500ms)
+        const pollInterval = setInterval(() => {
+            const currentTheme = localStorage.getItem('theme');
+            if (currentTheme !== prevTheme) {
+                prevTheme = currentTheme;
+                const newMode = getThemeFromFilament();
+                setColorMode(newMode);
+                console.log('[Voodflow] Theme changed to:', newMode);
+            }
+        }, 500);
+
+        // Strategy 2: Listen to system theme changes (when Filament theme is 'system')
+        const handleMediaChange = (e) => {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'system' || !savedTheme) {
+                const newMode = e.matches ? 'dark' : 'light';
+                setColorMode(newMode);
+                console.log('[Voodflow] System theme changed to:', newMode);
+            }
+        };
+
+        const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+        if (mediaQuery.addEventListener) {
+            mediaQuery.addEventListener('change', handleMediaChange);
+        }
+
+        return () => {
+            clearInterval(pollInterval);
+            if (mediaQuery.removeEventListener) {
+                mediaQuery.removeEventListener('change', handleMediaChange);
+            }
+        };
+    }, [getThemeFromFilament]);
 
 
     const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes.map(n => {
@@ -380,7 +434,7 @@ function FlowCanvas({ initialNodes, initialEdges, initialViewport, livewireId, e
                 onMoveEnd={onMoveEnd}
                 defaultViewport={initialViewport}
                 fitView={!initialViewport || (initialViewport.x === 0 && initialViewport.y === 0 && initialViewport.zoom === 1)}
-                colorMode="system"
+                colorMode={colorMode}
             >
                 <Background variant="dots" gap={12} size={1} />
                 <Controls />
