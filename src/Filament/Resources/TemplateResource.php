@@ -3,7 +3,7 @@
 namespace Voodflow\Voodflow\Filament\Resources;
 
 use BackedEnum;
-use Voodflow\Voodflow\Filament\Resources\SignalTemplateResource\Pages;
+use Voodflow\Voodflow\Filament\Resources\TemplateResource\Pages;
 use Voodflow\Voodflow\Models\SignalTemplate;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
@@ -17,7 +17,7 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Support\Str;
 
-class SignalTemplateResource extends Resource
+class TemplateResource extends Resource
 {
     protected static ?string $model = SignalTemplate::class;
 

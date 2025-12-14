@@ -1,13 +1,13 @@
 <?php
 
-namespace Voodflow\Voodflow\Filament\Resources\SignalTemplateResource\Pages;
+namespace Voodflow\Voodflow\Filament\Resources\TemplateResource\Pages;
 
-use Voodflow\Voodflow\Filament\Resources\SignalTemplateResource;
+use Voodflow\Voodflow\Filament\Resources\TemplateResource;
 use Filament\Resources\Pages\ListRecords;
 
 class ListSignalTemplates extends ListRecords
 {
-    protected static string $resource = SignalTemplateResource::class;
+    protected static string $resource = TemplateResource::class;
 
     protected function getHeaderActions(): array
     {

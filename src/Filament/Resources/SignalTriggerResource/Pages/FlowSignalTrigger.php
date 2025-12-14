@@ -1,8 +1,8 @@
 <?php
 
-namespace Voodflow\Voodflow\Filament\Resources\SignalTriggerResource\Pages;
+namespace Voodflow\Voodflow\Filament\Resources\TriggerResource\Pages;
 
-use Voodflow\Voodflow\Filament\Resources\SignalTriggerResource;
+use Voodflow\Voodflow\Filament\Resources\TriggerResource;
 use Filament\Actions\Action;
 use Filament\Forms;
 use Filament\Forms\Components\Builder;
@@ -12,7 +12,7 @@ use Filament\Support\Enums\Width;
 
 class FlowSignalTrigger extends EditRecord
 {
-    protected static string $resource = SignalTriggerResource::class;
+    protected static string $resource = TriggerResource::class;
 
     protected string $view = 'filament-signal::resources.signal-trigger-resource.pages.flow';
 
@@ -61,7 +61,7 @@ class FlowSignalTrigger extends EditRecord
             ->form([
                 Forms\Components\TextInput::make('name')->required(),
                 Forms\Components\Select::make('event_class')
-                    ->options(SignalTriggerResource::getEventClassOptions())
+                    ->options(TriggerResource::getEventClassOptions())
                     ->required(),
                 Forms\Components\Select::make('status')
                     ->options([
@@ -91,7 +91,7 @@ class FlowSignalTrigger extends EditRecord
                         'any' => 'Any',
                     ])->default('all'),
                 Builder::make('filters')
-                    ->blocks(SignalTriggerResource::getFilterBlocks())
+                    ->blocks(TriggerResource::getFilterBlocks())
                     ->collapsible(),
             ])
             ->action(function (array $data) {
@@ -110,7 +110,7 @@ class FlowSignalTrigger extends EditRecord
                 return [
                     Forms\Components\Hidden::make('event_class')
                         ->default($this->record->event_class),
-                    ...SignalTriggerResource::actionRepeaterSchema(),
+                    ...TriggerResource::actionRepeaterSchema(),
                 ];
             })
             ->action(function (array $data) {
@@ -141,7 +141,7 @@ class FlowSignalTrigger extends EditRecord
                 return [
                     Forms\Components\Hidden::make('event_class')
                         ->default($this->record->event_class),
-                    ...SignalTriggerResource::actionRepeaterSchema(),
+                    ...TriggerResource::actionRepeaterSchema(),
                 ];
             })
             ->action(function (array $data, array $arguments) {

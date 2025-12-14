@@ -5,7 +5,7 @@ namespace Voodflow\Voodflow\Filament\Resources;
 use BackedEnum;
 use Voodflow\Voodflow\Filament\Infolists\Components\ActionsListEntry;
 use Voodflow\Voodflow\Filament\Infolists\Components\FiltersListEntry;
-use Voodflow\Voodflow\Filament\Resources\SignalTriggerResource\Pages;
+use Voodflow\Voodflow\Filament\Resources\TriggerResource\Pages;
 use Voodflow\Voodflow\Voodflow;
 use Voodflow\Voodflow\Models\SignalTrigger;
 use Voodflow\Voodflow\Support\PayloadFieldAnalyzer;
@@ -33,7 +33,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Schema as DatabaseSchema;
 use Illuminate\Support\Str;
 
-class SignalTriggerResource extends Resource
+class TriggerResource extends Resource
 {
     protected static ?string $model = SignalTrigger::class;
 

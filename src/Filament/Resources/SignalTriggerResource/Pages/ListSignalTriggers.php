@@ -1,14 +1,14 @@
 <?php
 
-namespace Voodflow\Voodflow\Filament\Resources\SignalTriggerResource\Pages;
+namespace Voodflow\Voodflow\Filament\Resources\TriggerResource\Pages;
 
-use Voodflow\Voodflow\Filament\Resources\SignalTriggerResource;
+use Voodflow\Voodflow\Filament\Resources\TriggerResource;
 use Filament\Actions\Action;
 use Filament\Resources\Pages\ListRecords;
 
 class ListSignalTriggers extends ListRecords
 {
-    protected static string $resource = SignalTriggerResource::class;
+    protected static string $resource = TriggerResource::class;
 
     protected function getHeaderActions(): array
     {

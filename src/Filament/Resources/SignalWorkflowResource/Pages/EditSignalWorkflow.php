@@ -1,13 +1,13 @@
 <?php
 
-namespace Voodflow\Voodflow\Filament\Resources\SignalWorkflowResource\Pages;
+namespace Voodflow\Voodflow\Filament\Resources\WorkflowResource\Pages;
 
-use Voodflow\Voodflow\Filament\Resources\SignalWorkflowResource;
+use Voodflow\Voodflow\Filament\Resources\WorkflowResource;
 use Filament\Resources\Pages\EditRecord;
 
 class EditSignalWorkflow extends EditRecord
 {
-    protected static string $resource = SignalWorkflowResource::class;
+    protected static string $resource = WorkflowResource::class;
 
     protected function getHeaderActions(): array
     {

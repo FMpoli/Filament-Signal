@@ -2,7 +2,7 @@
 
 namespace Voodflow\Voodflow\Filament\Resources;
 
-use Voodflow\Voodflow\Filament\Resources\SignalExecutionResource\Pages;
+use Voodflow\Voodflow\Filament\Resources\ExecutionResource\Pages;
 use Voodflow\Voodflow\Models\SignalExecution;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
@@ -12,7 +12,7 @@ use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
 
-class SignalExecutionResource extends Resource
+class ExecutionResource extends Resource
 {
     protected static ?string $model = SignalExecution::class;
 

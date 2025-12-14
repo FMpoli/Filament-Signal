@@ -7,9 +7,9 @@ namespace Voodflow\Voodflow;
 // use Voodflow\Voodflow\Filament\Resources\TemplateResource;
 // use Voodflow\Voodflow\Filament\Resources\TriggerResource;
 // use Voodflow\Voodflow\Filament\Resources\WorkflowResource;
-use Voodflow\Voodflow\Filament\Resources\SignalExecutionResource;
-use Voodflow\Voodflow\Filament\Resources\SignalModelIntegrationResource;
-use Voodflow\Voodflow\Filament\Resources\SignalWorkflowResource;
+use Voodflow\Voodflow\Filament\Resources\ExecutionResource;
+use Voodflow\Voodflow\Filament\Resources\ModelIntegrationResource;
+use Voodflow\Voodflow\Filament\Resources\WorkflowResource;
 use Filament\Contracts\Plugin;
 use Filament\Panel;
 
@@ -34,9 +34,9 @@ class VoodflowPlugin implements Plugin
     public function register(Panel $panel): void
     {
         $panel->resources([
-            SignalWorkflowResource::class,
-            SignalExecutionResource::class,
-            SignalModelIntegrationResource::class,
+            WorkflowResource::class,
+            ExecutionResource::class,
+            ModelIntegrationResource::class,
         ]);
     }
 

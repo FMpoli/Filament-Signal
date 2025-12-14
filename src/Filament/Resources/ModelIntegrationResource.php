@@ -3,7 +3,7 @@
 namespace Voodflow\Voodflow\Filament\Resources;
 
 use BackedEnum;
-use Voodflow\Voodflow\Filament\Resources\SignalModelIntegrationResource\Pages;
+use Voodflow\Voodflow\Filament\Resources\ModelIntegrationResource\Pages;
 use Voodflow\Voodflow\Models\ModelIntegration;
 use Voodflow\Voodflow\Support\ReverseRelationRegistry;
 use Voodflow\Voodflow\Support\ModelRegistry;
@@ -30,7 +30,7 @@ use Illuminate\Support\Str;
 use ReflectionClass;
 use ReflectionMethod;
 
-class SignalModelIntegrationResource extends Resource
+class ModelIntegrationResource extends Resource
 {
     protected static ?string $model = ModelIntegration::class;
 

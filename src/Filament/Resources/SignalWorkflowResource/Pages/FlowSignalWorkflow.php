@@ -1,8 +1,8 @@
 <?php
 
-namespace Voodflow\Voodflow\Filament\Resources\SignalWorkflowResource\Pages;
+namespace Voodflow\Voodflow\Filament\Resources\WorkflowResource\Pages;
 
-use Voodflow\Voodflow\Filament\Resources\SignalWorkflowResource;
+use Voodflow\Voodflow\Filament\Resources\WorkflowResource;
 use Voodflow\Voodflow\Models\Workflow;
 use Filament\Actions\Action;
 use Filament\Actions\Concerns\InteractsWithActions;
@@ -20,7 +20,7 @@ class FlowSignalWorkflow extends Page implements HasActions, HasForms
     use InteractsWithActions;
     use InteractsWithForms;
 
-    protected static string $resource = SignalWorkflowResource::class;
+    protected static string $resource = WorkflowResource::class;
 
     protected string $view = 'filament-signal::resources.signal-trigger-resource.pages.flow';
 
@@ -45,10 +45,10 @@ class FlowSignalWorkflow extends Page implements HasActions, HasForms
     public function getFilterFieldsMapProperty(): array
     {
         $map = [];
-        $events = \Voodflow\Voodflow\Filament\Resources\SignalTriggerResource::getEventClassOptions();
+        $events = \Voodflow\Voodflow\Filament\Resources\TriggerResource::getEventClassOptions();
 
         foreach (array_keys($events) as $eventClass) {
-            $map[$eventClass] = \Voodflow\Voodflow\Filament\Resources\SignalTriggerResource::getFilterFieldOptionsWithTypesForEvent($eventClass);
+            $map[$eventClass] = \Voodflow\Voodflow\Filament\Resources\TriggerResource::getFilterFieldOptionsWithTypesForEvent($eventClass);
         }
 
         return $map;
@@ -78,7 +78,7 @@ class FlowSignalWorkflow extends Page implements HasActions, HasForms
 
         // Add special options if needed
         if ($type === 'trigger' || $class::type() === 'trigger') {
-            $config['eventOptions'] = \Voodflow\Voodflow\Filament\Resources\SignalTriggerResource::getEventClassOptions();
+            $config['eventOptions'] = \Voodflow\Voodflow\Filament\Resources\TriggerResource::getEventClassOptions();
         }
 
         $this->record->nodes()->create([
@@ -395,7 +395,7 @@ class FlowSignalWorkflow extends Page implements HasActions, HasForms
             'eventClass' => null,
             'status' => 'draft',
             'isNew' => true,
-            'eventOptions' => \Voodflow\Voodflow\Filament\Resources\SignalTriggerResource::getEventClassOptions(),
+            'eventOptions' => \Voodflow\Voodflow\Filament\Resources\TriggerResource::getEventClassOptions(),
         ];
 
         $this->record->nodes()->create([
@@ -532,14 +532,14 @@ class FlowSignalWorkflow extends Page implements HasActions, HasForms
                     ->rows(3),
                 Select::make('event_class')
                     ->label('Event Class')
-                    ->options(\Voodflow\Voodflow\Filament\Resources\SignalTriggerResource::getEventClassOptions())
+                    ->options(\Voodflow\Voodflow\Filament\Resources\TriggerResource::getEventClassOptions())
                     ->searchable()
                     ->preload()
                     ->required()
                     ->live()
                     ->helperText('Select an event from plugins (HasSignal) or Model Integrations')
                     ->getSearchResultsUsing(function (string $search): array {
-                        $options = \Voodflow\Voodflow\Filament\Resources\SignalTriggerResource::getEventClassOptions();
+                        $options = \Voodflow\Voodflow\Filament\Resources\TriggerResource::getEventClassOptions();
                         $results = [];
 
                         foreach ($options as $class => $name) {
@@ -559,7 +559,7 @@ class FlowSignalWorkflow extends Page implements HasActions, HasForms
                             return null;
                         }
 
-                        $options = \Base33\FilamentSignal\Filament\Resources\SignalTriggerResource::getEventClassOptions();
+                        $options = \Base33\FilamentSignal\Filament\Resources\TriggerResource::getEventClassOptions();
 
                         return $options[$value] ?? class_basename($value);
                     }),

@@ -1,11 +1,11 @@
 <?php
 
-namespace Voodflow\Voodflow\Filament\Resources\SignalTriggerResource\Pages;
+namespace Voodflow\Voodflow\Filament\Resources\TriggerResource\Pages;
 
-use Voodflow\Voodflow\Filament\Resources\SignalTriggerResource;
+use Voodflow\Voodflow\Filament\Resources\TriggerResource;
 use Filament\Resources\Pages\CreateRecord;
 
 class CreateSignalTrigger extends CreateRecord
 {
-    protected static string $resource = SignalTriggerResource::class;
+    protected static string $resource = TriggerResource::class;
 }

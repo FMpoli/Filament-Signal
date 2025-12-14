@@ -3,7 +3,7 @@
 namespace Voodflow\Voodflow\Filament\Resources;
 
 use BackedEnum;
-use Voodflow\Voodflow\Filament\Resources\SignalWorkflowResource\Pages;
+use Voodflow\Voodflow\Filament\Resources\WorkflowResource\Pages;
 use Voodflow\Voodflow\Models\Workflow;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
@@ -19,7 +19,7 @@ use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
 
-class SignalWorkflowResource extends Resource
+class WorkflowResource extends Resource
 {
     protected static ?string $model = Workflow::class;
 
