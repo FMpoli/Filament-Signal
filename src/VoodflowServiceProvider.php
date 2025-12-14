@@ -4,7 +4,7 @@ namespace Voodflow\Voodflow;
 
 
 use Voodflow\Voodflow\Models\ModelIntegration;
-use Voodflow\Voodflow\Services\SignalEventRegistrar;
+use Voodflow\Voodflow\Services\EventRegistrar;
 use Voodflow\Voodflow\Support\ReverseRelationRegistrar;
 use Voodflow\Voodflow\Support\ReverseRelationRegistry;
 use Voodflow\Voodflow\Support\ReverseRelationWarmup;
@@ -136,7 +136,7 @@ class VoodflowServiceProvider extends PackageServiceProvider
         $this->bootModelIntegrations();
 
         app()->booted(function (): void {
-            app(SignalEventRegistrar::class)->register();
+            app(EventRegistrar::class)->register();
         });
     }
 

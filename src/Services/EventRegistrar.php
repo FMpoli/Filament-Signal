@@ -17,7 +17,7 @@ class EventRegistrar
 {
     public function __construct(
         protected Dispatcher $dispatcher,
-        protected SignalEventProcessor $processor,
+        protected EventProcessor $processor,
         protected SignalEventRegistry $eventRegistry,
         protected SignalEloquentEventMap $eloquentEventMap
     ) {
