@@ -2,8 +2,8 @@
 
 namespace Voodflow\Voodflow\Filament\Resources\SignalTemplateResource\Pages;
 
-use Voodflow\Voodflow\Filament\Resources\SignalTemplateResource;
 use Filament\Resources\Pages\ListRecords;
+use Voodflow\Voodflow\Filament\Resources\SignalTemplateResource;
 
 class ListSignalTemplates extends ListRecords
 {

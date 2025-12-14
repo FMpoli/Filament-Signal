@@ -2,9 +2,9 @@
 
 namespace Voodflow\Voodflow\Filament\Resources\SignalWorkflowResource\Pages;
 
-use Voodflow\Voodflow\Filament\Resources\SignalWorkflowResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
+use Voodflow\Voodflow\Filament\Resources\SignalWorkflowResource;
 
 class ListSignalWorkflows extends ListRecords
 {

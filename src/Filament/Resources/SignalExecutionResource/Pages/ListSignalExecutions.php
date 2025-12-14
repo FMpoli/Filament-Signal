@@ -2,8 +2,8 @@
 
 namespace Voodflow\Voodflow\Filament\Resources\SignalExecutionResource\Pages;
 
-use Voodflow\Voodflow\Filament\Resources\SignalExecutionResource;
 use Filament\Resources\Pages\ListRecords;
+use Voodflow\Voodflow\Filament\Resources\SignalExecutionResource;
 
 class ListSignalExecutions extends ListRecords
 {

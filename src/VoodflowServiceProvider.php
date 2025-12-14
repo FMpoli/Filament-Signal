@@ -2,7 +2,17 @@
 
 namespace Voodflow\Voodflow;
 
-
+use Filament\Support\Assets\Asset;
+use Filament\Support\Assets\Css;
+use Filament\Support\Assets\Js;
+use Filament\Support\Facades\FilamentAsset;
+use Filament\Support\Facades\FilamentIcon;
+use Illuminate\Filesystem\Filesystem;
+use Illuminate\Support\Facades\Schema;
+use Livewire\Features\SupportTesting\Testable;
+use Spatie\LaravelPackageTools\Commands\InstallCommand;
+use Spatie\LaravelPackageTools\Package;
+use Spatie\LaravelPackageTools\PackageServiceProvider;
 use Voodflow\Voodflow\Models\SignalModelIntegration;
 use Voodflow\Voodflow\Services\SignalEventRegistrar;
 use Voodflow\Voodflow\Support\ReverseRelationRegistrar;
@@ -15,17 +25,6 @@ use Voodflow\Voodflow\Support\SignalPayloadFieldAnalyzer;
 use Voodflow\Voodflow\Support\SignalWebhookTemplate;
 use Voodflow\Voodflow\Support\SignalWebhookTemplateRegistry;
 use Voodflow\Voodflow\Testing\TestsFilamentSignal;
-use Filament\Support\Assets\Asset;
-use Filament\Support\Assets\Css;
-use Filament\Support\Assets\Js;
-use Filament\Support\Facades\FilamentAsset;
-use Filament\Support\Facades\FilamentIcon;
-use Illuminate\Filesystem\Filesystem;
-use Illuminate\Support\Facades\Schema;
-use Livewire\Features\SupportTesting\Testable;
-use Spatie\LaravelPackageTools\Commands\InstallCommand;
-use Spatie\LaravelPackageTools\Package;
-use Spatie\LaravelPackageTools\PackageServiceProvider;
 
 class VoodflowServiceProvider extends PackageServiceProvider
 {
@@ -71,20 +70,20 @@ class VoodflowServiceProvider extends PackageServiceProvider
 
     public function packageRegistered(): void
     {
-        $this->app->singleton(SignalWebhookTemplateRegistry::class, fn(): SignalWebhookTemplateRegistry => new SignalWebhookTemplateRegistry);
-        $this->app->singleton(SignalEventRegistry::class, fn(): SignalEventRegistry => new SignalEventRegistry);
-        $this->app->singleton(SignalModelRegistry::class, fn(): SignalModelRegistry => new SignalModelRegistry);
-        $this->app->singleton(ReverseRelationRegistry::class, fn(): ReverseRelationRegistry => new ReverseRelationRegistry);
-        $this->app->singleton(ReverseRelationRegistrar::class, fn($app): ReverseRelationRegistrar => new ReverseRelationRegistrar(
+        $this->app->singleton(SignalWebhookTemplateRegistry::class, fn (): SignalWebhookTemplateRegistry => new SignalWebhookTemplateRegistry);
+        $this->app->singleton(SignalEventRegistry::class, fn (): SignalEventRegistry => new SignalEventRegistry);
+        $this->app->singleton(SignalModelRegistry::class, fn (): SignalModelRegistry => new SignalModelRegistry);
+        $this->app->singleton(ReverseRelationRegistry::class, fn (): ReverseRelationRegistry => new ReverseRelationRegistry);
+        $this->app->singleton(ReverseRelationRegistrar::class, fn ($app): ReverseRelationRegistrar => new ReverseRelationRegistrar(
             $app->make(ReverseRelationRegistry::class)
         ));
-        $this->app->singleton(ReverseRelationWarmup::class, fn($app): ReverseRelationWarmup => new ReverseRelationWarmup(
+        $this->app->singleton(ReverseRelationWarmup::class, fn ($app): ReverseRelationWarmup => new ReverseRelationWarmup(
             $app->make(SignalEventRegistry::class),
             $app->make(SignalPayloadFieldAnalyzer::class),
             $app->make(SignalModelRegistry::class),
             $app->make(ReverseRelationRegistrar::class)
         ));
-        $this->app->singleton(SignalEloquentEventMap::class, fn(): SignalEloquentEventMap => new SignalEloquentEventMap);
+        $this->app->singleton(SignalEloquentEventMap::class, fn (): SignalEloquentEventMap => new SignalEloquentEventMap);
     }
 
     public function packageBooted(): void
@@ -142,13 +141,13 @@ class VoodflowServiceProvider extends PackageServiceProvider
 
     protected function bootModelIntegrations(): void
     {
-        if (!class_exists(SignalModelIntegration::class)) {
+        if (! class_exists(SignalModelIntegration::class)) {
             return;
         }
 
         try {
             $table = config('voodflow.table_names.model_integrations', 'voodflow_model_integrations');
-            if (!Schema::hasTable($table)) {
+            if (! Schema::hasTable($table)) {
                 return;
             }
         } catch (\Throwable $exception) {

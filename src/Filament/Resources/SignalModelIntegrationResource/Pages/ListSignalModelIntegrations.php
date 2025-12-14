@@ -2,9 +2,9 @@
 
 namespace Voodflow\Voodflow\Filament\Resources\SignalModelIntegrationResource\Pages;
 
-use Voodflow\Voodflow\Filament\Resources\SignalModelIntegrationResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
+use Voodflow\Voodflow\Filament\Resources\SignalModelIntegrationResource;
 
 class ListSignalModelIntegrations extends ListRecords
 {

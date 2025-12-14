@@ -2,12 +2,12 @@
 
 namespace Voodflow\Voodflow\Actions;
 
+use Illuminate\Support\Arr;
 use Voodflow\Voodflow\Contracts\SignalActionHandler;
 use Voodflow\Voodflow\Models\SignalAction;
 use Voodflow\Voodflow\Models\SignalActionLog;
 use Voodflow\Voodflow\Support\SignalPayloadConfigurator;
 use Voodflow\Voodflow\Support\SignalPayloadFieldAnalyzer;
-use Illuminate\Support\Arr;
 
 class LogActionHandler implements SignalActionHandler
 {

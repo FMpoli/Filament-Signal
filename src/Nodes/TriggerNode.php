@@ -6,7 +6,7 @@ use Voodflow\Voodflow\Contracts\NodeInterface;
 
 /**
  * Trigger Node Handler
- * 
+ *
  * Type: trigger
  * Description: The workflow starting point
  */
@@ -61,9 +61,9 @@ class TriggerNode implements NodeInterface
 
     /**
      * Execute the node logic
-     * 
-     * @param array $input The input data from previous nodes
-     * @param array $config The node configuration
+     *
+     * @param  array  $input  The input data from previous nodes
+     * @param  array  $config  The node configuration
      * @return array The output data to pass to next nodes
      */
     public function execute(array $input, array $config): array
@@ -74,18 +74,18 @@ class TriggerNode implements NodeInterface
 
     /**
      * Validate the node configuration
-     * 
-     * @param array $config The node configuration
+     *
+     * @param  array  $config  The node configuration
      * @return array Array of validation errors, empty if valid
      */
     public function validate(array $config): array
     {
         $errors = [];
-        
+
         if (empty($config['eventClass'])) {
             $errors[] = 'Event Class is required';
         }
-        
+
         return $errors;
     }
 }

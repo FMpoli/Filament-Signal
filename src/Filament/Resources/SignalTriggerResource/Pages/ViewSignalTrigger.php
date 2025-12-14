@@ -2,8 +2,8 @@
 
 namespace Voodflow\Voodflow\Filament\Resources\SignalTriggerResource\Pages;
 
-use Voodflow\Voodflow\Filament\Resources\SignalTriggerResource;
 use Filament\Resources\Pages\ViewRecord;
+use Voodflow\Voodflow\Filament\Resources\SignalTriggerResource;
 
 class ViewSignalTrigger extends ViewRecord
 {

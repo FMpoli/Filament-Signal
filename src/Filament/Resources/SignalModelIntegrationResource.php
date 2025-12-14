@@ -3,10 +3,6 @@
 namespace Voodflow\Voodflow\Filament\Resources;
 
 use BackedEnum;
-use Voodflow\Voodflow\Filament\Resources\SignalModelIntegrationResource\Pages;
-use Voodflow\Voodflow\Models\SignalModelIntegration;
-use Voodflow\Voodflow\Support\ReverseRelationRegistry;
-use Voodflow\Voodflow\Support\SignalModelRegistry;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
@@ -29,6 +25,10 @@ use Illuminate\Support\Facades\Schema as DatabaseSchema;
 use Illuminate\Support\Str;
 use ReflectionClass;
 use ReflectionMethod;
+use Voodflow\Voodflow\Filament\Resources\SignalModelIntegrationResource\Pages;
+use Voodflow\Voodflow\Models\SignalModelIntegration;
+use Voodflow\Voodflow\Support\ReverseRelationRegistry;
+use Voodflow\Voodflow\Support\SignalModelRegistry;
 
 class SignalModelIntegrationResource extends Resource
 {

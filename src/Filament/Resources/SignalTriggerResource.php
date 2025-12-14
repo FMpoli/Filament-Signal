@@ -3,13 +3,6 @@
 namespace Voodflow\Voodflow\Filament\Resources;
 
 use BackedEnum;
-use Voodflow\Voodflow\Filament\Infolists\Components\ActionsListEntry;
-use Voodflow\Voodflow\Filament\Infolists\Components\FiltersListEntry;
-use Voodflow\Voodflow\Filament\Resources\SignalTriggerResource\Pages;
-use Voodflow\Voodflow\FilamentSignal;
-use Voodflow\Voodflow\Models\SignalTrigger;
-use Voodflow\Voodflow\Support\SignalPayloadFieldAnalyzer;
-use Voodflow\Voodflow\Support\SignalWebhookTemplateRegistry;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
@@ -32,6 +25,13 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Schema as DatabaseSchema;
 use Illuminate\Support\Str;
+use Voodflow\Voodflow\Filament\Infolists\Components\ActionsListEntry;
+use Voodflow\Voodflow\Filament\Infolists\Components\FiltersListEntry;
+use Voodflow\Voodflow\Filament\Resources\SignalTriggerResource\Pages;
+use Voodflow\Voodflow\FilamentSignal;
+use Voodflow\Voodflow\Models\SignalTrigger;
+use Voodflow\Voodflow\Support\SignalPayloadFieldAnalyzer;
+use Voodflow\Voodflow\Support\SignalWebhookTemplateRegistry;
 
 class SignalTriggerResource extends Resource
 {
@@ -1607,9 +1607,9 @@ class SignalTriggerResource extends Resource
 
                 // Determina il tipo del campo
                 $type = $data['type'] ?? 'string';
-                
+
                 // Normalizza i tipi per il frontend
-                $normalizedType = match(strtolower($type)) {
+                $normalizedType = match (strtolower($type)) {
                     'datetime', 'date', 'timestamp', 'carbon' => 'date',
                     'int', 'integer', 'bigint', 'smallint' => 'number',
                     'float', 'double', 'decimal' => 'number',
@@ -1656,7 +1656,7 @@ class SignalTriggerResource extends Resource
                         }
 
                         $relationLabel = $relation['label'] ?? $relationName;
-                        
+
                         // Per relazioni, determina il tipo dal nome campo
                         $type = 'string';
                         if (str_ends_with($fieldKey, '_at') || $fieldKey === 'date') {
@@ -1664,7 +1664,7 @@ class SignalTriggerResource extends Resource
                         } elseif (str_ends_with($fieldKey, '_id') || $fieldKey === 'id') {
                             $type = 'number';
                         }
-                        
+
                         $options[$fieldPath] = [
                             'label' => "{$relationLabel} → {$formattedLabel}",
                             'type' => $type,

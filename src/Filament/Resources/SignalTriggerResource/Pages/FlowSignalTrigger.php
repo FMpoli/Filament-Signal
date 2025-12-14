@@ -2,13 +2,13 @@
 
 namespace Voodflow\Voodflow\Filament\Resources\SignalTriggerResource\Pages;
 
-use Voodflow\Voodflow\Filament\Resources\SignalTriggerResource;
 use Filament\Actions\Action;
 use Filament\Forms;
 use Filament\Forms\Components\Builder;
 use Filament\Resources\Pages\EditRecord;
 use Filament\Schemas\Schema;
 use Filament\Support\Enums\Width;
+use Voodflow\Voodflow\Filament\Resources\SignalTriggerResource;
 
 class FlowSignalTrigger extends EditRecord
 {

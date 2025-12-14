@@ -3,8 +3,6 @@
 namespace Voodflow\Voodflow\Filament\Resources;
 
 use BackedEnum;
-use Voodflow\Voodflow\Filament\Resources\SignalWorkflowResource\Pages;
-use Voodflow\Voodflow\Models\SignalWorkflow;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
@@ -18,6 +16,8 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Voodflow\Voodflow\Filament\Resources\SignalWorkflowResource\Pages;
+use Voodflow\Voodflow\Models\SignalWorkflow;
 
 class SignalWorkflowResource extends Resource
 {

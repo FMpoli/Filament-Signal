@@ -2,8 +2,8 @@
 
 namespace Voodflow\Voodflow\Filament\Resources\SignalWorkflowResource\Pages;
 
-use Voodflow\Voodflow\Filament\Resources\SignalWorkflowResource;
 use Filament\Resources\Pages\CreateRecord;
+use Voodflow\Voodflow\Filament\Resources\SignalWorkflowResource;
 
 class CreateSignalWorkflow extends CreateRecord
 {

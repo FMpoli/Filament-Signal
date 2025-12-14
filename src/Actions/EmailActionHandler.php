@@ -2,14 +2,14 @@
 
 namespace Voodflow\Voodflow\Actions;
 
-use Voodflow\Voodflow\Contracts\SignalActionHandler;
-use Voodflow\Voodflow\Models\SignalAction;
-use Voodflow\Voodflow\Models\SignalActionLog;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use InvalidArgumentException;
+use Voodflow\Voodflow\Contracts\SignalActionHandler;
+use Voodflow\Voodflow\Models\SignalAction;
+use Voodflow\Voodflow\Models\SignalActionLog;
 
 class EmailActionHandler implements SignalActionHandler
 {

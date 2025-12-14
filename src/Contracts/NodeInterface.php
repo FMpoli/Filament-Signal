@@ -4,7 +4,7 @@ namespace Voodflow\Voodflow\Contracts;
 
 /**
  * Interface for Signal workflow nodes.
- * 
+ *
  * Implement this interface when creating custom nodes.
  */
 interface NodeInterface
@@ -31,17 +31,17 @@ interface NodeInterface
 
     /**
      * Execute the node logic
-     * 
-     * @param array $input The input data from previous nodes
-     * @param array $config The node configuration
+     *
+     * @param  array  $input  The input data from previous nodes
+     * @param  array  $config  The node configuration
      * @return array The output data to pass to next nodes
      */
     public function execute(array $input, array $config): array;
 
     /**
      * Validate the node configuration
-     * 
-     * @param array $config The node configuration
+     *
+     * @param  array  $config  The node configuration
      * @return array Array of validation errors, empty if valid
      */
     public function validate(array $config): array;

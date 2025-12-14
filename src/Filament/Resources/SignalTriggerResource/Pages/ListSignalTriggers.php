@@ -2,9 +2,9 @@
 
 namespace Voodflow\Voodflow\Filament\Resources\SignalTriggerResource\Pages;
 
-use Voodflow\Voodflow\Filament\Resources\SignalTriggerResource;
 use Filament\Actions\Action;
 use Filament\Resources\Pages\ListRecords;
+use Voodflow\Voodflow\Filament\Resources\SignalTriggerResource;
 
 class ListSignalTriggers extends ListRecords
 {

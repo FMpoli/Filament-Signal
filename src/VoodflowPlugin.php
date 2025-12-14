@@ -2,11 +2,11 @@
 
 namespace Voodflow\Voodflow;
 
+use Filament\Contracts\Plugin;
+use Filament\Panel;
 use Voodflow\Voodflow\Filament\Resources\SignalExecutionResource;
 use Voodflow\Voodflow\Filament\Resources\SignalModelIntegrationResource;
 use Voodflow\Voodflow\Filament\Resources\SignalWorkflowResource;
-use Filament\Contracts\Plugin;
-use Filament\Panel;
 
 class VoodflowPlugin implements Plugin
 {

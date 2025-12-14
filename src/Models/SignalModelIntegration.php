@@ -2,14 +2,14 @@
 
 namespace Voodflow\Voodflow\Models;
 
-use Voodflow\Voodflow\FilamentSignal;
-use Voodflow\Voodflow\Support\SignalEloquentEventMap;
-use Voodflow\Voodflow\Support\SignalEventRegistry;
-use Voodflow\Voodflow\Support\SignalModelRegistry;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
+use Voodflow\Voodflow\FilamentSignal;
+use Voodflow\Voodflow\Support\SignalEloquentEventMap;
+use Voodflow\Voodflow\Support\SignalEventRegistry;
+use Voodflow\Voodflow\Support\SignalModelRegistry;
 
 class SignalModelIntegration extends Model
 {

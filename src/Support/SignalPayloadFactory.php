@@ -2,12 +2,12 @@
 
 namespace Voodflow\Voodflow\Support;
 
-use Voodflow\Voodflow\Contracts\SignalPayloadProvider;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use JsonSerializable;
+use Voodflow\Voodflow\Contracts\SignalPayloadProvider;
 
 class SignalPayloadFactory
 {

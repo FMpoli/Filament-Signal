@@ -2,8 +2,8 @@
 
 namespace Voodflow\Voodflow\Filament\Resources\SignalModelIntegrationResource\Pages;
 
-use Voodflow\Voodflow\Filament\Resources\SignalModelIntegrationResource;
 use Filament\Resources\Pages\EditRecord;
+use Voodflow\Voodflow\Filament\Resources\SignalModelIntegrationResource;
 
 class EditSignalModelIntegration extends EditRecord
 {

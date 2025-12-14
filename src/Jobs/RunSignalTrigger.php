@@ -2,13 +2,13 @@
 
 namespace Voodflow\Voodflow\Jobs;
 
-use Voodflow\Voodflow\Models\SignalTrigger;
-use Voodflow\Voodflow\Services\SignalActionExecutor;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Voodflow\Voodflow\Models\SignalTrigger;
+use Voodflow\Voodflow\Services\SignalActionExecutor;
 
 class RunSignalTrigger implements ShouldQueue
 {

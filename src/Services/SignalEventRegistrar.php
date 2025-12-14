@@ -2,16 +2,16 @@
 
 namespace Voodflow\Voodflow\Services;
 
-use Voodflow\Voodflow\Events\EloquentSignalEvent;
-use Voodflow\Voodflow\Models\SignalTrigger;
-use Voodflow\Voodflow\Support\SignalEloquentEventMap;
-use Voodflow\Voodflow\Support\SignalEventRegistry;
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Throwable;
+use Voodflow\Voodflow\Events\EloquentSignalEvent;
+use Voodflow\Voodflow\Models\SignalTrigger;
+use Voodflow\Voodflow\Support\SignalEloquentEventMap;
+use Voodflow\Voodflow\Support\SignalEventRegistry;
 
 class SignalEventRegistrar
 {

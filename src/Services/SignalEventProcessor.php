@@ -2,12 +2,12 @@
 
 namespace Voodflow\Voodflow\Services;
 
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
 use Voodflow\Voodflow\Contracts\SignalIdentifiableEvent;
 use Voodflow\Voodflow\Jobs\RunSignalTrigger;
 use Voodflow\Voodflow\Models\SignalTrigger;
 use Voodflow\Voodflow\Support\SignalPayloadFactory;
-use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Log;
 
 class SignalEventProcessor
 {
