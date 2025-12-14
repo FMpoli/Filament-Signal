@@ -2,7 +2,7 @@
 
 namespace Voodflow\Voodflow\Support;
 
-class SignalWebhookTemplate
+class WebhookTemplate
 {
     public function __construct(
         public string $id,
@@ -10,7 +10,8 @@ class SignalWebhookTemplate
         public string $eventClass,
         public ?string $description = null,
         public array $defaults = [],
-    ) {}
+    ) {
+    }
 
     public static function make(string $id, string $name, string $eventClass): self
     {

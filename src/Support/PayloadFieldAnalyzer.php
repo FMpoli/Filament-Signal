@@ -7,7 +7,7 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use ReflectionClass;
 
-class SignalPayloadFieldAnalyzer
+class PayloadFieldAnalyzer
 {
     protected SignalModelRegistry $modelRegistry;
 

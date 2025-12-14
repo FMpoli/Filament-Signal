@@ -5,7 +5,7 @@ namespace Voodflow\Voodflow\Support;
 /**
  * Registro per modelli che non implementano HasSignal ma vogliono esporre campi per segnali
  */
-class SignalModelRegistry
+class ModelRegistry
 {
     /**
      * @var array<string, array{essential: array, relations?: array}>

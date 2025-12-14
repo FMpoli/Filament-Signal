@@ -2,7 +2,7 @@
 
 namespace Voodflow\Voodflow\Support;
 
-class SignalEventRegistry
+class EventRegistry
 {
     /**
      * @var array<string, array{class: string, name: string, description?: string, group?: string}>
@@ -71,7 +71,7 @@ class SignalEventRegistry
 
         foreach ($this->events as $event) {
             $group = $event['group'] ?? 'Other';
-            if (! isset($grouped[$group])) {
+            if (!isset($grouped[$group])) {
                 $grouped[$group] = [];
             }
             $grouped[$group][$event['class']] = $event['name'];
@@ -85,7 +85,7 @@ class SignalEventRegistry
 
     public function find(?string $eventClass): ?array
     {
-        if (! $eventClass) {
+        if (!$eventClass) {
             return null;
         }
 

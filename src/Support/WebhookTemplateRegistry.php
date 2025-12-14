@@ -2,7 +2,7 @@
 
 namespace Voodflow\Voodflow\Support;
 
-class SignalWebhookTemplateRegistry
+class WebhookTemplateRegistry
 {
     /**
      * @var array<string, SignalWebhookTemplate>
@@ -24,7 +24,7 @@ class SignalWebhookTemplateRegistry
 
     public function find(?string $id): ?SignalWebhookTemplate
     {
-        if (! $id) {
+        if (!$id) {
             return null;
         }
 

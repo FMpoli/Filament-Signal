@@ -5,7 +5,7 @@ namespace Voodflow\Voodflow\Support;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 
-class SignalPayloadConfigurator
+class PayloadConfigurator
 {
     /**
      * Configura e filtra il payload in base alle configurazioni

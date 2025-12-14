@@ -9,7 +9,7 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use JsonSerializable;
 
-class SignalPayloadFactory
+class PayloadFactory
 {
     /**
      * @return array<string, mixed>
@@ -42,7 +42,7 @@ class SignalPayloadFactory
         }
 
         if ($value instanceof Collection) {
-            return $value->map(fn ($item) => $this->normalizeValue($item))->all();
+            return $value->map(fn($item) => $this->normalizeValue($item))->all();
         }
 
         if ($value instanceof JsonSerializable) {
@@ -54,11 +54,11 @@ class SignalPayloadFactory
         }
 
         if (is_object($value)) {
-            return Arr::map(get_object_vars($value), fn ($item) => $this->normalizeValue($item));
+            return Arr::map(get_object_vars($value), fn($item) => $this->normalizeValue($item));
         }
 
         if (is_array($value)) {
-            return Arr::map($value, fn ($item) => $this->normalizeValue($item));
+            return Arr::map($value, fn($item) => $this->normalizeValue($item));
         }
 
         return $value;
