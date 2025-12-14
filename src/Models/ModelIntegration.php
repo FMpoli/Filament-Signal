@@ -51,7 +51,7 @@ class ModelIntegration extends Model
         // Questo è necessario perché EventRegistrar::register() viene chiamato solo all'avvio
         // e se aggiungiamo una nuova Model Integration dopo l'avvio, i listener non vengono ricaricati
         if (app()->isBooted()) {
-            app(\Voodflow\Voodflow\Services\EventRegistrar::class)->register();
+            app(\Voodflow\Voodflow\Services\SignalEventRegistrar::class)->register();
         }
     }
 
