@@ -1,20 +1,20 @@
 <?php
 
-namespace Base33\FilamentSignal;
+namespace Voodflow\Voodflow;
 
 
-use Base33\FilamentSignal\Models\SignalModelIntegration;
-use Base33\FilamentSignal\Services\SignalEventRegistrar;
-use Base33\FilamentSignal\Support\ReverseRelationRegistrar;
-use Base33\FilamentSignal\Support\ReverseRelationRegistry;
-use Base33\FilamentSignal\Support\ReverseRelationWarmup;
-use Base33\FilamentSignal\Support\SignalEloquentEventMap;
-use Base33\FilamentSignal\Support\SignalEventRegistry;
-use Base33\FilamentSignal\Support\SignalModelRegistry;
-use Base33\FilamentSignal\Support\SignalPayloadFieldAnalyzer;
-use Base33\FilamentSignal\Support\SignalWebhookTemplate;
-use Base33\FilamentSignal\Support\SignalWebhookTemplateRegistry;
-use Base33\FilamentSignal\Testing\TestsFilamentSignal;
+use Voodflow\Voodflow\Models\SignalModelIntegration;
+use Voodflow\Voodflow\Services\SignalEventRegistrar;
+use Voodflow\Voodflow\Support\ReverseRelationRegistrar;
+use Voodflow\Voodflow\Support\ReverseRelationRegistry;
+use Voodflow\Voodflow\Support\ReverseRelationWarmup;
+use Voodflow\Voodflow\Support\SignalEloquentEventMap;
+use Voodflow\Voodflow\Support\SignalEventRegistry;
+use Voodflow\Voodflow\Support\SignalModelRegistry;
+use Voodflow\Voodflow\Support\SignalPayloadFieldAnalyzer;
+use Voodflow\Voodflow\Support\SignalWebhookTemplate;
+use Voodflow\Voodflow\Support\SignalWebhookTemplateRegistry;
+use Voodflow\Voodflow\Testing\TestsFilamentSignal;
 use Filament\Support\Assets\Asset;
 use Filament\Support\Assets\Css;
 use Filament\Support\Assets\Js;
@@ -27,7 +27,7 @@ use Spatie\LaravelPackageTools\Commands\InstallCommand;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
 
-class FilamentSignalServiceProvider extends PackageServiceProvider
+class VoodflowServiceProvider extends PackageServiceProvider
 {
     public static string $name = 'filament-signal';
 

@@ -1,11 +1,11 @@
 <?php
 
-namespace Base33\FilamentSignal\Models;
+namespace Voodflow\Voodflow\Models;
 
-use Base33\FilamentSignal\FilamentSignal;
-use Base33\FilamentSignal\Support\SignalEloquentEventMap;
-use Base33\FilamentSignal\Support\SignalEventRegistry;
-use Base33\FilamentSignal\Support\SignalModelRegistry;
+use Voodflow\Voodflow\FilamentSignal;
+use Voodflow\Voodflow\Support\SignalEloquentEventMap;
+use Voodflow\Voodflow\Support\SignalEventRegistry;
+use Voodflow\Voodflow\Support\SignalModelRegistry;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Arr;

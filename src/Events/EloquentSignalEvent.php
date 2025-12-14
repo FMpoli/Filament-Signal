@@ -1,11 +1,11 @@
 <?php
 
-namespace Base33\FilamentSignal\Events;
+namespace Voodflow\Voodflow\Events;
 
-use Base33\FilamentSignal\Contracts\HasSignal;
-use Base33\FilamentSignal\Contracts\SignalIdentifiableEvent;
-use Base33\FilamentSignal\Contracts\SignalPayloadProvider;
-use Base33\FilamentSignal\Support\SignalModelRegistry;
+use Voodflow\Voodflow\Contracts\HasSignal;
+use Voodflow\Voodflow\Contracts\SignalIdentifiableEvent;
+use Voodflow\Voodflow\Contracts\SignalPayloadProvider;
+use Voodflow\Voodflow\Support\SignalModelRegistry;
 use Illuminate\Database\Eloquent\Model;
 
 class EloquentSignalEvent implements SignalIdentifiableEvent, SignalPayloadProvider

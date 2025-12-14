@@ -1,9 +1,9 @@
 <?php
 
-namespace Base33\FilamentSignal\Contracts;
+namespace Voodflow\Voodflow\Contracts;
 
-use Base33\FilamentSignal\Models\SignalAction;
-use Base33\FilamentSignal\Models\SignalActionLog;
+use Voodflow\Voodflow\Models\SignalAction;
+use Voodflow\Voodflow\Models\SignalActionLog;
 
 interface SignalActionHandler
 {

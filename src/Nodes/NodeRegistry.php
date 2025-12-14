@@ -1,6 +1,6 @@
 <?php
 
-namespace Base33\FilamentSignal\Nodes;
+namespace Voodflow\Voodflow\Nodes;
 
 /**
  * Registry of available Signal workflow nodes.

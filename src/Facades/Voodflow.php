@@ -1,13 +1,13 @@
 <?php
 
-namespace Base33\FilamentSignal\Facades;
+namespace Voodflow\Voodflow\Facades;
 
 use Illuminate\Support\Facades\Facade;
 
 /**
  * @see \Base33\FilamentSignal\FilamentSignal
  */
-class FilamentSignal extends Facade
+class Voodflow extends Facade
 {
     protected static function getFacadeAccessor()
     {

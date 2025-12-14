@@ -1,9 +1,9 @@
 <?php
 
-namespace Base33\FilamentSignal\Filament\Resources\SignalWorkflowResource\Pages;
+namespace Voodflow\Voodflow\Filament\Resources\SignalWorkflowResource\Pages;
 
-use Base33\FilamentSignal\Filament\Resources\SignalWorkflowResource;
-use Base33\FilamentSignal\Models\SignalWorkflow;
+use Voodflow\Voodflow\Filament\Resources\SignalWorkflowResource;
+use Voodflow\Voodflow\Models\SignalWorkflow;
 use Filament\Actions\Action;
 use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\Contracts\HasActions;

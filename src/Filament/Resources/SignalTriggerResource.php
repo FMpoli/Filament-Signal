@@ -1,15 +1,15 @@
 <?php
 
-namespace Base33\FilamentSignal\Filament\Resources;
+namespace Voodflow\Voodflow\Filament\Resources;
 
 use BackedEnum;
-use Base33\FilamentSignal\Filament\Infolists\Components\ActionsListEntry;
-use Base33\FilamentSignal\Filament\Infolists\Components\FiltersListEntry;
-use Base33\FilamentSignal\Filament\Resources\SignalTriggerResource\Pages;
-use Base33\FilamentSignal\FilamentSignal;
-use Base33\FilamentSignal\Models\SignalTrigger;
-use Base33\FilamentSignal\Support\SignalPayloadFieldAnalyzer;
-use Base33\FilamentSignal\Support\SignalWebhookTemplateRegistry;
+use Voodflow\Voodflow\Filament\Infolists\Components\ActionsListEntry;
+use Voodflow\Voodflow\Filament\Infolists\Components\FiltersListEntry;
+use Voodflow\Voodflow\Filament\Resources\SignalTriggerResource\Pages;
+use Voodflow\Voodflow\FilamentSignal;
+use Voodflow\Voodflow\Models\SignalTrigger;
+use Voodflow\Voodflow\Support\SignalPayloadFieldAnalyzer;
+use Voodflow\Voodflow\Support\SignalWebhookTemplateRegistry;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;

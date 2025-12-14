@@ -1,6 +1,6 @@
 <?php
 
-namespace Base33\FilamentSignal\Console\Commands;
+namespace Voodflow\Voodflow\Console\Commands;
 
 use Illuminate\Console\Command;
 

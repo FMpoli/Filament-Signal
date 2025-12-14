@@ -1,11 +1,11 @@
 <?php
 
-namespace Base33\FilamentSignal;
+namespace Voodflow\Voodflow;
 
-use Base33\FilamentSignal\Support\SignalEventRegistry;
-use Base33\FilamentSignal\Support\SignalModelRegistry;
-use Base33\FilamentSignal\Support\SignalWebhookTemplate;
-use Base33\FilamentSignal\Support\SignalWebhookTemplateRegistry;
+use Voodflow\Voodflow\Support\SignalEventRegistry;
+use Voodflow\Voodflow\Support\SignalModelRegistry;
+use Voodflow\Voodflow\Support\SignalWebhookTemplate;
+use Voodflow\Voodflow\Support\SignalWebhookTemplateRegistry;
 
 class FilamentSignal
 {

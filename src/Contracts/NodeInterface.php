@@ -1,6 +1,6 @@
 <?php
 
-namespace Base33\FilamentSignal\Contracts;
+namespace Voodflow\Voodflow\Contracts;
 
 /**
  * Interface for Signal workflow nodes.

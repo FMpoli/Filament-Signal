@@ -1,9 +1,9 @@
 <?php
 
-namespace Base33\FilamentSignal\Filament\Resources;
+namespace Voodflow\Voodflow\Filament\Resources;
 
-use Base33\FilamentSignal\Filament\Resources\SignalExecutionResource\Pages;
-use Base33\FilamentSignal\Models\SignalExecution;
+use Voodflow\Voodflow\Filament\Resources\SignalExecutionResource\Pages;
+use Voodflow\Voodflow\Models\SignalExecution;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Forms;

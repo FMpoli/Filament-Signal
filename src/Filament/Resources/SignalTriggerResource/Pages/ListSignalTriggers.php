@@ -1,8 +1,8 @@
 <?php
 
-namespace Base33\FilamentSignal\Filament\Resources\SignalTriggerResource\Pages;
+namespace Voodflow\Voodflow\Filament\Resources\SignalTriggerResource\Pages;
 
-use Base33\FilamentSignal\Filament\Resources\SignalTriggerResource;
+use Voodflow\Voodflow\Filament\Resources\SignalTriggerResource;
 use Filament\Actions\Action;
 use Filament\Resources\Pages\ListRecords;
 

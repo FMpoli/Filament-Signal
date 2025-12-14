@@ -1,6 +1,6 @@
 <?php
 
-namespace Base33\FilamentSignal\Support;
+namespace Voodflow\Voodflow\Support;
 
 class SignalWebhookTemplate
 {
