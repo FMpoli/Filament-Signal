@@ -5,7 +5,7 @@ namespace Voodflow\Voodflow\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class SignalTemplate extends Model
+class Template extends Model
 {
     use HasFactory;
 
