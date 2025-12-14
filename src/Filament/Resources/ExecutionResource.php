@@ -11,12 +11,13 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
+use BackedEnum;
 
 class ExecutionResource extends Resource
 {
     protected static ?string $model = Execution::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-rectangle-stack';
 
     public static function getNavigationGroup(): ?string
     {
