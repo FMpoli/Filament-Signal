@@ -27,7 +27,7 @@ class Execution extends Model
 
     public function getTable()
     {
-        return config('signal.table_names.executions', 'signal_executions');
+        return config('voodflow.table_names.executions', 'signal_executions');
     }
 
     public function workflow(): BelongsTo

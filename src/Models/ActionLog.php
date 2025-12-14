@@ -30,16 +30,16 @@ class ActionLog extends Model
 
     public function getTable()
     {
-        return config('signal.table_names.action_logs', parent::getTable());
+        return config('voodflow.table_names.action_logs', parent::getTable());
     }
 
     public function trigger(): BelongsTo
     {
-        return $this->belongsTo(config('signal.models.trigger', SignalTrigger::class));
+        return $this->belongsTo(config('voodflow.models.trigger', SignalTrigger::class));
     }
 
     public function action(): BelongsTo
     {
-        return $this->belongsTo(config('signal.models.action', SignalAction::class));
+        return $this->belongsTo(config('voodflow.models.action', SignalAction::class));
     }
 }

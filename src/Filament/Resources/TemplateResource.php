@@ -61,7 +61,7 @@ class TemplateResource extends Resource
                         ->label(__('filament-signal::signal.fields.content_html'))
                         ->required()
 
-                        ->toolbarButtons(config('signal.editor.tiptap.toolbar_buttons')),
+                        ->toolbarButtons(config('voodflow.editor.tiptap.toolbar_buttons')),
                     Forms\Components\Textarea::make('content_text')
                         ->label(__('filament-signal::signal.fields.content_text'))
                         ->rows(4),

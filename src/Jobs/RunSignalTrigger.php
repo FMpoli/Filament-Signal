@@ -25,7 +25,7 @@ class RunSignalTrigger implements ShouldQueue
         protected string $eventClass,
         protected array $payload,
     ) {
-        if ($connection = config('signal.queue_connection')) {
+        if ($connection = config('voodflow.queue_connection')) {
             $this->onConnection($connection);
         }
     }

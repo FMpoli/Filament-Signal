@@ -50,7 +50,7 @@ class VoodflowServiceProvider extends PackageServiceProvider
                     ->askToStarRepoOnGitHub('base33/filament-signal');
             });
 
-        $configFileName = 'signal';
+        $configFileName = 'voodflow';
 
         if (file_exists($package->basePath("/../config/{$configFileName}.php"))) {
             $package->hasConfigFile($configFileName);
@@ -147,7 +147,7 @@ class VoodflowServiceProvider extends PackageServiceProvider
         }
 
         try {
-            $table = config('signal.table_names.model_integrations', 'signal_model_integrations');
+            $table = config('voodflow.table_names.model_integrations', 'signal_model_integrations');
             if (!Schema::hasTable($table)) {
                 return;
             }
@@ -160,7 +160,7 @@ class VoodflowServiceProvider extends PackageServiceProvider
 
     protected function registerConfiguredWebhookTemplates(): void
     {
-        $templates = config('signal.webhook_templates', []);
+        $templates = config('voodflow.webhook_templates', []);
 
         if (empty($templates)) {
             return;

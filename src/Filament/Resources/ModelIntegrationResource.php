@@ -871,7 +871,7 @@ class ModelIntegrationResource extends Resource
      */
     protected static function getAvailableModelOptions(?string $search = null): array
     {
-        $excludedModels = config('signal.excluded_models', []);
+        $excludedModels = config('voodflow.excluded_models', []);
         $models = [];
 
         // 1. Trova modelli dai Resource Filament registrati nel pannello corrente

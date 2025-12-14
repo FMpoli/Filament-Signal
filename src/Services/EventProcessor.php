@@ -52,7 +52,7 @@ class EventProcessor
 
         $payload = $this->payloadFactory->fromEvent($event);
 
-        $useSync = config('signal.execute_sync', false) || config('queue.default') === 'sync';
+        $useSync = config('voodflow.execute_sync', false) || config('queue.default') === 'sync';
 
         foreach ($triggers as $trigger) {
             // Controlla se il trigger passa i filtri configurati

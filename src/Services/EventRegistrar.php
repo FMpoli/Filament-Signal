@@ -114,7 +114,7 @@ class EventRegistrar
     protected function discoverEvents(): Collection
     {
         // Eventi dal config
-        $configured = collect(config('signal.registered_events', []));
+        $configured = collect(config('voodflow.registered_events', []));
 
         // Eventi registrati dai plugin tramite FilamentSignal::registerEvent()
         $registeredEvents = collect(array_keys($this->eventRegistry->all()));

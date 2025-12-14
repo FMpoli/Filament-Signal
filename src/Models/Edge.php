@@ -21,7 +21,7 @@ class Edge extends Model
 
     public function getTable()
     {
-        return config('signal.table_names.edges', 'signal_edges');
+        return config('voodflow.table_names.edges', 'signal_edges');
     }
 
     public function workflow(): BelongsTo

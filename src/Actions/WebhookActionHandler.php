@@ -29,18 +29,18 @@ class WebhookActionHandler implements SignalActionHandler
         $bodyMode = Arr::get($configuration, 'body', 'payload');
         $meta = Arr::get($configuration, 'meta', []);
         $tags = Arr::get($configuration, 'tags', []);
-        $secret = Arr::get($configuration, 'secret', config('signal.webhook.secret'));
-        $queue = Arr::get($configuration, 'queue', config('signal.webhook.queue'));
-        $connection = Arr::get($configuration, 'connection', config('signal.webhook.connection'));
-        $timeout = Arr::get($configuration, 'timeout', config('signal.webhook.timeout'));
-        $tries = Arr::get($configuration, 'tries', config('signal.webhook.tries'));
-        $backoffStrategy = Arr::get($configuration, 'backoff_strategy', config('signal.webhook.backoff_strategy'));
+        $secret = Arr::get($configuration, 'secret', config('voodflow.webhook.secret'));
+        $queue = Arr::get($configuration, 'queue', config('voodflow.webhook.queue'));
+        $connection = Arr::get($configuration, 'connection', config('voodflow.webhook.connection'));
+        $timeout = Arr::get($configuration, 'timeout', config('voodflow.webhook.timeout'));
+        $tries = Arr::get($configuration, 'tries', config('voodflow.webhook.tries'));
+        $backoffStrategy = Arr::get($configuration, 'backoff_strategy', config('voodflow.webhook.backoff_strategy'));
         $verifySsl = Arr::has($configuration, 'verify_ssl')
             ? Arr::get($configuration, 'verify_ssl')
-            : config('signal.webhook.verify_ssl', true);
-        $throwOnFailure = Arr::get($configuration, 'throw_exception_on_failure', config('signal.webhook.throw_exception_on_failure', false));
+            : config('voodflow.webhook.verify_ssl', true);
+        $throwOnFailure = Arr::get($configuration, 'throw_exception_on_failure', config('voodflow.webhook.throw_exception_on_failure', false));
         // Se execute_sync è true nel config, forza l'esecuzione sincrona anche per i webhook
-        $dispatchSync = Arr::get($configuration, 'dispatch_sync', false) || config('signal.execute_sync', false);
+        $dispatchSync = Arr::get($configuration, 'dispatch_sync', false) || config('voodflow.execute_sync', false);
         $proxy = Arr::get($configuration, 'proxy');
         $signer = Arr::get($configuration, 'signer');
         $customJob = Arr::get($configuration, 'job');

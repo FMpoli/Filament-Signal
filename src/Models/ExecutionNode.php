@@ -30,7 +30,7 @@ class ExecutionNode extends Model
 
     public function getTable()
     {
-        return config('signal.table_names.execution_nodes', 'signal_execution_nodes');
+        return config('voodflow.table_names.execution_nodes', 'signal_execution_nodes');
     }
 
     public function execution(): BelongsTo

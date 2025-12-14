@@ -26,7 +26,7 @@ class Node extends Model
 
     public function getTable()
     {
-        return config('signal.table_names.nodes', 'signal_nodes');
+        return config('voodflow.table_names.nodes', 'signal_nodes');
     }
 
     public function workflow(): BelongsTo

@@ -387,7 +387,7 @@ class TriggerResource extends Resource
     /**
      * Raccoglie tutte le opzioni degli eventi disponibili:
      * - Eventi registrati dai plugin tramite FilamentSignal::registerEvent()
-     * - Eventi configurati in config('signal.registered_events')
+     * - Eventi configurati in config('voodflow.registered_events')
      * - Eventi già usati nei trigger esistenti (dal database)
      *
      * @return array<string, string> Array con chiave = event class, valore = nome visualizzato
@@ -403,7 +403,7 @@ class TriggerResource extends Resource
         $options = array_merge($options, $registeredOptions);
 
         // Eventi dal config
-        $configuredEvents = config('signal.registered_events', []);
+        $configuredEvents = config('voodflow.registered_events', []);
         foreach ($configuredEvents as $eventClass) {
             if (is_string($eventClass) && !isset($options[$eventClass])) {
                 // Se non è già registrato con un nome, usa il nome della classe
@@ -532,7 +532,7 @@ class TriggerResource extends Resource
      */
     public static function getCustomActionSchema(string $actionType): ?array
     {
-        $customSchemas = config('signal.action_schemas', []);
+        $customSchemas = config('voodflow.action_schemas', []);
         $schema = $customSchemas[$actionType] ?? null;
 
         if (is_callable($schema)) {
@@ -582,7 +582,7 @@ class TriggerResource extends Resource
                         ->label(__('filament-signal::signal.fields.signing_secret'))
                         ->password()
                         ->revealable()
-                        ->default(fn() => config('signal.webhook.secret') ?: Str::random(40))
+                        ->default(fn() => config('voodflow.webhook.secret') ?: Str::random(40))
                         ->helperText(__('filament-signal::signal.helpers.signing_secret'))
                         ->columnSpan(2),
                 ]),
@@ -729,7 +729,7 @@ class TriggerResource extends Resource
     public static function setActionTypeDefaults(string $actionType, callable $set): void
     {
         // Prima controlla se ci sono default custom registrati da plugin
-        $customDefaults = config('signal.action_defaults', []);
+        $customDefaults = config('voodflow.action_defaults', []);
         if (isset($customDefaults[$actionType]) && is_callable($customDefaults[$actionType])) {
             $customDefaults[$actionType]($set);
 
@@ -752,7 +752,7 @@ class TriggerResource extends Resource
     {
         $set('configuration.method', 'POST');
         $set('configuration.body', 'event');
-        if (!config('signal.webhook.secret')) {
+        if (!config('voodflow.webhook.secret')) {
             $set('configuration.secret', Str::random(40));
         }
     }
@@ -999,7 +999,7 @@ class TriggerResource extends Resource
 
     protected static function getActionTypeOptions(): array
     {
-        return collect(config('signal.action_handlers', []))
+        return collect(config('voodflow.action_handlers', []))
             ->keys()
             ->mapWithKeys(function (string $type) {
                 $translationKey = "filament-signal::signal.action_types.{$type}";

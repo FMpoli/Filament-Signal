@@ -29,6 +29,6 @@ class Template extends Model
 
     public function getTable()
     {
-        return config('signal.table_names.templates', parent::getTable());
+        return config('voodflow.table_names.templates', parent::getTable());
     }
 }

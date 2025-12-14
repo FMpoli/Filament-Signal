@@ -19,7 +19,7 @@ class ActionExecutor
     public function __construct(
         protected array $handlers = []
     ) {
-        $this->handlers = $handlers ?: config('signal.action_handlers', []);
+        $this->handlers = $handlers ?: config('voodflow.action_handlers', []);
     }
 
     /**

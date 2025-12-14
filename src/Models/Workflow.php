@@ -23,7 +23,7 @@ class Workflow extends Model
 
     public function getTable()
     {
-        return config('signal.table_names.workflows', 'signal_workflows');
+        return config('voodflow.table_names.workflows', 'signal_workflows');
     }
 
     public function nodes(): HasMany

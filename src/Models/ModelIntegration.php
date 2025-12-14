@@ -32,7 +32,7 @@ class ModelIntegration extends Model
 
     public function getTable()
     {
-        return config('signal.table_names.model_integrations', 'signal_model_integrations');
+        return config('voodflow.table_names.model_integrations', 'signal_model_integrations');
     }
 
     protected static function booted(): void
