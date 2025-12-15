@@ -30,13 +30,14 @@ interface NodeInterface
     public static function metadata(): array;
 
     /**
-     * Execute the node logic
+     * Execute the node logic with ExecutionContext
      * 
-     * @param array $input The input data from previous nodes
-     * @param array $config The node configuration
-     * @return array The output data to pass to next nodes
+     * Modern signature using ExecutionContext and ExecutionResult
+     * 
+     * @param \Voodflow\Voodflow\Execution\ExecutionContext $context
+     * @return \Voodflow\Voodflow\Execution\ExecutionResult
      */
-    public function execute(array $input, array $config): array;
+    public function execute(\Voodflow\Voodflow\Execution\ExecutionContext $context): \Voodflow\Voodflow\Execution\ExecutionResult;
 
     /**
      * Validate the node configuration
@@ -46,3 +47,4 @@ interface NodeInterface
      */
     public function validate(array $config): array;
 }
+
