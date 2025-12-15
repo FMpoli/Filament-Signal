@@ -210,10 +210,8 @@ class VoodflowServiceProvider extends PackageServiceProvider
     protected function getCommands(): array
     {
         return [
-            // TODO Phase 2: Uncomment after renaming command files
-            // \Voodflow\Voodflow\Console\Commands\VoodflowCommand::class,
-            // \Voodflow\Voodflow\Console\Commands\MakeVoodflowNodeCommand::class,
-            // \Voodflow\Voodflow\Console\Commands\DebugVoodflow::class,
+            MakeSignalNodeCommand::class,
+            MakeNodeCommand::class,
         ];
     }
 
