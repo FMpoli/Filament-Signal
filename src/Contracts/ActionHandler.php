@@ -2,17 +2,22 @@
 
 namespace Voodflow\Voodflow\Contracts;
 
-use Voodflow\Voodflow\Models\SignalAction;
-use Voodflow\Voodflow\Models\SignalActionLog;
-
+/**
+ * Interface for action handlers
+ * Each action type (webhook, email, etc.) should implement this interface
+ * 
+ * Handlers execute actions within workflow nodes and return results
+ * for storage in ExecutionNode
+ */
 interface ActionHandler
 {
     /**
-     * Execute the configured action and return an optional response payload to log.
+     * Execute the action
      *
-     * @param  array<string, mixed>  $payload
-     * @param  SignalActionLog|null  $log  Il log dell'azione, può essere aggiornato con il payload finale
-     * @return array<string, mixed>|null
+     * @param array $config Action configuration from the node
+     * @param array $payload Event payload data passed through the workflow  
+     * @param string $eventClass The event class that triggered this workflow
+     * @return array|null Response data to be stored in ExecutionNode.output
      */
-    public function handle(SignalAction $action, array $payload, string $eventClass, ?SignalActionLog $log = null): ?array;
+    public function handle(array $config, array $payload, string $eventClass): ?array;
 }
