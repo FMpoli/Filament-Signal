@@ -60,20 +60,12 @@ class FilterNode implements NodeInterface
     }
 
     /**
-     * Execute the node logic
-     * 
-     * @param array $input The input data from previous nodes
-     * @param array $config The node configuration
-     * @return array The output data to pass to next nodes
+     * Execute filter logic with new signature
      */
-    public function execute(array $input, array $config): array
+    public function execute(\Voodflow\Voodflow\Execution\ExecutionContext $context): \Voodflow\Voodflow\Execution\ExecutionResult
     {
-        // TODO: Implement filter logic
-        // Return input if it passes filters, or empty/null if it fails?
-        // Or throw exception to stop flow?
-        // Usually filters just stop propagation if condition met.
-
-        return $input;
+        // Pass through for now - filtering logic not yet implemented
+        return \Voodflow\Voodflow\Execution\ExecutionResult::success($context->input);
     }
 
     /**

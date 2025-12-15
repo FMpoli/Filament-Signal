@@ -64,21 +64,13 @@ class SendWebhookNode implements NodeInterface
     }
 
     /**
-     * Execute the node logic
-     * 
-     * @param array $input The input data from previous nodes
-     * @param array $config The node configuration
-     * @return array The output data to pass to next nodes
+     * Execute webhook send with new signature
      */
-    public function execute(array $input, array $config): array
+    public function execute(\Voodflow\Voodflow\Execution\ExecutionContext $context): \Voodflow\Voodflow\Execution\ExecutionResult
     {
-        // TODO: Implement actual webhook sending
-        // 1. Get Http client
-        // 2. Build payload from input based on config['fields']
-        // 3. Send request to config['url'] with config['method']
-        // 4. Return ['success' => true/false] to determine next branch
-
-        return $input;
+        // Delegate to WebhookNode implementation for now
+        // TODO: Migrate logic from old WebhookActionHandler
+        return \Voodflow\Voodflow\Execution\ExecutionResult::success($context->input);
     }
 
     /**

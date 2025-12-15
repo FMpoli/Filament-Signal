@@ -60,16 +60,13 @@ class TriggerNode implements NodeInterface
     }
 
     /**
-     * Execute the node logic
-     * 
-     * @param array $input The input data from previous nodes
-     * @param array $config The node configuration
-     * @return array The output data to pass to next nodes
+     * Execute trigger logic with new signature
      */
-    public function execute(array $input, array $config): array
+    public function execute(\Voodflow\Voodflow\Execution\ExecutionContext $context): \Voodflow\Voodflow\Execution\ExecutionResult
     {
-        // Trigger is a source node, pass input or event data through
-        return $input;
+        // Trigger nodes typically don't execute, they listen for events
+        // Pass through input for now
+        return \Voodflow\Voodflow\Execution\ExecutionResult::success($context->input);
     }
 
     /**

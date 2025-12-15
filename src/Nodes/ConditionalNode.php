@@ -44,8 +44,12 @@ class ConditionalNode implements NodeInterface
         return [];
     }
 
-    public function execute(array $inputData, array $config): array
+    /**
+     * Execute the conditional logic with new signature
+     */
+    public function execute(\Voodflow\Voodflow\Execution\ExecutionContext $context): \Voodflow\Voodflow\Execution\ExecutionResult
     {
-        return $inputData;
+        // For now, just pass through input - conditional logic not yet implemented
+        return \Voodflow\Voodflow\Execution\ExecutionResult::success($context->input);
     }
 }
