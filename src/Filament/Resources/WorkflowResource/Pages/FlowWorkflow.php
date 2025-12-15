@@ -34,7 +34,7 @@ class FlowWorkflow extends Page implements HasActions, HasForms
     /**
      * Get available nodes for the frontend
      */
-    public function getAvailableNodes(): array
+    public function getAvailableNodesProperty(): array
     {
         // Use new Services NodeRegistry
         $registry = app(\Voodflow\Voodflow\Services\NodeRegistry::class);

@@ -156,27 +156,6 @@ class VoodflowServiceProvider extends PackageServiceProvider
         ModelIntegration::query()->get()->each->registerOnBoot();
     }
 
-    protected function registerConfiguredWebhookTemplates(): void
-    {
-        $templates = config('voodflow.webhook_templates', []);
-
-        if (empty($templates)) {
-            return;
-        }
-
-        $registry = app(WebhookTemplateRegistry::class);
-
-        foreach ($templates as $template) {
-            if (is_array($template)) {
-                $template = WebhookTemplate::fromArray($template);
-            }
-
-            if ($template instanceof WebhookTemplate) {
-                $registry->register($template);
-            }
-        }
-    }
-
     protected function getAssetPackageName(): ?string
     {
         return 'voodflow/voodflow';
