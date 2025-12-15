@@ -3,7 +3,7 @@
 namespace Voodflow\Voodflow\Services;
 
 use Voodflow\Voodflow\Events\EloquentSignalEvent;
-use Voodflow\Voodflow\Models\SignalTrigger;
+use Voodflow\Voodflow\Models\Workflow;
 use Voodflow\Voodflow\Support\EloquentEventMap;
 use Voodflow\Voodflow\Support\EventRegistry;
 use Illuminate\Contracts\Events\Dispatcher;
@@ -13,11 +13,17 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Throwable;
 
+/**
+ * Event Registrar
+ * 
+ * Registers Laravel event listeners for workflows.
+ * Updated to use WorkflowExecutor instead of legacy EventProcessor.
+ */
 class EventRegistrar
 {
     public function __construct(
         protected Dispatcher $dispatcher,
-        protected EventProcessor $processor,
+        protected WorkflowExecutor $workflowExecutor,
         protected EventRegistry $eventRegistry,
         protected EloquentEventMap $eloquentEventMap
     ) {
@@ -27,54 +33,77 @@ class EventRegistrar
     {
         $events = $this->discoverEvents();
 
-        Log::info('Signal: Registering event listeners', [
+        Log::info('Voodflow: Registering event listeners', [
             'events_count' => $events->count(),
             'events' => $events->toArray(),
         ]);
 
         foreach ($events as $eventName) {
-            // Rimuovi i listener esistenti per questo evento per evitare duplicati
-            // Nota: questo rimuove TUTTI i listener per questo evento, non solo quelli di Signal
-            // Ma è necessario per evitare listener duplicati quando si ricarica dopo aver salvato una Model Integration
+            // Remove existing listeners to avoid duplicates
             $this->dispatcher->forget($eventName);
 
-            Log::info('Signal: Registering listener for event', [
+            Log::info('Voodflow: Registering listener for event', [
                 'event_name' => $eventName,
             ]);
 
             $this->dispatcher->listen($eventName, function (...$payload) use ($eventName): void {
-                // Log diretto su file per debug
-                try {
-                    $logFile = base_path('storage/logs/signal-debug.log');
-                    $logMessage = date('Y-m-d H:i:s') . " - Event listener called - Event: {$eventName}, Payload count: " . count($payload) . "\n";
-                    @file_put_contents($logFile, $logMessage, FILE_APPEND);
-                } catch (\Throwable $e) {
-                    // Ignora errori di scrittura
-                }
-
-                Log::info('Signal: Event listener called', [
-                    'event_name' => $eventName,
-                    'payload_count' => count($payload),
-                ]);
-
                 $event = $this->wrapEventPayload($eventName, $payload);
 
                 if (!$event) {
-                    Log::info('Signal: Event wrapped to null, skipping', [
+                    Log::debug('Voodflow: Event wrapped to null, skipping', [
                         'event_name' => $eventName,
                     ]);
-
                     return;
                 }
 
-                Log::info('Signal: Calling processor', [
-                    'event_name' => $eventName,
-                    'event_class' => get_class($event),
-                ]);
+                // Find workflows listening to this event
+                $workflows = $this->findWorkflowsForEvent($eventName);
 
-                $this->processor->handle($event);
+                foreach ($workflows as $workflow) {
+                    try {
+                        // Extract payload data from event object
+                        $payloadData = $this->extractPayloadFromEvent($event);
+
+                        // Execute workflow with WorkflowExecutor
+                        $this->workflowExecutor->execute($workflow, $payloadData, $eventName);
+                    } catch (Throwable $e) {
+                        Log::error('Voodflow: Workflow execution failed', [
+                            'workflow_id' => $workflow->id,
+                            'event' => $eventName,
+                            'error' => $e->getMessage(),
+                        ]);
+                    }
+                }
             });
         }
+    }
+
+    /**
+     * Find workflows that listen to a specific event
+     */
+    protected function findWorkflowsForEvent(string $eventClass): Collection
+    {
+        return Workflow::where('status', 'active')
+            ->where('event_class', $eventClass)
+            ->get();
+    }
+
+    /**
+     * Extract payload data from event object
+     */
+    protected function extractPayloadFromEvent(object $event): array
+    {
+        if ($event instanceof EloquentSignalEvent) {
+            return [
+                'operation' => $event->operation,
+                'alias' => $event->alias,
+                'model' => $event->model->toArray(),
+                'model_class' => get_class($event->model),
+            ];
+        }
+
+        // For other event types, try to extract public properties
+        return get_object_vars($event);
     }
 
     protected function wrapEventPayload(string $eventName, array $payload): ?object
@@ -113,22 +142,22 @@ class EventRegistrar
 
     protected function discoverEvents(): Collection
     {
-        // Eventi dal config
+        // Events from config
         $configured = collect(config('voodflow.registered_events', []));
 
-        // Eventi registrati dai plugin tramite FilamentSignal::registerEvent()
+        // Events registered by plugins via FilamentSignal::registerEvent()
         $registeredEvents = collect(array_keys($this->eventRegistry->all()));
 
-        // Eventi già usati nei trigger esistenti (dal database)
+        // Events from active workflows
         $databaseEvents = collect();
 
         try {
-            $databaseEvents = SignalTrigger::query()
+            $databaseEvents = Workflow::where('status', 'active')
                 ->select('event_class')
                 ->distinct()
                 ->pluck('event_class');
         } catch (Throwable $exception) {
-            Log::debug('Signal could not load events from database.', [
+            Log::debug('Voodflow could not load events from database.', [
                 'exception' => $exception->getMessage(),
             ]);
         }
