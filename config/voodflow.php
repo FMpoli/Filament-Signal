@@ -39,7 +39,6 @@ return [
         'model_integrations' => 'voodflow_model_integrations',
         'triggers' => 'voodflow_triggers',
         'actions' => 'voodflow_actions',
-        'templates' => 'voodflow_templates',
         'action_logs' => 'voodflow_action_logs',
     ],
 
@@ -78,18 +77,6 @@ return [
         'backoff_strategy' => env('FILAMENT_SIGNAL_WEBHOOK_BACKOFF', 'Spatie\\WebhookServer\\BackoffStrategy\\ExponentialBackoffStrategy'),
         'verify_ssl' => env('FILAMENT_SIGNAL_WEBHOOK_VERIFY_SSL', true),
         'throw_exception_on_failure' => env('FILAMENT_SIGNAL_WEBHOOK_THROW_ON_FAILURE', false),
-    ],
-
-    'webhook_templates' => [
-        // [
-        //     'id' => 'user-created',
-        //     'name' => 'User created',
-        //     'event_class' => \App\Events\UserCreated::class,
-        //     'description' => 'Triggered when a user is created.',
-        //     'defaults' => [
-        //         'metadata.some_key' => 'value',
-        //     ],
-        // ],
     ],
 
     /*
