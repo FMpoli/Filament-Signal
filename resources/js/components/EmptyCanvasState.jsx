@@ -22,12 +22,24 @@ const EmptyCanvasState = ({ availableNodes = {}, onAddNode }) => {
 
     // Filter nodes by search query
     const filteredNodes = useMemo(() => {
+        // Safety check: ensure availableNodes is an object
+        if (!availableNodes || typeof availableNodes !== 'object') {
+            console.warn('[EmptyCanvasState] availableNodes is not an object:', availableNodes);
+            return {};
+        }
+
         if (!searchQuery) return availableNodes;
 
         const filtered = {};
         Object.entries(availableNodes).forEach(([category, nodes]) => {
+            // Safety check: ensure nodes is an array
+            if (!Array.isArray(nodes)) {
+                console.warn('[EmptyCanvasState] nodes not array for category:', category, nodes);
+                return;
+            }
+
             const matchingNodes = nodes.filter(node =>
-                node.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                node.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
                 node.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
                 category.toLowerCase().includes(searchQuery.toLowerCase())
             );
@@ -157,7 +169,7 @@ const EmptyCanvasState = ({ availableNodes = {}, onAddNode }) => {
                     </div>
                 ) : (
                     /* Improved Node Picker with Categories & Search */
-                    <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 w-[600px] max-h-[70vh] overflow-hidden flex flex-col">
+                    <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 w-[600px] max-h-[60vh] overflow-hidden flex flex-col">
                         {/* Header */}
                         <div className="flex items-center justify-between p-4 border-b border-slate-200 dark:border-slate-700">
                             <h3 className="text-lg font-bold text-slate-700 dark:text-slate-200">
@@ -253,40 +265,46 @@ const EmptyCanvasState = ({ availableNodes = {}, onAddNode }) => {
                                                 {/* Nodes Grid */}
                                                 {isExpanded && (
                                                     <div className="p-2 grid grid-cols-2 gap-2 bg-slate-50/50 dark:bg-slate-900/20">
-                                                        {nodes.map((node) => (
-                                                            <button
-                                                                key={node.type}
-                                                                onClick={() => {
-                                                                    onAddNode(node.type);
-                                                                    setShowNodePicker(false);
-                                                                    setSearchQuery('');
-                                                                }}
-                                                                className={`
-                                                                    p-3 rounded-lg
-                                                                    bg-white dark:bg-slate-800
-                                                                    border ${colors.border}
-                                                                    ${colors.hover}
-                                                                    transition-all duration-150
-                                                                    text-left
-                                                                    hover:scale-105
-                                                                    group
-                                                                `}
-                                                            >
-                                                                <div className="flex items-start gap-2">
-                                                                    <span className="text-2xl" title={node.icon}>
-                                                                        {getIconForNode(node.icon)}
-                                                                    </span>
-                                                                    <div className="flex-1 min-w-0">
-                                                                        <h4 className={`font-medium text-sm ${colors.text} truncate`}>
-                                                                            {node.name}
-                                                                        </h4>
-                                                                        <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2">
-                                                                            {node.description || `Add ${node.name}`}
-                                                                        </p>
+                                                        {Array.isArray(nodes) && nodes.length > 0 ? (
+                                                            nodes.map((node) => (
+                                                                <button
+                                                                    key={node.type}
+                                                                    onClick={() => {
+                                                                        onAddNode(node.type);
+                                                                        setShowNodePicker(false);
+                                                                        setSearchQuery('');
+                                                                    }}
+                                                                    className={`
+                                                                        p-3 rounded-lg
+                                                                        bg-white dark:bg-slate-800
+                                                                        border ${colors.border}
+                                                                        ${colors.hover}
+                                                                        transition-all duration-150
+                                                                        text-left
+                                                                        hover:scale-105
+                                                                        group
+                                                                    `}
+                                                                >
+                                                                    <div className="flex items-start gap-2">
+                                                                        <span className="text-2xl" title={node.icon}>
+                                                                            {getIconForNode(node.icon)}
+                                                                        </span>
+                                                                        <div className="flex-1 min-w-0">
+                                                                            <h4 className={`font-medium text-sm ${colors.text} truncate`}>
+                                                                                {node.name}
+                                                                            </h4>
+                                                                            <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2">
+                                                                                {node.description || `Add ${node.name}`}
+                                                                            </p>
+                                                                        </div>
                                                                     </div>
-                                                                </div>
-                                                            </button>
-                                                        ))}
+                                                                </button>
+                                                            ))
+                                                        ) : (
+                                                            <div className="col-span-2 text-center py-4 text-slate-400">
+                                                                No nodes in this category
+                                                            </div>
+                                                        )}
                                                     </div>
                                                 )}
                                             </div>
