@@ -34,9 +34,11 @@ class FlowWorkflow extends Page implements HasActions, HasForms
     /**
      * Get available nodes for the frontend
      */
-    public function getAvailableNodesProperty(): array
+    public function getAvailableNodes(): array
     {
-        return \Voodflow\Voodflow\Nodes\NodeRegistry::getMetadataMap();
+        // Use new Services NodeRegistry
+        $registry = app(\Voodflow\Voodflow\Services\NodeRegistry::class);
+        return $registry->getMetadataForReact();
     }
 
     /**
@@ -57,7 +59,9 @@ class FlowWorkflow extends Page implements HasActions, HasForms
     public function createGenericNode(array $data): void
     {
         $type = $data['type'] ?? null;
-        $class = \Voodflow\Voodflow\Nodes\NodeRegistry::get($type);
+        // Use new Services NodeRegistry
+        $registry = app(\Voodflow\Voodflow\Services\NodeRegistry::class);
+        $class = $registry->get($type);
 
         if (!$class) {
             return;

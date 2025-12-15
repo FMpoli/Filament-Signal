@@ -5,15 +5,16 @@ namespace Voodflow\Voodflow;
 
 use Voodflow\Voodflow\Models\ModelIntegration;
 use Voodflow\Voodflow\Services\EventRegistrar;
+use Voodflow\Voodflow\Console\Commands\FilamentSignalCommand;
+use Voodflow\Voodflow\Console\Commands\MakeSignalNodeCommand;
+use Voodflow\Voodflow\Console\Commands\MakeNodeCommand;
+use Voodflow\Voodflow\Support\EloquentEventMap;
 use Voodflow\Voodflow\Support\ReverseRelationRegistrar;
 use Voodflow\Voodflow\Support\ReverseRelationRegistry;
 use Voodflow\Voodflow\Support\ReverseRelationWarmup;
-use Voodflow\Voodflow\Support\EloquentEventMap;
 use Voodflow\Voodflow\Support\EventRegistry;
 use Voodflow\Voodflow\Support\ModelRegistry;
 use Voodflow\Voodflow\Support\PayloadFieldAnalyzer;
-use Voodflow\Voodflow\Support\WebhookTemplate;
-use Voodflow\Voodflow\Support\WebhookTemplateRegistry;
 use Voodflow\Voodflow\Testing\TestsFilamentSignal;
 use Filament\Support\Assets\Asset;
 use Filament\Support\Assets\Css;
@@ -71,7 +72,6 @@ class VoodflowServiceProvider extends PackageServiceProvider
 
     public function packageRegistered(): void
     {
-        $this->app->singleton(WebhookTemplateRegistry::class, fn(): WebhookTemplateRegistry => new WebhookTemplateRegistry);
         $this->app->singleton(EventRegistry::class, fn(): EventRegistry => new EventRegistry);
         $this->app->singleton(ModelRegistry::class, fn(): ModelRegistry => new ModelRegistry);
         $this->app->singleton(ReverseRelationRegistry::class, fn(): ReverseRelationRegistry => new ReverseRelationRegistry);
@@ -89,8 +89,6 @@ class VoodflowServiceProvider extends PackageServiceProvider
 
     public function packageBooted(): void
     {
-        $this->registerConfiguredWebhookTemplates();
-
         // Asset Registration
         FilamentAsset::register(
             $this->getAssets(),
