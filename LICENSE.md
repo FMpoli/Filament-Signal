@@ -1,6 +1,6 @@
 The MIT License (MIT)
 
-Copyright (c) Base33 <francesco.mulassano@gmail.com>
+Copyright (c) Voodflow <francesco.mulassano@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

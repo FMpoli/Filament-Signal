@@ -1,8 +1,8 @@
 <?php
 
-namespace Base33\FilamentSignal\Tests;
+namespace Voodflow\Voodflow\Tests;
 
-use Base33\FilamentSignal\FilamentSignalServiceProvider;
+use Voodflow\Voodflow\VoodflowServiceProvider;
 use BladeUI\Heroicons\BladeHeroiconsServiceProvider;
 use BladeUI\Icons\BladeIconsServiceProvider;
 use Filament\Actions\ActionsServiceProvider;
@@ -25,7 +25,7 @@ class TestCase extends Orchestra
         parent::setUp();
 
         Factory::guessFactoryNamesUsing(
-            fn (string $modelName) => 'Base33\\FilamentSignal\\Database\\Factories\\' . class_basename($modelName) . 'Factory'
+            fn(string $modelName) => 'Voodflow\\Voodflow\\Database\\Factories\\' . class_basename($modelName) . 'Factory'
         );
     }
 
@@ -44,7 +44,7 @@ class TestCase extends Orchestra
             SupportServiceProvider::class,
             TablesServiceProvider::class,
             WidgetsServiceProvider::class,
-            FilamentSignalServiceProvider::class,
+            VoodflowServiceProvider::class,
         ];
     }
 

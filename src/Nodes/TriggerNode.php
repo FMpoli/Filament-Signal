@@ -47,7 +47,7 @@ class TriggerNode implements NodeInterface
     public static function metadata(): array
     {
         return [
-            'author' => 'Base33',
+            'author' => 'Voodflow',
             'version' => '1.0.0',
             'color' => 'orange',
             'icon' => 'heroicon-o-bolt',

@@ -6,7 +6,7 @@ import AddNodeButton from './AddNodeButton';
 /**
  * SendWebhook Node Component
  * 
- * Type: base33_send_webhook
+ * Type: voodflow_send_webhook
  * Description: Send webhook with configuration
  */
 const SendWebhookNode = ({ id, data }) => {
@@ -190,8 +190,8 @@ const SendWebhookNode = ({ id, data }) => {
             const node = allNodes.find(n => n.id === nodeId);
             if (!node) return null;
 
-            // Check for trigger type 
-            if (node.type === 'trigger' || node.type === 'base33_trigger') {
+            // Check for trigger type (support both voodflow and legacy base33 prefixes)
+            if (node.type === 'trigger' || node.type === 'voodflow_trigger' || node.type === 'base33_trigger') {
                 return node.data?.eventClass;
             }
 

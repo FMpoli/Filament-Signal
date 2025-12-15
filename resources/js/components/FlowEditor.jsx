@@ -23,12 +23,19 @@ import EmptyCanvasState from './EmptyCanvasState';
 import ContextMenu from './ContextMenu';
 
 const nodeTypes = {
-    // Current types (after removing base33_ prefix)
+    // Current types (voodflow_ prefix)
     trigger: TriggerNode,
     filter: FilterNode,
     filter_pro: FilterProNode,
     send_webhook: SendWebhookNode,
     conditional: ConditionalNode,
+
+    // Namespaced types with voodflow prefix
+    voodflow_trigger: TriggerNode,
+    voodflow_filter: FilterNode,
+    voodflow_filter_pro: FilterProNode,
+    voodflow_send_webhook: SendWebhookNode,
+    voodflow_conditional: ConditionalNode,
 
     // Legacy namespaced types (for backwards compatibility with old data)
     base33_trigger: TriggerNode,

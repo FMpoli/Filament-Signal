@@ -1,6 +1,6 @@
 <?php
 
-namespace Base33\FilamentSignal\Database\Factories;
+namespace Voodflow\Voodflow\Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
 

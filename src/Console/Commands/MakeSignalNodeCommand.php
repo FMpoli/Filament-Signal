@@ -85,7 +85,7 @@ class MakeSignalNodeCommand extends Command
 
         // Get node name
         $name = $this->argument('name') ?? $this->ask('What is the name of your node? (e.g., SendEmail, WebhookCall)');
-        
+
         if (empty($name)) {
             $this->error('Node name is required.');
             return 1;
@@ -103,7 +103,7 @@ class MakeSignalNodeCommand extends Command
             0
         );
 
-        if (! isset($this->nodeTypes[$type])) {
+        if (!isset($this->nodeTypes[$type])) {
             $this->error("Invalid node type: {$type}");
             return 1;
         }
@@ -131,7 +131,7 @@ class MakeSignalNodeCommand extends Command
         );
 
         // Get vendor namespace
-        $vendor = $this->option('vendor') ?? $this->ask('Vendor namespace (e.g. app, base33)', 'base33');
+        $vendor = $this->option('vendor') ?? $this->ask('Vendor namespace (e.g. app, voodflow)', 'voodflow');
 
         // Summary
         $this->info('');
@@ -149,7 +149,7 @@ class MakeSignalNodeCommand extends Command
             ]
         );
 
-        if (! $this->confirm('Do you wish to continue?', true)) {
+        if (!$this->confirm('Do you wish to continue?', true)) {
             return 0;
         }
 
@@ -207,9 +207,9 @@ class MakeSignalNodeCommand extends Command
         ], $stub);
 
         $path = $this->getPackagePath() . "/resources/js/components/{$name}Node.jsx";
-        
+
         if (file_exists($path)) {
-            if (! $this->confirm("{$name}Node.jsx already exists. Overwrite?", false)) {
+            if (!$this->confirm("{$name}Node.jsx already exists. Overwrite?", false)) {
                 $this->warn("Skipped React component.");
                 return;
             }
@@ -248,14 +248,14 @@ class MakeSignalNodeCommand extends Command
         ], $stub);
 
         $dir = $this->getPackagePath() . '/src/Nodes';
-        if (! is_dir($dir)) {
+        if (!is_dir($dir)) {
             mkdir($dir, 0755, true);
         }
 
         $path = "{$dir}/{$name}Node.php";
-        
+
         if (file_exists($path)) {
-            if (! $this->confirm("{$name}Node.php already exists. Overwrite?", false)) {
+            if (!$this->confirm("{$name}Node.php already exists. Overwrite?", false)) {
                 $this->warn("Skipped PHP handler.");
                 return;
             }
@@ -271,8 +271,8 @@ class MakeSignalNodeCommand extends Command
     protected function updateNodeRegistry(string $name, string $type): void
     {
         $registryPath = $this->getPackagePath() . '/src/Nodes/NodeRegistry.php';
-        
-        if (! file_exists($registryPath)) {
+
+        if (!file_exists($registryPath)) {
             // Create registry if it doesn't exist
             $this->createNodeRegistry($name, $type);
             return;
@@ -321,9 +321,9 @@ class NodeRegistry
 PHP;
 
         $content = str_replace('{{NAME}}', $name, $stub);
-        
+
         $dir = $this->getPackagePath() . '/src/Nodes';
-        if (! is_dir($dir)) {
+        if (!is_dir($dir)) {
             mkdir($dir, 0755, true);
         }
 
@@ -592,7 +592,7 @@ class {{NAME}}Node implements NodeInterface
     public static function metadata(): array
     {
         return [
-            'author' => 'Base33',
+            'author' => 'Voodflow',
             'version' => '1.0.0',
             'color' => '{{COLOR}}',
             'icon' => '{{ICON}}',

@@ -47,7 +47,7 @@ class VoodflowServiceProvider extends PackageServiceProvider
                     ->publishConfigFile()
                     ->publishMigrations()
                     ->askToRunMigrations()
-                    ->askToStarRepoOnGitHub('base33/filament-signal');
+                    ->askToStarRepoOnGitHub('voodflow/voodflow');
             });
 
         $configFileName = 'voodflow';
@@ -109,24 +109,24 @@ class VoodflowServiceProvider extends PackageServiceProvider
         if (app()->runningInConsole()) {
             foreach (app(Filesystem::class)->files(__DIR__ . '/../stubs/') as $file) {
                 $this->publishes([
-                    $file->getRealPath() => base_path("stubs/filament-signal/{$file->getFilename()}"),
-                ], 'filament-signal-stubs');
+                    $file->getRealPath() => base_path("stubs/voodflow/{$file->getFilename()}"),
+                ], 'voodflow-stubs');
             }
 
             // Publish JavaScript assets
             $jsPath = __DIR__ . '/../resources/dist/filament-signal.js';
             if (file_exists($jsPath)) {
                 $this->publishes([
-                    $jsPath => public_path('js/base33/filament-signal/filament-signal-scripts.js'),
-                ], 'filament-signal-assets');
+                    $jsPath => public_path('js/voodflow/voodflow/voodflow-scripts.js'),
+                ], 'voodflow-assets');
             }
 
             // Publish CSS assets
             $cssPath = __DIR__ . '/../resources/dist/filament-signal.css';
             if (file_exists($cssPath)) {
                 $this->publishes([
-                    $cssPath => public_path('css/base33/filament-signal/filament-signal-styles.css'),
-                ], 'filament-signal-assets');
+                    $cssPath => public_path('css/voodflow/voodflow/voodflow-styles.css'),
+                ], 'voodflow-assets');
             }
         }
 
@@ -181,7 +181,7 @@ class VoodflowServiceProvider extends PackageServiceProvider
 
     protected function getAssetPackageName(): ?string
     {
-        return 'base33/filament-signal';
+        return 'voodflow/voodflow';
     }
 
     /**
@@ -193,12 +193,12 @@ class VoodflowServiceProvider extends PackageServiceProvider
 
         $cssPath = __DIR__ . '/../resources/dist/filament-signal.css';
         if (file_exists($cssPath)) {
-            $assets[] = Css::make('filament-signal-styles', $cssPath);
+            $assets[] = Css::make('voodflow-styles', $cssPath);
         }
 
         $jsPath = __DIR__ . '/../resources/dist/filament-signal.js';
         if (file_exists($jsPath)) {
-            $assets[] = Js::make('filament-signal-scripts', $jsPath);
+            $assets[] = Js::make('voodflow-scripts', $jsPath);
         }
 
         return $assets;

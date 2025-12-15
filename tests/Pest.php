@@ -1,5 +1,5 @@
 <?php
 
-use Base33\FilamentSignal\Tests\TestCase;
+use Voodflow\Voodflow\Tests\TestCase;
 
 uses(TestCase::class)->in(__DIR__);
