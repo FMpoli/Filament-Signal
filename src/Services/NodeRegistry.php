@@ -86,21 +86,58 @@ class NodeRegistry
     }
 
     /**
-     * Get all nodes metadata for React
+     * Get metadata formatted for React frontend - grouped by category
      */
     public function getMetadataForReact(): array
     {
-        $metadata = [];
+        $nodes = $this->all();
+        $grouped = [];
 
-        foreach ($this->nodes as $type => $nodeClass) {
-            $metadata[$type] = [
-                'className' => $nodeClass,
-                'type' => $nodeClass::type(),
-                'name' => $nodeClass::name(),
-                'metadata' => $nodeClass::metadata(),
+        foreach ($nodes as $type => $class) {
+            $metadata = $class::metadata();
+            $category = $metadata['category'] ?? 'Other';
+
+            // Normalize category names
+            $categoryMap = [
+                'trigger' => 'Triggers',
+                'action' => 'Actions',
+                'transform' => 'Transform',
+                'flow' => 'Flow Control',
+            ];
+
+            $categoryName = $categoryMap[$category] ?? ucfirst($category);
+
+            if (!isset($grouped[$categoryName])) {
+                $grouped[$categoryName] = [];
+            }
+
+            $grouped[$categoryName][] = [
+                'type' => $type,
+                'name' => $class::name(),
+                'description' => $metadata['description'] ?? '',
+                'icon' => $metadata['icon'] ?? 'heroicon-o-cube',
+                'color' => $metadata['color'] ?? 'gray',
+                'category' => $categoryName,
             ];
         }
 
-        return $metadata;
+        // Sort categories in preferred order
+        $order = ['Triggers', 'Actions', 'Transform', 'Flow Control', 'Other'];
+        $sorted = [];
+
+        foreach ($order as $cat) {
+            if (isset($grouped[$cat])) {
+                $sorted[$cat] = $grouped[$cat];
+            }
+        }
+
+        // Add any remaining categories
+        foreach ($grouped as $cat => $nodes) {
+            if (!isset($sorted[$cat])) {
+                $sorted[$cat] = $nodes;
+            }
+        }
+
+        return $sorted;
     }
 }

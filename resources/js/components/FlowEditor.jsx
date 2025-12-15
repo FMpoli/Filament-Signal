@@ -47,21 +47,33 @@ const nodeTypes = {
 
 function FlowCanvas({ initialNodes, initialEdges, initialViewport, livewireId, eventOptions, filterFieldsMap, availableNodesMap }) {
 
-    // Transform map to list for UI
+    // Transform grouped categories to flat list for internal use
+    // availableNodesMap is now: { "Triggers": [{node}, {node}], "Actions": [...] }
     const availableNodesList = useMemo(() => {
-        if (!availableNodesMap) return [];
-        const list = Object.values(availableNodesMap)
-            // Don't filter by input - we want ALL nodes including triggers
-            .map(node => ({
-                id: node.className, // Unique identifier instead of just type
-                type: node.type, // Visual component type (trigger, filter, etc)
-                label: node.metadata?.label || node.name,
-                icon: (node.metadata?.icon || 'circle').replace('heroicon-o-', ''),
-                color: node.metadata?.color || 'gray',
-                group: node.metadata?.group || 'Custom',
-                positioning: node.metadata?.positioning || {},
-                metadata: node.metadata // Include full metadata
-            }));
+        if (!availableNodesMap || typeof availableNodesMap !== 'object') return [];
+
+        // Flatten all categories into a single list
+        const list = [];
+        Object.entries(availableNodesMap).forEach(([category, nodes]) => {
+            if (Array.isArray(nodes)) {
+                nodes.forEach(node => {
+                    list.push({
+                        id: node.type, // Use type as unique ID
+                        type: node.type,
+                        label: node.name,
+                        icon: (node.icon || 'circle').replace('heroicon-o-', ''),
+                        color: node.color || 'gray',
+                        group: category,
+                        category: category,
+                        metadata: {
+                            description: node.description,
+                            category: node.category
+                        }
+                    });
+                });
+            }
+        });
+
         return list;
     }, [availableNodesMap]);
 

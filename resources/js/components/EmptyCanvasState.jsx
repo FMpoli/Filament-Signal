@@ -1,94 +1,111 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 
 /**
  * EmptyCanvasState Component
  * 
  * Shows an attractive call-to-action when the canvas is empty.
- * Allows users to start a new flow by adding a trigger.
+ * Now with categorized nodes, search, and scalable design!
  */
-const EmptyCanvasState = ({ availableNodes = [], onAddNode }) => {
+const EmptyCanvasState = ({ availableNodes = {}, onAddNode }) => {
     const [showNodePicker, setShowNodePicker] = useState(false);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [expandedCategories, setExpandedCategories] = useState(['Triggers', 'Actions']);
 
-    // Icon mapping for common node icons
-    const getIconForNode = (iconName) => {
-        const icons = {
-            'bolt': (
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-8 h-8">
-                    <path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clipRule="evenodd" />
-                </svg>
-            ),
-            'funnel': (
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-8 h-8">
-                    <path fillRule="evenodd" d="M3 3a1 1 0 011-1h12a1 1 0 011 1v3a1 1 0 01-.293.707L12 11.414V15a1 1 0 01-.293.707l-2 2A1 1 0 018 17v-5.586L3.293 6.707A1 1 0 013 6V3z" clipRule="evenodd" />
-                </svg>
-            ),
-            'filter': (
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-8 h-8">
-                    <path fillRule="evenodd" d="M3 3a1 1 0 011-1h12a1 1 0 011 1v3a1 1 0 01-.293.707L12 11.414V15a1 1 0 01-.293.707l-2 2A1 1 0 018 17v-5.586L3.293 6.707A1 1 0 013 6V3z" clipRule="evenodd" />
-                </svg>
-            ),
-            'circle': (
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-8 h-8">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clipRule="evenodd" />
-                </svg>
-            ),
-        };
-        return icons[iconName] || icons['circle'];
+    // Category metadata
+    const categoryConfig = {
+        'Triggers': { icon: '⚡', color: 'orange', emoji: '🔔' },
+        'Actions': { icon: '📤', color: 'blue', emoji: '⚙️' },
+        'Transform': { icon: '🔄', color: 'purple', emoji: '🔀' },
+        'Flow Control': { icon: '↪️', color: 'yellow', emoji: '🔀' },
+        'Other': { icon: '📦', color: 'gray', emoji: '📦' },
     };
 
-    // Transform availableNodes to nodeOptions format
-    const nodeOptions = availableNodes.map(node => ({
-        type: node.type,
-        label: node.label,
-        description: node.metadata?.description || `Add a ${node.label} node`,
-        icon: getIconForNode(node.icon),
-        color: node.color,
-        onClick: () => onAddNode(node.type),
-        recommended: node.positioning?.recommended || false,
-    }));
+    // Filter nodes by search query
+    const filteredNodes = useMemo(() => {
+        if (!searchQuery) return availableNodes;
 
+        const filtered = {};
+        Object.entries(availableNodes).forEach(([category, nodes]) => {
+            const matchingNodes = nodes.filter(node =>
+                node.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                node.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                category.toLowerCase().includes(searchQuery.toLowerCase())
+            );
+
+            if (matchingNodes.length > 0) {
+                filtered[category] = matchingNodes;
+            }
+        });
+
+        return filtered;
+    }, [availableNodes, searchQuery]);
+
+    // Toggle category expansion
+    const toggleCategory = (category) => {
+        setExpandedCategories(prev =>
+            prev.includes(category)
+                ? prev.filter(c => c !== category)
+                : [...prev, category]
+        );
+    };
+
+    // Icon mapping for nodes
+    const getIconForNode = (iconName) => {
+        const cleanIcon = iconName?.replace('heroicon-o-', '').replace('heroicon-', '');
+
+        const icons = {
+            'bolt': '⚡',
+            'paper-airplane': '📤',
+            'funnel': '🔽',
+            'filter': '🔽',
+            'arrows-pointing-out': '↪️',
+            'cube': '📦',
+        };
+
+        return icons[cleanIcon] || '⚙️';
+    };
+
+    // Color classes for categories
     const colorClasses = {
         orange: {
             bg: 'bg-orange-500',
-            bgLight: 'bg-orange-100 dark:bg-orange-900/30',
-            border: 'border-orange-500',
-            text: 'text-orange-500',
-            hover: 'hover:bg-orange-50 dark:hover:bg-orange-900/20',
-            ring: 'ring-orange-500',
-        },
-        purple: {
-            bg: 'bg-purple-500',
-            bgLight: 'bg-purple-100 dark:bg-purple-900/30',
-            border: 'border-purple-500',
-            text: 'text-purple-500',
-            hover: 'hover:bg-purple-50 dark:hover:bg-purple-900/20',
-            ring: 'ring-purple-500',
+            bgLight: 'bg-orange-50 dark:bg-orange-900/20',
+            border: 'border-orange-200 dark:border-orange-800',
+            text: 'text-orange-600 dark:text-orange-400',
+            hover: 'hover:bg-orange-100 dark:hover:bg-orange-900/30',
         },
         blue: {
             bg: 'bg-blue-500',
-            bgLight: 'bg-blue-100 dark:bg-blue-900/30',
-            border: 'border-blue-500',
-            text: 'text-blue-500',
-            hover: 'hover:bg-blue-50 dark:hover:bg-blue-900/20',
-            ring: 'ring-blue-500',
+            bgLight: 'bg-blue-50 dark:bg-blue-900/20',
+            border: 'border-blue-200 dark:border-blue-800',
+            text: 'text-blue-600 dark:text-blue-400',
+            hover: 'hover:bg-blue-100 dark:hover:bg-blue-900/30',
         },
-        warning: {
-            bg: 'bg-amber-500',
-            bgLight: 'bg-amber-100 dark:bg-amber-900/30',
-            border: 'border-amber-500',
-            text: 'text-amber-500',
-            hover: 'hover:bg-amber-50 dark:hover:bg-amber-900/20',
-            ring: 'ring-amber-500',
+        purple: {
+            bg: 'bg-purple-500',
+            bgLight: 'bg-purple-50 dark:bg-purple-900/20',
+            border: 'border-purple-200 dark:border-purple-800',
+            text: 'text-purple-600 dark:text-purple-400',
+            hover: 'hover:bg-purple-100 dark:hover:bg-purple-900/30',
+        },
+        yellow: {
+            bg: 'bg-yellow-500',
+            bgLight: 'bg-yellow-50 dark:bg-yellow-900/20',
+            border: 'border-yellow-200 dark:border-yellow-800',
+            text: 'text-yellow-600 dark:text-yellow-400',
+            hover: 'hover:bg-yellow-100 dark:hover:bg-yellow-900/30',
         },
         gray: {
             bg: 'bg-gray-500',
-            bgLight: 'bg-gray-100 dark:bg-gray-900/30',
-            border: 'border-gray-500',
-            text: 'text-gray-500',
-            hover: 'hover:bg-gray-50 dark:hover:bg-gray-900/20',
-            ring: 'ring-gray-500',
+            bgLight: 'bg-gray-50 dark:bg-gray-900/20',
+            border: 'border-gray-200 dark:border-gray-800',
+            text: 'text-gray-600 dark:text-gray-400',
+            hover: 'hover:bg-gray-100 dark:hover:bg-gray-900/30',
         },
     };
+
+    // Total node count
+    const totalNodes = Object.values(filteredNodes).reduce((sum, nodes) => sum + nodes.length, 0);
 
     return (
         <div className="absolute inset-0 flex items-center justify-center z-10 pointer-events-none">
@@ -96,7 +113,6 @@ const EmptyCanvasState = ({ availableNodes = [], onAddNode }) => {
                 {!showNodePicker ? (
                     /* Initial CTA */
                     <div className="text-center">
-                        {/* Animated Icon */}
                         <div className="relative inline-block mb-6">
                             <div className="absolute inset-0 bg-gradient-to-r from-orange-400 to-purple-500 rounded-full blur-xl opacity-30 animate-pulse"></div>
                             <div className="relative bg-gradient-to-br from-slate-800 to-slate-900 dark:from-slate-700 dark:to-slate-800 rounded-2xl p-6 shadow-2xl border border-slate-700">
@@ -107,7 +123,6 @@ const EmptyCanvasState = ({ availableNodes = [], onAddNode }) => {
                             </div>
                         </div>
 
-                        {/* Title */}
                         <h2 className="text-2xl font-bold text-slate-700 dark:text-slate-200 mb-2">
                             Start Building Your Workflow
                         </h2>
@@ -115,10 +130,9 @@ const EmptyCanvasState = ({ availableNodes = [], onAddNode }) => {
                             Create automation rules by connecting triggers, filters, and actions together.
                         </p>
 
-                        {/* Main CTA Button */}
                         <button
                             onClick={() => setShowNodePicker(true)}
-                            className={`
+                            className="
                                 inline-flex items-center gap-3
                                 px-6 py-3
                                 bg-gradient-to-r from-orange-500 to-orange-600
@@ -129,7 +143,7 @@ const EmptyCanvasState = ({ availableNodes = [], onAddNode }) => {
                                 transition-all duration-200
                                 hover:scale-105
                                 hover:shadow-xl hover:shadow-orange-500/30
-                            `}
+                            "
                         >
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5">
                                 <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
@@ -137,20 +151,23 @@ const EmptyCanvasState = ({ availableNodes = [], onAddNode }) => {
                             Add First Node
                         </button>
 
-                        {/* Quick Hint */}
                         <p className="text-xs text-slate-400 dark:text-slate-500 mt-4">
                             Tip: Start with a Trigger to respond to events automatically
                         </p>
                     </div>
                 ) : (
-                    /* Node Picker */
-                    <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 p-6 max-w-xl">
-                        <div className="flex items-center justify-between mb-4">
+                    /* Improved Node Picker with Categories & Search */
+                    <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 w-[600px] max-h-[70vh] overflow-hidden flex flex-col">
+                        {/* Header */}
+                        <div className="flex items-center justify-between p-4 border-b border-slate-200 dark:border-slate-700">
                             <h3 className="text-lg font-bold text-slate-700 dark:text-slate-200">
                                 Choose a Node Type
                             </h3>
                             <button
-                                onClick={() => setShowNodePicker(false)}
+                                onClick={() => {
+                                    setShowNodePicker(false);
+                                    setSearchQuery('');
+                                }}
                                 className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
                             >
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5">
@@ -159,55 +176,124 @@ const EmptyCanvasState = ({ availableNodes = [], onAddNode }) => {
                             </button>
                         </div>
 
-                        <div className="space-y-3">
-                            {nodeOptions.map((option) => {
-                                const colors = colorClasses[option.color] || colorClasses.gray; // Fallback to gray
-                                return (
-                                    <button
-                                        key={option.type}
-                                        onClick={option.onClick}
-                                        className={`
-                                            w-full p-4 rounded-xl
-                                            border-2 ${option.recommended ? colors.border : 'border-slate-200 dark:border-slate-600'}
-                                            ${colors.hover}
-                                            transition-all duration-200
-                                            text-left
-                                            group
-                                            relative
-                                            hover:border-current hover:${colors.text}
-                                        `}
-                                    >
-                                        {option.recommended && (
-                                            <span className={`
-                                                absolute -top-2 right-3
-                                                px-2 py-0.5
-                                                ${colors.bg}
-                                                text-white text-xs font-bold
-                                                rounded-full
-                                            `}>
-                                                Recommended
-                                            </span>
-                                        )}
-                                        <div className="flex items-center gap-4">
-                                            <div className={`
-                                                p-3 rounded-xl
-                                                ${colors.bgLight}
-                                                ${colors.text}
-                                            `}>
-                                                {option.icon}
+                        {/* Search Bar */}
+                        <div className="p-4 border-b border-slate-200 dark:border-slate-700">
+                            <div className="relative">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+                                    <path fillRule="evenodd" d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z" clipRule="evenodd" />
+                                </svg>
+                                <input
+                                    type="text"
+                                    placeholder="🔍 Search nodes..."
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    className="
+                                        w-full pl-10 pr-4 py-2
+                                        bg-slate-50 dark:bg-slate-700
+                                        border border-slate-200 dark:border-slate-600
+                                        rounded-lg
+                                        text-slate-700 dark:text-slate-200
+                                        placeholder:text-slate-400
+                                        focus:outline-none focus:ring-2 focus:ring-orange-500
+                                    "
+                                />
+                            </div>
+                            {totalNodes > 0 && (
+                                <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">
+                                    {totalNodes} node{totalNodes !== 1 ? 's' : ''} available
+                                </p>
+                            )}
+                        </div>
+
+                        {/* Categories & Nodes */}
+                        <div className="overflow-y-auto flex-1 p-4">
+                            {Object.keys(filteredNodes).length === 0 ? (
+                                <div className="text-center py-8">
+                                    <p className="text-slate-400 dark:text-slate-500">
+                                        No nodes found for "{searchQuery}"
+                                    </p>
+                                </div>
+                            ) : (
+                                <div className="space-y-3">
+                                    {Object.entries(filteredNodes).map(([category, nodes]) => {
+                                        const config = categoryConfig[category] || categoryConfig['Other'];
+                                        const colors = colorClasses[config.color];
+                                        const isExpanded = expandedCategories.includes(category);
+
+                                        return (
+                                            <div key={category} className="border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden">
+                                                {/* Category Header */}
+                                                <button
+                                                    onClick={() => toggleCategory(category)}
+                                                    className={`
+                                                        w-full px-4 py-2 flex items-center justify-between
+                                                        ${colors.bgLight} ${colors.hover}
+                                                        transition-colors
+                                                    `}
+                                                >
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="text-xl">{config.emoji}</span>
+                                                        <span className={`font-semibold ${colors.text}`}>
+                                                            {category}
+                                                        </span>
+                                                        <span className="text-xs text-slate-400 dark:text-slate-500">
+                                                            ({nodes.length})
+                                                        </span>
+                                                    </div>
+                                                    <svg
+                                                        xmlns="http://www.w3.org/2000/svg"
+                                                        viewBox="0 0 20 20"
+                                                        fill="currentColor"
+                                                        className={`w-5 h-5 ${colors.text} transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+                                                    >
+                                                        <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clipRule="evenodd" />
+                                                    </svg>
+                                                </button>
+
+                                                {/* Nodes Grid */}
+                                                {isExpanded && (
+                                                    <div className="p-2 grid grid-cols-2 gap-2 bg-slate-50/50 dark:bg-slate-900/20">
+                                                        {nodes.map((node) => (
+                                                            <button
+                                                                key={node.type}
+                                                                onClick={() => {
+                                                                    onAddNode(node.type);
+                                                                    setShowNodePicker(false);
+                                                                    setSearchQuery('');
+                                                                }}
+                                                                className={`
+                                                                    p-3 rounded-lg
+                                                                    bg-white dark:bg-slate-800
+                                                                    border ${colors.border}
+                                                                    ${colors.hover}
+                                                                    transition-all duration-150
+                                                                    text-left
+                                                                    hover:scale-105
+                                                                    group
+                                                                `}
+                                                            >
+                                                                <div className="flex items-start gap-2">
+                                                                    <span className="text-2xl" title={node.icon}>
+                                                                        {getIconForNode(node.icon)}
+                                                                    </span>
+                                                                    <div className="flex-1 min-w-0">
+                                                                        <h4 className={`font-medium text-sm ${colors.text} truncate`}>
+                                                                            {node.name}
+                                                                        </h4>
+                                                                        <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2">
+                                                                            {node.description || `Add ${node.name}`}
+                                                                        </p>
+                                                                    </div>
+                                                                </div>
+                                                            </button>
+                                                        ))}
+                                                    </div>
+                                                )}
                                             </div>
-                                            <div>
-                                                <h4 className={`font-semibold text-slate-700 dark:text-slate-200 group-hover:${colors.text}`}>
-                                                    {option.label}
-                                                </h4>
-                                                <p className="text-sm text-slate-500 dark:text-slate-400">
-                                                    {option.description}
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </button>
-                                );
-                            })}
+                                        );
+                                    })}
+                                </div>
+                            )}
                         </div>
                     </div>
                 )}
