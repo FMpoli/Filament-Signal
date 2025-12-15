@@ -1,6 +1,6 @@
 <?php
 
-namespace Voodflow\Voodflow\Nodes;
+namespace Voodflow\Voodflow\Nodes\FilterNode;
 
 use Voodflow\Voodflow\Contracts\NodeInterface;
 
