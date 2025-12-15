@@ -1,7 +1,5 @@
 <?php
 
-use Voodflow\Voodflow\Actions\LogActionHandler;
-use Voodflow\Voodflow\Actions\WebhookActionHandler;
 use Voodflow\Voodflow\Models\Edge;
 use Voodflow\Voodflow\Models\Execution;
 use Voodflow\Voodflow\Models\ExecutionNode;
@@ -64,23 +62,11 @@ return [
     ],
 
     /*
-     * Action handlers registrati nel sistema.
-     *
-     * Per aggiungere nuovi action handlers da plugin esterni, puoi:
-     * 1. Creare un Service Provider nel tuo plugin
-     * 2. Nel metodo boot(), aggiungere:
-     *
-     *    config(['signal.action_handlers.telegram' => \YourPlugin\Actions\TelegramActionHandler::class]);
-     *
-     * Oppure pubblicare il file di configurazione e aggiungere manualmente:
-     *
-     *    'telegram' => \YourPlugin\Actions\TelegramActionHandler::class,
-     *
-     * Il tuo handler deve implementare SignalActionHandler interface.
+     * DEPRECATED: Action handlers are now built into self-contained nodes
+     * This config section is no longer used and will be removed in future versions.
      */
     'action_handlers' => [
-        'log' => LogActionHandler::class,
-        'webhook' => WebhookActionHandler::class,
+        // Left empty - handlers moved into node classes
     ],
 
     'webhook' => [

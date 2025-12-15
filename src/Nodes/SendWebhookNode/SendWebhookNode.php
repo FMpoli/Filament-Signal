@@ -1,6 +1,6 @@
 <?php
 
-namespace Voodflow\Voodflow\Nodes;
+namespace Voodflow\Voodflow\Nodes\SendWebhookNode;
 
 use Voodflow\Voodflow\Contracts\NodeInterface;
 use Voodflow\Voodflow\Execution\ExecutionContext;
