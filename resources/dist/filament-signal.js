@@ -148,12 +148,12 @@ Error generating stack: `+l.message+`
                                         text-slate-700 dark:text-slate-200
                                         placeholder:text-slate-400
                                         focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent
-                                    `}))),te.default.createElement("div",{className:"border-b border-slate-200 dark:border-slate-700 px-6"},te.default.createElement("div",{className:"flex gap-1 -mb-px"},c.map(S=>{let d=u[S]||u.Other,p=m[d.color],g=i===S,v=s[S]?.length||0;return te.default.createElement("button",{key:S,onClick:()=>r(S),className:`
-                                                px-4 py-3 border-b-2 font-medium text-sm
+                                    `}))),te.default.createElement("div",{className:"border-b border-slate-200 dark:border-slate-700 px-4"},te.default.createElement("div",{className:"flex gap-0.5 -mb-px overflow-x-auto scrollbar-hide"},c.map(S=>{let d=u[S]||u.Other,p=m[d.color],g=i===S,v=s[S]?.length||0;return te.default.createElement("button",{key:S,onClick:()=>r(S),className:`
+                                                px-3 py-2.5 border-b-2 font-medium text-xs
                                                 transition-all duration-200
-                                                flex items-center gap-2
+                                                flex items-center gap-1.5 whitespace-nowrap
                                                 ${g?p.tab:p.tabInactive}
-                                            `},te.default.createElement("span",{className:"text-lg"},d.emoji),te.default.createElement("span",null,S),te.default.createElement("span",{className:`
+                                            `},te.default.createElement("span",{className:"text-base"},d.emoji),te.default.createElement("span",null,S),te.default.createElement("span",{className:`
                                                 px-1.5 py-0.5 rounded text-xs font-semibold
                                                 ${g?p.badge:"bg-slate-100 dark:bg-slate-700 text-slate-500"}
                                             `},v))}))),te.default.createElement("div",{className:"p-6 max-h-[400px] overflow-y-auto scrollbar-hide"},h.length===0?te.default.createElement("div",{className:"text-center py-12"},te.default.createElement("p",{className:"text-slate-400 dark:text-slate-500"},"No nodes found ",a&&`for "${a}"`)):te.default.createElement("div",{className:"grid grid-cols-2 gap-3"},h.map(S=>te.default.createElement("button",{key:S.type,onClick:()=>{t(S.type),l(!1),o("")},className:`

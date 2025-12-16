@@ -205,8 +205,8 @@ const EmptyCanvasState = ({ availableNodes = {}, onAddNode }) => {
                         </div>
 
                         {/* Horizontal Tabs */}
-                        <div className="border-b border-slate-200 dark:border-slate-700 px-6">
-                            <div className="flex gap-1 -mb-px">
+                        <div className="border-b border-slate-200 dark:border-slate-700 px-4">
+                            <div className="flex gap-0.5 -mb-px overflow-x-auto scrollbar-hide">
                                 {availableCategories.map((category) => {
                                     const config = categoryConfig[category] || categoryConfig['Other'];
                                     const colors = colorClasses[config.color];
@@ -218,13 +218,13 @@ const EmptyCanvasState = ({ availableNodes = {}, onAddNode }) => {
                                             key={category}
                                             onClick={() => setActiveTab(category)}
                                             className={`
-                                                px-4 py-3 border-b-2 font-medium text-sm
+                                                px-3 py-2.5 border-b-2 font-medium text-xs
                                                 transition-all duration-200
-                                                flex items-center gap-2
+                                                flex items-center gap-1.5 whitespace-nowrap
                                                 ${isActive ? colors.tab : colors.tabInactive}
                                             `}
                                         >
-                                            <span className="text-lg">{config.emoji}</span>
+                                            <span className="text-base">{config.emoji}</span>
                                             <span>{category}</span>
                                             <span className={`
                                                 px-1.5 py-0.5 rounded text-xs font-semibold
