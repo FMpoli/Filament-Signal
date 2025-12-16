@@ -12,6 +12,7 @@ use Filament\Panel;
 use Voodflow\Voodflow\Filament\Resources\ExecutionResource;
 use Voodflow\Voodflow\Filament\Resources\ModelIntegrationResource;
 use Voodflow\Voodflow\Filament\Resources\WorkflowResource;
+use Voodflow\Voodflow\Filament\Resources\InstalledPackageResource;
 
 class VoodflowPlugin implements Plugin
 {
@@ -19,24 +20,13 @@ class VoodflowPlugin implements Plugin
     {
         return 'voodflow';
     }
-
-    // public function register(Panel $panel): void
-    // {
-    //     $panel->resources([
-    //         TriggerResource::class,
-    //         WorkflowResource::class,
-    //         ExecutionResource::class,
-    //         TemplateResource::class,
-    //         ModelIntegrationResource::class,
-    //     ]);
-    // }
-
     public function register(Panel $panel): void
     {
         $panel->resources([
             WorkflowResource::class,
             ExecutionResource::class,
             ModelIntegrationResource::class,
+            InstalledPackageResource::class,
         ]);
     }
 

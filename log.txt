@@ -1,0 +1,9 @@
+commit 8ac4ebbcf1b4d5250c0ea4277a996bfee61b59bc
+Author: Francesco <francesco@cactus.polito.it>
+Date:   Tue Dec 16 17:36:55 2025 +0100
+
+    Fix node packaging and dynamic loading: disable publicDir in Vite config, support default exports in dynamic loader
+
+ resources/js/utils/dynamicNodeLoader.js     |  7 ++-
+ src/Console/Commands/PackageNodeCommand.php | 66 +++++++++++++++++++++++++----
+ 2 files changed, 63 insertions(+), 10 deletions(-)

@@ -3,6 +3,7 @@ import { Handle, Position, useEdges, useReactFlow } from 'reactflow';
 import { useAvailableFields } from '../hooks';
 import ConfirmModal from './ConfirmModal';
 import AddNodeButton from './AddNodeButton';
+import VoodflowLogo from './VoodflowLogo';
 
 const FilterProNode = ({ id, data }) => {
     const { setNodes } = useReactFlow();
@@ -255,10 +256,8 @@ const FilterProNode = ({ id, data }) => {
                 <div className="p-4">
                     {!isConnected ? (
                         <div className="text-center py-4">
-                            <div className="text-slate-400 dark:text-slate-500 text-sm mb-2">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-8 h-8 mx-auto mb-2 opacity-50">
-                                    <path fillRule="evenodd" d="M4.25 2A2.25 2.25 0 002 4.25v2.5A2.25 2.25 0 004.25 9h2.5A2.25 2.25 0 009 6.75v-2.5A2.25 2.25 0 006.75 2h-2.5zm0 9A2.25 2.25 0 002 13.25v2.5A2.25 2.25 0 004.25 18h2.5A2.25 2.25 0 009 15.75v-2.5A2.25 2.25 0 006.75 11h-2.5zm9-9A2.25 2.25 0 0011 4.25v2.5A2.25 2.25 0 0013.25 9h2.5A2.25 2.25 0 0018 6.75v-2.5A2.25 2.25 0 0015.75 2h-2.5zm0 9A2.25 2.25 0 0011 13.25v2.5A2.25 2.25 0 0013.25 18h2.5A2.25 2.25 0 0018 15.75v-2.5A2.25 2.25 0 0015.75 11h-2.5z" clipRule="evenodd" />
-                                </svg>
+                            <div className="text-slate-400 dark:text-slate-500 text-sm mb-2 flex justify-center opacity-50">
+                                <VoodflowLogo width={60} height={60} />
                             </div>
                             <div className="text-purple-500 font-medium text-sm">Connect data</div>
                         </div>

@@ -129,21 +129,25 @@ function FlowCanvas({ initialNodes, initialEdges, initialViewport, livewireId, e
     }, []);
 
     const nodeTypes = useMemo(() => {
-        const allTypes = {
+        const types = {
             ...coreNodeTypes,
             ...nodeRegistry,
             ...dynamicNodeTypes
         };
 
-        return new Proxy(allTypes, {
-            get(target, prop) {
-                if (prop in target) {
-                    return target[prop];
+        // Ensure every available node type has a component handler
+        // If a bundle is not loaded yet or missing, use FallbackNode
+        if (availableNodesMap) {
+            Object.values(availableNodesMap).flat().forEach(node => {
+                if (!types[node.type]) {
+                    // console.warn(`[FlowEditor] Node type "${node.type}" missing component, using FallbackNode`);
+                    types[node.type] = (props) => <FallbackNode type={node.type} {...props} />;
                 }
-                return (props) => <FallbackNode type={String(prop)} {...props} />;
-            }
-        });
-    }, [dynamicNodeTypes]);
+            });
+        }
+
+        return types;
+    }, [dynamicNodeTypes, availableNodesMap]);
 
     const [colorMode, setColorMode] = useState(getThemeFromFilament);
 

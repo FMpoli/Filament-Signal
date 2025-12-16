@@ -1,0 +1,13 @@
+{
+    "name": "filter-pro-node",
+    "display_name": "Filter Pro",
+    "version": "1.0.0",
+    "author": "Voodflow",
+    "description": "Advanced filtering with complex conditions",
+    "category": "transform",
+    "tier": "PRO",
+    "php": {
+        "class": "FilterProNode",
+        "namespace": "Voodflow\\Voodflow\\Nodes\\FilterProNode"
+    }
+}

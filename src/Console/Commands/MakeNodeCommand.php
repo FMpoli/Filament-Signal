@@ -38,12 +38,14 @@ class MakeNodeCommand extends Command
         // Generate files
         $this->generateNodeClass($nodeDir, $nodeClass, $nodeInfo);
         $this->generateReactComponent($nodeDir, $nodeClass, $nodeInfo);
+        $this->generateManifest($nodeDir, $nodeClass, $nodeInfo);
 
         $this->newLine();
         $this->info("✅ Node {$nodeClass} created successfully!");
         $this->newLine();
         $this->info("📁 Location: {$nodeDir}");
         $this->info('📝 Files created:');
+        $this->line("   - manifest.json");
         $this->line("   - {$nodeClass}.php");
         $this->line("   - components/{$nodeClass}.jsx");
         $this->newLine();
@@ -393,6 +395,7 @@ import React, { useState } from 'react';
 import { Handle, Position, useEdges, useReactFlow } from 'reactflow';
 import ConfirmModal from '../../../../resources/js/components/ConfirmModal';
 import AddNodeButton from '../../../../resources/js/components/AddNodeButton';
+import VoodflowLogo from '../../../../resources/js/components/VoodflowLogo';
 
 /**
  * {$nodeClass} React Component
@@ -401,6 +404,7 @@ import AddNodeButton from '../../../../resources/js/components/AddNodeButton';
  * 
  * @author {$nodeInfo['author']}
  * @version 1.0.0
+ * @see https://voodflow.com
  */
 const {$nodeClass} = ({ id, data }) => {
     const { setNodes } = useReactFlow();
@@ -534,11 +538,7 @@ const {$nodeClass} = ({ id, data }) => {
                 <div className="p-4">
                     {!isConnected ? (
                         <div className="text-center py-4">
-                            <div className="text-slate-400 dark:text-slate-500 text-sm mb-2">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-8 h-8 mx-auto mb-2 opacity-50">
-                                    <path fillRule="evenodd" d="M4.25 2A2.25 2.25 0 002 4.25v2.5A2.25 2.25 0 004.25 9h2.5A2.25 2.25 0 009 6.75v-2.5A2.25 2.25 0 006.75 2h-2.5zm0 9A2.25 2.25 0 002 13.25v2.5A2.25 2.25 0 004.25 18h2.5A2.25 2.25 0 009 15.75v-2.5A2.25 2.25 0 006.75 11h-2.5zm9-9A2.25 2.25 0 0011 4.25v2.5A2.25 2.25 0 0013.25 9h2.5A2.25 2.25 0 0018 6.75v-2.5A2.25 2.25 0 0015.75 2h-2.5zm0 9A2.25 2.25 0 0011 13.25v2.5A2.25 2.25 0 0013.25 18h2.5A2.25 2.25 0 0018 15.75v-2.5A2.25 2.25 0 0015.75 11h-2.5z" clipRule="evenodd" />
-                                </svg>
-                            </div>
+                            <VoodflowLogo className="w-12 h-12 mx-auto mb-2 opacity-50" />
                             <div className="text-{$color}-500 font-medium text-sm">Connect data</div>
                         </div>
                     ) : !isExpanded ? (
@@ -603,10 +603,41 @@ const {$nodeClass} = ({ id, data }) => {
     );
 };
 
+
 export default {$nodeClass};
 
 JSX;
 
         file_put_contents($nodeDir . "/components/{$nodeClass}.jsx", $template);
+    }
+
+    protected function generateManifest(string $nodeDir, string $nodeClass, array $nodeInfo): void
+    {
+        $kebabName = \Illuminate\Support\Str::kebab($nodeClass);
+        $namespace = "Voodflow\\Voodflow\\Nodes\\{$nodeClass}";
+
+        $manifest = [
+            'name' => $kebabName,
+            'display_name' => $nodeInfo['name'], // Using name provided by user (e.g. MyNode)
+            'version' => '1.0.0',
+            'author' => $nodeInfo['author'],
+            'description' => $nodeInfo['description'],
+            'category' => $nodeInfo['type'],
+            'tier' => $nodeInfo['tier'],
+            'php' => [
+                'class' => $nodeClass,
+                'namespace' => $namespace,
+            ],
+            'javascript' => [
+                'component' => $nodeClass,
+                'bundle' => "dist/{$kebabName}.js",
+            ],
+        ];
+
+        if ($nodeInfo['author_url']) $manifest['author_url'] = $nodeInfo['author_url'];
+        if ($nodeInfo['repository']) $manifest['repository'] = $nodeInfo['repository'];
+        if ($nodeInfo['license']) $manifest['license'] = ['type' => $nodeInfo['license']];
+
+        file_put_contents($nodeDir . '/manifest.json', json_encode($manifest, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
     }
 }

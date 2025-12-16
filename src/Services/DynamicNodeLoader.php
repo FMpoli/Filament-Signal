@@ -48,7 +48,8 @@ class DynamicNodeLoader
 
                 $bundlePath = $nodeDir . '/' . ($manifest['javascript']['bundle'] ?? '');
 
-                if (! File::exists($bundlePath)) {
+                if (! File::isFile($bundlePath)) {
+                    // No bundle for this node – skip it
                     continue;
                 }
 

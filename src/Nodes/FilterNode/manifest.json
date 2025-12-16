@@ -1,0 +1,13 @@
+{
+    "name": "filter-node",
+    "display_name": "Filter",
+    "version": "1.0.0",
+    "author": "Voodflow",
+    "description": "Filter execution flow",
+    "category": "flow",
+    "tier": "CORE",
+    "php": {
+        "class": "FilterNode",
+        "namespace": "Voodflow\\Voodflow\\Nodes\\FilterNode"
+    }
+}

@@ -1,7 +1,12 @@
-
 import React from 'react';
-import { createRoot } from 'react-dom/client';
+import * as ReactDOM from 'react-dom/client';
+import * as ReactFlow from 'reactflow';
 import FlowEditor from './components/FlowEditor.jsx';
+
+// Expose React globals for dynamic nodes (which must be built with externals)
+window.React = React;
+window.ReactDOM = ReactDOM;
+window.ReactFlow = ReactFlow;
 
 window.mountSignalFlowEditor = (container) => {
     if (!container) return;
@@ -60,7 +65,7 @@ window.mountSignalFlowEditor = (container) => {
     }
 
     const livewireId = container.dataset.livewireId;
-    const root = createRoot(container);
+    const root = ReactDOM.createRoot(container);
     container._reactRoot = root; // Store root for cleanup
 
     root.render(

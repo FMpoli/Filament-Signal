@@ -74,7 +74,7 @@ class NodeRegistry
      */
     protected function processDirectory(string $path): void
     {
-        // 1. Try manifest.json first (Preferred)
+        // 1. Try manifest.json first (Mandatory)
         $manifestPath = $path . '/manifest.json';
         if (File::exists($manifestPath)) {
             $content = File::get($manifestPath);
@@ -91,13 +91,11 @@ class NodeRegistry
 
                 if (class_exists($className) && in_array(NodeInterface::class, class_implements($className))) {
                     $this->register($className);
-
+                    // Manifest-based registration succeeded – stop further scanning for this directory
                     return;
                 }
             }
         }
-
-        // 2. Fallback: Scan PHP files in directory
         $files = File::allFiles($path);
 
         foreach ($files as $file) {
@@ -123,6 +121,7 @@ class NodeRegistry
                 $this->register($className);
             }
         }
+
     }
 
     /**

@@ -1,0 +1,13 @@
+{
+    "name": "conditional-node",
+    "display_name": "Conditional",
+    "version": "1.0.0",
+    "author": "Voodflow",
+    "description": "Branch flow based on conditions",
+    "category": "flow",
+    "tier": "CORE",
+    "php": {
+        "class": "ConditionalNode",
+        "namespace": "Voodflow\\Voodflow\\Nodes\\ConditionalNode"
+    }
+}

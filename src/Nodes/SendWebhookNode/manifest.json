@@ -1,0 +1,13 @@
+{
+    "name": "send-webhook-node",
+    "display_name": "Send Webhook",
+    "version": "1.0.0",
+    "author": "Voodflow",
+    "description": "Send data to external URL",
+    "category": "action",
+    "tier": "CORE",
+    "php": {
+        "class": "SendWebhookNode",
+        "namespace": "Voodflow\\Voodflow\\Nodes\\SendWebhookNode"
+    }
+}

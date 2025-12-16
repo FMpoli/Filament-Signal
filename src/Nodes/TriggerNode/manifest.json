@@ -1,0 +1,13 @@
+{
+    "name": "trigger-node",
+    "display_name": "Trigger",
+    "version": "1.0.0",
+    "author": "Voodflow",
+    "description": "Start workflow on events",
+    "category": "trigger",
+    "tier": "CORE",
+    "php": {
+        "class": "TriggerNode",
+        "namespace": "Voodflow\\Voodflow\\Nodes\\TriggerNode"
+    }
+}
