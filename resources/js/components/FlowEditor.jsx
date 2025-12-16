@@ -496,7 +496,7 @@ function FlowCanvas({ initialNodes, initialEdges, initialViewport, livewireId, e
                     <ContextMenu
                         onClick={onPaneClick}
                         {...menu}
-                        availableNodes={availableNodesList}
+                        availableNodes={availableNodesMap}
                         onAddNode={(nodeType) => {
                             if (!window.Livewire || !livewireId) return;
                             const component = window.Livewire.find(livewireId);
