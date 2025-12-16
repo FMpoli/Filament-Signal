@@ -14,6 +14,7 @@ use Spatie\LaravelPackageTools\Commands\InstallCommand;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
 use Voodflow\Voodflow\Console\Commands\MakeNodeCommand;
+use Voodflow\Voodflow\Console\Commands\PackageNodeCommand;
 use Voodflow\Voodflow\Console\Commands\MakeSignalNodeCommand;
 use Voodflow\Voodflow\Models\ModelIntegration;
 use Voodflow\Voodflow\Services\EventRegistrar;
@@ -187,6 +188,7 @@ class VoodflowServiceProvider extends PackageServiceProvider
         return [
             MakeSignalNodeCommand::class,
             MakeNodeCommand::class,
+            PackageNodeCommand::class,
         ];
     }
 
