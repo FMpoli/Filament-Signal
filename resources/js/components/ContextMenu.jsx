@@ -180,7 +180,10 @@ export default function ContextMenu({ id, top, left, right, bottom, availableNod
                         return (
                             <button
                                 key={category}
-                                onClick={() => setActiveTab(category)}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setActiveTab(category);
+                                }}
                                 className={`
                                     px-2 py-1.5 border-b-2 font-medium text-xs
                                     transition-all duration-200

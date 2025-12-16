@@ -219,7 +219,7 @@ Error generating stack: `+l.message+`
                             text-slate-700 dark:text-slate-200
                             placeholder:text-slate-400
                             focus:outline-none focus:ring-2 focus:ring-orange-500
-                        `}))),ne.default.createElement("div",{className:"border-b border-slate-200 dark:border-slate-700 px-2"},ne.default.createElement("div",{className:"flex gap-0.5 -mb-px overflow-x-auto scrollbar-hide"},v.map(U=>{let j=N[U]||N.Other,G=_[j.color],y=b===U,k=g[U]?.length||0;return ne.default.createElement("button",{key:U,onClick:()=>x(U),className:`
+                        `}))),ne.default.createElement("div",{className:"border-b border-slate-200 dark:border-slate-700 px-2"},ne.default.createElement("div",{className:"flex gap-0.5 -mb-px overflow-x-auto scrollbar-hide"},v.map(U=>{let j=N[U]||N.Other,G=_[j.color],y=b===U,k=g[U]?.length||0;return ne.default.createElement("button",{key:U,onClick:T=>{T.stopPropagation(),x(U)},className:`
                                     px-2 py-1.5 border-b-2 font-medium text-xs
                                     transition-all duration-200
                                     flex items-center gap-1 whitespace-nowrap
