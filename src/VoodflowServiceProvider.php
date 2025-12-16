@@ -231,6 +231,7 @@ class VoodflowServiceProvider extends PackageServiceProvider
     {
         return [
             'create_voodflow_table',
+            'create_voodflow_installed_packages_table',
         ];
     }
 }

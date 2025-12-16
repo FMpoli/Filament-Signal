@@ -17,39 +17,54 @@ class DynamicNodeLoader
     public function getInstalledNodeBundles(): array
     {
         $bundles = [];
-        $nodesDir = __DIR__ . '/../Nodes';
+        
+        $paths = [
+            __DIR__ . '/../Nodes',
+            storage_path('app/voodflow/nodes'),
+        ];
 
-        if (!File::isDirectory($nodesDir)) {
-            return $bundles;
-        }
-
-        $nodeDirs = File::directories($nodesDir);
-
-        foreach ($nodeDirs as $nodeDir) {
-            $manifest = $this->loadManifest($nodeDir);
-            
-            if (!$manifest) {
+        foreach ($paths as $nodesDir) {
+            if (!File::isDirectory($nodesDir)) {
                 continue;
             }
 
-            $bundlePath = $nodeDir . '/' . ($manifest['javascript']['bundle'] ?? '');
-            
-            if (!File::exists($bundlePath)) {
-                continue;
-            }
+            $nodeDirs = File::directories($nodesDir);
 
-            // Copy bundle to public if not already there
-            $publicPath = $this->publishBundle($bundlePath, $manifest['name']);
-            
-            if ($publicPath) {
-                $bundles[] = [
-                    'type' => $this->getNodeType($manifest),
-                    'name' => $manifest['name'],
-                    'display_name' => $manifest['display_name'] ?? $manifest['name'],
-                    'url' => $publicPath,
-                    'globalName' => $manifest['javascript']['component'] ?? $manifest['php']['class'],
-                    'manifest' => $manifest,
-                ];
+            foreach ($nodeDirs as $nodeDir) {
+                $manifest = $this->loadManifest($nodeDir);
+                
+                if (!$manifest) {
+                    continue;
+                }
+
+                // Check active status from DB
+                $name = $manifest['name'] ?? null;
+                if ($name && \Illuminate\Support\Facades\Schema::hasTable('voodflow_installed_packages')) {
+                    $package = \Voodflow\Voodflow\Models\InstalledPackage::where('name', $name)->first();
+                    if ($package && !$package->is_active) {
+                        continue;
+                    }
+                }
+
+                $bundlePath = $nodeDir . '/' . ($manifest['javascript']['bundle'] ?? '');
+                
+                if (!File::exists($bundlePath)) {
+                    continue;
+                }
+
+                // Copy bundle to public if not already there
+                $publicPath = $this->publishBundle($bundlePath, $manifest['name']);
+                
+                if ($publicPath) {
+                    $bundles[] = [
+                        'type' => $this->getNodeType($manifest),
+                        'name' => $manifest['name'],
+                        'display_name' => $manifest['display_name'] ?? $manifest['name'],
+                        'url' => $publicPath,
+                        'globalName' => $manifest['javascript']['component'] ?? $manifest['php']['class'],
+                        'manifest' => $manifest,
+                    ];
+                }
             }
         }
 

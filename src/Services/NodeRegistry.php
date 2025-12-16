@@ -37,6 +37,36 @@ class NodeRegistry
         foreach ($directories as $directory) {
             $this->processDirectory($directory);
         }
+
+        // Scan storage nodes (Installed via UI)
+        $storageNodesPath = storage_path('app/voodflow/nodes');
+        if (File::isDirectory($storageNodesPath)) {
+            $directories = File::directories($storageNodesPath);
+            foreach ($directories as $directory) {
+                 // Check DB status if table exists
+                 $manifestPath = $directory . '/manifest.json';
+                 if (File::exists($manifestPath)) {
+                      $content = File::get($manifestPath);
+                      $manifest = json_decode($content, true);
+                      $name = $manifest['name'] ?? null;
+                      
+                      try {
+                          if ($name && \Illuminate\Support\Facades\Schema::hasTable('voodflow_installed_packages')) {
+                              $package = \Voodflow\Voodflow\Models\InstalledPackage::where('name', $name)->first();
+                              // If found regarding DB records, reuse logic. If not found, assume active (manually placed)? 
+                              // Or if manually placed in storage, maybe treat as active.
+                              // But if logic is 'installed via UI', it should be in DB.
+                              if ($package && !$package->is_active) {
+                                  continue; 
+                              }
+                          }
+                      } catch (\Exception $e) {
+                          // Fallback if DB issue
+                      }
+                 }
+                $this->processDirectory($directory);
+            }
+        }
     }
 
     /**
