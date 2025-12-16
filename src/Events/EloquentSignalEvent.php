@@ -2,11 +2,11 @@
 
 namespace Voodflow\Voodflow\Events;
 
+use Illuminate\Database\Eloquent\Model;
 use Voodflow\Voodflow\Contracts\HasSignal;
 use Voodflow\Voodflow\Contracts\IdentifiableEvent;
 use Voodflow\Voodflow\Contracts\PayloadProvider;
 use Voodflow\Voodflow\Support\ModelRegistry;
-use Illuminate\Database\Eloquent\Model;
 
 class EloquentSignalEvent implements IdentifiableEvent, PayloadProvider
 {

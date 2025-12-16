@@ -2,8 +2,8 @@
 
 namespace Voodflow\Voodflow\Filament\Resources\WorkflowResource\Pages;
 
-use Voodflow\Voodflow\Filament\Resources\WorkflowResource;
 use Filament\Resources\Pages\ViewRecord;
+use Voodflow\Voodflow\Filament\Resources\WorkflowResource;
 
 class ViewWorkflow extends ViewRecord
 {

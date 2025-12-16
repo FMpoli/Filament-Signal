@@ -4,7 +4,7 @@ namespace Voodflow\Voodflow\Execution;
 
 /**
  * Execution Result
- * 
+ *
  * Returned by node execution containing:
  * - Success status
  * - Output data for next node
@@ -18,8 +18,7 @@ class ExecutionResult
         public array $output = [],
         public ?string $error = null,
         public ?string $nextNodeId = null,
-    ) {
-    }
+    ) {}
 
     /**
      * Create a successful result

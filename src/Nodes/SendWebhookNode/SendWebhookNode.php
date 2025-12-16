@@ -2,18 +2,18 @@
 
 namespace Voodflow\Voodflow\Nodes\SendWebhookNode;
 
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Voodflow\Voodflow\Contracts\NodeInterface;
 use Voodflow\Voodflow\Execution\ExecutionContext;
 use Voodflow\Voodflow\Execution\ExecutionResult;
-use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Log;
 
 /**
  * Send Webhook Node
- * 
+ *
  * Self-contained webhook sender node.
  * Sends HTTP requests to configured endpoints.
- * 
+ *
  * Migrated from WebhookNode POC - now fully functional.
  */
 class SendWebhookNode implements NodeInterface
@@ -87,7 +87,7 @@ class SendWebhookNode implements NodeInterface
         try {
             // Send HTTP request
             $response = Http::withHeaders($headers)
-                        ->timeout($timeout)
+                ->timeout($timeout)
                 ->{strtolower($method)}($url, $requestData);
 
             // Return success with response data
@@ -147,12 +147,12 @@ class SendWebhookNode implements NodeInterface
 
         if (empty($config['url'])) {
             $errors['url'] = 'URL is required';
-        } elseif (!filter_var($config['url'], FILTER_VALIDATE_URL)) {
+        } elseif (! filter_var($config['url'], FILTER_VALIDATE_URL)) {
             $errors['url'] = 'Invalid URL format';
         }
 
         $allowedMethods = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'];
-        if (isset($config['method']) && !in_array(strtoupper($config['method']), $allowedMethods)) {
+        if (isset($config['method']) && ! in_array(strtoupper($config['method']), $allowedMethods)) {
             $errors['method'] = 'Invalid HTTP method';
         }
 

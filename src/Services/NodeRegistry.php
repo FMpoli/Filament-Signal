@@ -7,7 +7,7 @@ use Voodflow\Voodflow\Contracts\NodeInterface;
 
 /**
  * Node Registry
- * 
+ *
  * Discovers and registers all available workflow nodes.
  * Nodes are auto-discovered from src/Nodes/ directories.
  */
@@ -27,7 +27,7 @@ class NodeRegistry
     {
         $nodesPath = __DIR__ . '/../Nodes';
 
-        if (!File::isDirectory($nodesPath)) {
+        if (! File::isDirectory($nodesPath)) {
             return;
         }
 
@@ -59,7 +59,7 @@ class NodeRegistry
      */
     public function register(string $nodeClass): void
     {
-        if (!in_array(NodeInterface::class, class_implements($nodeClass))) {
+        if (! in_array(NodeInterface::class, class_implements($nodeClass))) {
             throw new \InvalidArgumentException("$nodeClass must implement NodeInterface");
         }
 
@@ -69,7 +69,7 @@ class NodeRegistry
 
     /**
      * Get all registered nodes
-     * 
+     *
      * @return array Map of type => class name
      */
     public function all(): array
@@ -89,7 +89,7 @@ class NodeRegistry
      * Get metadata formatted for React frontend - grouped by category
      * Returns object (stdClass) when empty to ensure proper JSON encoding
      */
-    public function getMetadataForReact(): array|object
+    public function getMetadataForReact(): array | object
     {
         $nodes = $this->all();
         $grouped = [];
@@ -108,7 +108,7 @@ class NodeRegistry
 
             $categoryName = $categoryMap[$category] ?? ucfirst($category);
 
-            if (!isset($grouped[$categoryName])) {
+            if (! isset($grouped[$categoryName])) {
                 $grouped[$categoryName] = [];
             }
 
@@ -136,7 +136,7 @@ class NodeRegistry
 
         // Add any remaining categories
         foreach ($grouped as $cat => $nodes) {
-            if (!isset($sorted[$cat])) {
+            if (! isset($sorted[$cat])) {
                 $sorted[$cat] = $nodes;
             }
         }

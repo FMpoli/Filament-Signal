@@ -2,22 +2,22 @@
 
 namespace Voodflow\Voodflow\Filament\Resources;
 
-use Voodflow\Voodflow\Filament\Resources\ExecutionResource\Pages;
+use BackedEnum;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
-use Voodflow\Voodflow\Models\Execution;
 use Filament\Forms;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
-use BackedEnum;
+use Voodflow\Voodflow\Filament\Resources\ExecutionResource\Pages;
+use Voodflow\Voodflow\Models\Execution;
 
 class ExecutionResource extends Resource
 {
     protected static ?string $model = Execution::class;
 
-    protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static BackedEnum | string | null $navigationIcon = 'heroicon-o-rectangle-stack';
 
     public static function getNavigationGroup(): ?string
     {

@@ -2,12 +2,12 @@
 
 namespace Voodflow\Voodflow\Support;
 
-use Voodflow\Voodflow\Contracts\PayloadProvider;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use JsonSerializable;
+use Voodflow\Voodflow\Contracts\PayloadProvider;
 
 class PayloadFactory
 {
@@ -42,7 +42,7 @@ class PayloadFactory
         }
 
         if ($value instanceof Collection) {
-            return $value->map(fn($item) => $this->normalizeValue($item))->all();
+            return $value->map(fn ($item) => $this->normalizeValue($item))->all();
         }
 
         if ($value instanceof JsonSerializable) {
@@ -54,11 +54,11 @@ class PayloadFactory
         }
 
         if (is_object($value)) {
-            return Arr::map(get_object_vars($value), fn($item) => $this->normalizeValue($item));
+            return Arr::map(get_object_vars($value), fn ($item) => $this->normalizeValue($item));
         }
 
         if (is_array($value)) {
-            return Arr::map($value, fn($item) => $this->normalizeValue($item));
+            return Arr::map($value, fn ($item) => $this->normalizeValue($item));
         }
 
         return $value;

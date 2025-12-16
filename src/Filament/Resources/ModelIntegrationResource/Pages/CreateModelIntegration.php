@@ -2,8 +2,8 @@
 
 namespace Voodflow\Voodflow\Filament\Resources\ModelIntegrationResource\Pages;
 
-use Voodflow\Voodflow\Filament\Resources\ModelIntegrationResource;
 use Filament\Resources\Pages\CreateRecord;
+use Voodflow\Voodflow\Filament\Resources\ModelIntegrationResource;
 
 class CreateModelIntegration extends CreateRecord
 {

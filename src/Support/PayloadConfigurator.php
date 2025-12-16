@@ -64,7 +64,7 @@ class PayloadConfigurator
         // IMPORTANTE: Se ci sono relazioni inverse, salva gli id originali PRIMA di filtrare il payload
         // perché appendReverseRelations() ne ha bisogno per recuperare i record correlati
         $originalIds = [];
-        if (!empty($reverseSelections)) {
+        if (! empty($reverseSelections)) {
             foreach ($reverseSelections as $selection) {
                 $meta = $selection['meta'] ?? [];
                 $parentKey = $meta['parent_property'] ?? null;
@@ -75,9 +75,9 @@ class PayloadConfigurator
 
             // Assicurati che 'id' sia sempre incluso nei includeFields quando ci sono relazioni inverse
             $mainKey = $this->findMainKey($payload);
-            if ($mainKey && !empty($includeFields)) {
+            if ($mainKey && ! empty($includeFields)) {
                 $idField = $mainKey . '.id';
-                if (!in_array($idField, $includeFields)) {
+                if (! in_array($idField, $includeFields)) {
                     $includeFields[] = $idField;
                 }
             } elseif ($mainKey && empty($includeFields)) {
@@ -87,21 +87,21 @@ class PayloadConfigurator
         }
 
         // Poi filtra i campi da includere (PRIMA di filtrare le relazioni, così le relazioni vengono preservate)
-        if (!empty($includeFields)) {
+        if (! empty($includeFields)) {
             $payload = $this->includeOnly($payload, $includeFields, $relationFields, $relationMetaMap);
         }
 
         // IMPORTANTE: Aggiungi PRIMA le relazioni inverse al payload, così possono essere filtrate successivamente
         // Le relazioni inverse devono essere aggiunte prima di filterRelationFields() perché altrimenti
         // filterReverseRelationFields() non trova i record da filtrare
-        if (!empty($reverseSelections)) {
+        if (! empty($reverseSelections)) {
             $payload = $this->appendReverseRelations($payload, $reverseSelections, $originalIds);
         }
 
         // Filtra i campi delle relazioni selezionati PRIMA di expandRelations
         // così preserviamo i campi già caricati (inventory_code, serial_number, ecc.)
         // Questo include anche il filtraggio delle relazioni inverse appena aggiunte
-        if (!empty($relationFields)) {
+        if (! empty($relationFields)) {
             $payload = $this->filterRelationFields($payload, $relationFields, $relationMetaMap);
         }
 
@@ -111,16 +111,16 @@ class PayloadConfigurator
         // e non deve essere espansa (perché espandere sovrascriverebbe i dati filtrati con solo i campi essenziali)
         // IMPORTANTE: Se expandRelations è vuoto ma ci sono relazioni configurate in getSignalFields(),
         // dobbiamo comunque espandere le relazioni annidate (es: unit.model, unit.brand, unit.type)
-        if (!empty($expandRelations)) {
+        if (! empty($expandRelations)) {
             $payload = $this->expandRelations($payload, $expandRelations, $expandNested);
-        } elseif (!empty($relationFields)) {
+        } elseif (! empty($relationFields)) {
             // Se expandRelations è vuoto ma ci sono relationFields, prova a espandere le relazioni annidate
             // usando la configurazione da getSignalFields()
             $payload = $this->expandNestedRelationsFromConfig($payload, $relationFields, $relationMetaMap);
         }
 
         // Infine rimuovi i campi esclusi
-        if (!empty($excludeFields)) {
+        if (! empty($excludeFields)) {
             $payload = $this->excludeFields($payload, $excludeFields);
         }
 
@@ -145,18 +145,18 @@ class PayloadConfigurator
             // Per le relazioni inverse, model_class contiene il modello sorgente (es: EquipmentLoan)
             $modelClass = $meta['model_class'] ?? null;
 
-            if (!$parentKey || !$alias || !$foreignKey || !$modelClass) {
+            if (! $parentKey || ! $alias || ! $foreignKey || ! $modelClass) {
                 continue;
             }
 
-            if (!isset($payload[$parentKey]) || !is_array($payload[$parentKey])) {
+            if (! isset($payload[$parentKey]) || ! is_array($payload[$parentKey])) {
                 continue;
             }
 
             // Prova a recuperare l'id dal payload filtrato, altrimenti usa quello originale
             $parentId = $payload[$parentKey]['id'] ?? $originalIds[$parentKey] ?? null;
 
-            if (!$parentId) {
+            if (! $parentId) {
                 continue;
             }
 
@@ -170,16 +170,16 @@ class PayloadConfigurator
                 if ($modelFields && isset($modelFields['relations'])) {
                     foreach ($modelFields['relations'] as $relationName => $relationConfig) {
                         $relationExpand = $relationConfig['expand'] ?? [];
-                        if (!empty($relationExpand)) {
+                        if (! empty($relationExpand)) {
                             // Costruisci il path completo per l'espansione (es: unit.model, unit.brand, unit.type)
                             foreach ($relationExpand as $nestedRelation) {
                                 $expandPath = "{$relationName}.{$nestedRelation}";
-                                if (!in_array($expandPath, $expand)) {
+                                if (! in_array($expandPath, $expand)) {
                                     $expand[] = $expandPath;
                                 }
                             }
                             // Aggiungi anche la relazione principale se non è già presente
-                            if (!in_array($relationName, $expand)) {
+                            if (! in_array($relationName, $expand)) {
                                 $expand[] = $relationName;
                             }
                         }
@@ -200,13 +200,13 @@ class PayloadConfigurator
         $parentKey = $meta['parent_property'] ?? null;
         $alias = $meta['alias'] ?? null;
 
-        if (!$parentKey || !$alias) {
+        if (! $parentKey || ! $alias) {
             return $payload;
         }
 
         if (
-            !isset($payload[$parentKey][$alias]) ||
-            !is_array($payload[$parentKey][$alias])
+            ! isset($payload[$parentKey][$alias]) ||
+            ! is_array($payload[$parentKey][$alias])
         ) {
             return $payload;
         }
@@ -225,10 +225,10 @@ class PayloadConfigurator
                     // Campo annidato (es: equipment_loan.unit.inventory_code)
                     $relationPath = implode('.', array_slice($parts, 1, -1)); // unit o unit.model
                     $fieldName = $parts[count($parts) - 1]; // inventory_code o name
-                    if (!isset($nestedFields[$relationPath])) {
+                    if (! isset($nestedFields[$relationPath])) {
                         $nestedFields[$relationPath] = [];
                     }
-                    if (!in_array($fieldName, $nestedFields[$relationPath])) {
+                    if (! in_array($fieldName, $nestedFields[$relationPath])) {
                         $nestedFields[$relationPath][] = $fieldName;
                     }
                 }
@@ -254,12 +254,12 @@ class PayloadConfigurator
         }
 
         // Assicurati che 'id' sia sempre incluso
-        if (!in_array('id', $fieldKeys)) {
+        if (! in_array('id', $fieldKeys)) {
             $fieldKeys[] = 'id';
         }
 
         $payload[$parentKey][$alias] = array_map(function ($record) use ($fieldKeys, $nestedFields) {
-            if (!is_array($record)) {
+            if (! is_array($record)) {
                 return $record;
             }
 
@@ -274,7 +274,7 @@ class PayloadConfigurator
             // Filtra i campi delle relazioni annidate se sono stati selezionati
             // Ordina i path per lunghezza (prima i più corti) per processare correttamente le relazioni annidate
             $sortedPaths = array_keys($nestedFields);
-            usort($sortedPaths, fn($a, $b) => substr_count($a, '.') <=> substr_count($b, '.'));
+            usort($sortedPaths, fn ($a, $b) => substr_count($a, '.') <=> substr_count($b, '.'));
 
             foreach ($sortedPaths as $relationPath) {
                 $selectedFields = $nestedFields[$relationPath];
@@ -284,7 +284,7 @@ class PayloadConfigurator
                 $currentData = $record;
                 $exists = true;
                 foreach ($pathParts as $part) {
-                    if (!isset($currentData[$part]) || !is_array($currentData[$part])) {
+                    if (! isset($currentData[$part]) || ! is_array($currentData[$part])) {
                         $exists = false;
 
                         break;
@@ -292,13 +292,13 @@ class PayloadConfigurator
                     $currentData = $currentData[$part];
                 }
 
-                if (!$exists) {
+                if (! $exists) {
                     continue;
                 }
 
                 // Ottieni il valore corrente nel record filtrato (se esiste)
                 $currentFiltered = Arr::get($filtered, $relationPath, []);
-                if (!is_array($currentFiltered)) {
+                if (! is_array($currentFiltered)) {
                     $currentFiltered = [];
                 }
 
@@ -310,7 +310,7 @@ class PayloadConfigurator
                 }
 
                 // Imposta il valore filtrato solo se ci sono campi
-                if (!empty($currentFiltered)) {
+                if (! empty($currentFiltered)) {
                     Arr::set($filtered, $relationPath, $currentFiltered);
                 }
             }
@@ -326,7 +326,7 @@ class PayloadConfigurator
      */
     protected function fetchReverseRelationRecords(string $modelClass, string $foreignKey, mixed $parentId, array $expand = []): array
     {
-        if (!class_exists($modelClass)) {
+        if (! class_exists($modelClass)) {
             return [];
         }
 
@@ -340,12 +340,12 @@ class PayloadConfigurator
                 if ($modelFields && isset($modelFields['relations'])) {
                     foreach ($modelFields['relations'] as $relationName => $relationConfig) {
                         $relationExpand = $relationConfig['expand'] ?? [];
-                        if (!empty($relationExpand)) {
+                        if (! empty($relationExpand)) {
                             // Costruisci il path completo per l'espansione (es: unit.model, unit.brand, unit.type)
                             // Laravel caricherà automaticamente anche la relazione principale (unit)
                             foreach ($relationExpand as $nestedRelation) {
                                 $expandPath = "{$relationName}.{$nestedRelation}";
-                                if (!in_array($expandPath, $expand)) {
+                                if (! in_array($expandPath, $expand)) {
                                     $expand[] = $expandPath;
                                 }
                             }
@@ -354,11 +354,11 @@ class PayloadConfigurator
                 }
             }
 
-            if (!empty($expand)) {
+            if (! empty($expand)) {
                 $query->with($expand);
             }
 
-            $records = $query->get()->map(fn($model) => $model->toArray())->all();
+            $records = $query->get()->map(fn ($model) => $model->toArray())->all();
 
             return $records;
         } catch (\Throwable $exception) {
@@ -400,7 +400,7 @@ class PayloadConfigurator
         }
 
         // Se ci sono campi annidati (es: loan.id, loan.status), costruisci l'oggetto loan
-        if (!empty($nestedFields)) {
+        if (! empty($nestedFields)) {
             $parentKeys = [];
             foreach ($nestedFields as $field) {
                 $parts = explode('.', $field);
@@ -412,7 +412,7 @@ class PayloadConfigurator
 
             // Per ogni parent key (es: loan), costruisci l'oggetto con i campi selezionati
             foreach ($parentKeys as $parentKey => $_) {
-                if (!isset($payload[$parentKey]) || !is_array($payload[$parentKey])) {
+                if (! isset($payload[$parentKey]) || ! is_array($payload[$parentKey])) {
                     continue;
                 }
 
@@ -433,10 +433,10 @@ class PayloadConfigurator
 
                 // IMPORTANTE: Preserva le relazioni espanse dentro il parent se ci sono relationFields configurati
                 // Le relazioni sono già state filtrate da filterRelationFields, quindi includile così come sono
-                if (!empty($relationFields)) {
+                if (! empty($relationFields)) {
                     $relationsWithFields = [];
                     foreach ($relationFields as $formKey => $selectedFields) {
-                        if (empty($selectedFields) || !is_array($selectedFields)) {
+                        if (empty($selectedFields) || ! is_array($selectedFields)) {
                             continue;
                         }
 
@@ -447,7 +447,7 @@ class PayloadConfigurator
                             }
 
                             $alias = $meta['alias'] ?? null;
-                            if (!$alias) {
+                            if (! $alias) {
                                 continue;
                             }
 
@@ -503,7 +503,7 @@ class PayloadConfigurator
     protected function filterRelationFields(array $payload, array $relationFields, array $relationMetaMap = []): array
     {
         foreach ($relationFields as $formKey => $selectedFields) {
-            if (!is_array($selectedFields)) {
+            if (! is_array($selectedFields)) {
                 continue;
             }
 
@@ -519,11 +519,11 @@ class PayloadConfigurator
                 $parentKey = $meta['parent_property'] ?? null;
                 $alias = $meta['alias'] ?? null;
 
-                if (!$parentKey || !$alias) {
+                if (! $parentKey || ! $alias) {
                     continue;
                 }
 
-                if (!isset($payload[$parentKey][$alias]) || !is_array($payload[$parentKey][$alias])) {
+                if (! isset($payload[$parentKey][$alias]) || ! is_array($payload[$parentKey][$alias])) {
                     continue;
                 }
 
@@ -536,7 +536,7 @@ class PayloadConfigurator
 
                 // FALLBACK: Se parent_model_class non è nel meta, prova a ottenerlo dal payload
                 // Il parentKey (es: 'loan') dovrebbe corrispondere al modello principale dell'evento
-                if (!$parentModelClass && isset($payload[$parentKey]) && isset($payload[$parentKey]['id'])) {
+                if (! $parentModelClass && isset($payload[$parentKey]) && isset($payload[$parentKey]['id'])) {
                     // Prova a ottenere il modello padre dal config o dal payload stesso
                     // Per ora, assumiamo che il modello padre sia quello che ha getSignalFields() configurato
                     // e che la chiave nel payload corrisponda al nome del modello (es: 'loan' -> EquipmentLoan)
@@ -548,7 +548,7 @@ class PayloadConfigurator
                 // IMPORTANTE: Usa SOLO i campi selezionati nella Payload Configuration
                 // La Model Integration definisce i campi DISPONIBILI, ma la Payload Configuration decide quali INCLUDERE
                 // Se non ci sono campi selezionati, non includere quella relazione (o solo 'id' se necessario)
-                if (!empty($selectedFields)) {
+                if (! empty($selectedFields)) {
                     // Estrai i campi selezionati dall'UI
                     // I campi possono essere in formato:
                     // - "parentKey.alias.field" (es: "blog_post.author.name")
@@ -564,13 +564,13 @@ class PayloadConfigurator
 
                         if (count($parts) === 1) {
                             // Campo diretto della relazione (es: "name", "email")
-                            if (!in_array($field, $fieldKeys)) {
+                            if (! in_array($field, $fieldKeys)) {
                                 $fieldKeys[] = $field;
                             }
                         } elseif (count($parts) === 2 && $parts[0] === $alias) {
                             // Campo diretto della relazione quando è specificato con l'alias (es: "author.name")
                             $nestedField = $parts[1];
-                            if (!in_array($nestedField, $fieldKeys)) {
+                            if (! in_array($nestedField, $fieldKeys)) {
                                 $fieldKeys[] = $nestedField;
                             }
                         } elseif (count($parts) >= 2) {
@@ -583,7 +583,7 @@ class PayloadConfigurator
                                 if (count($parts) === 2) {
                                     // Campo diretto (es: "author.name")
                                     $nestedField = $parts[1];
-                                    if (!in_array($nestedField, $fieldKeys)) {
+                                    if (! in_array($nestedField, $fieldKeys)) {
                                         $fieldKeys[] = $nestedField;
                                     }
                                 } else {
@@ -591,10 +591,10 @@ class PayloadConfigurator
                                     $nestedRelation = $parts[1];
                                     $nestedField = $parts[2] ?? null;
                                     if ($nestedField) {
-                                        if (!isset($nestedFields[$nestedRelation])) {
+                                        if (! isset($nestedFields[$nestedRelation])) {
                                             $nestedFields[$nestedRelation] = [];
                                         }
-                                        if (!in_array($nestedField, $nestedFields[$nestedRelation])) {
+                                        if (! in_array($nestedField, $nestedFields[$nestedRelation])) {
                                             $nestedFields[$nestedRelation][] = $nestedField;
                                         }
                                     }
@@ -618,7 +618,7 @@ class PayloadConfigurator
                 }
 
                 // Assicurati che 'id' sia sempre incluso
-                if (!in_array('id', $fieldKeys)) {
+                if (! in_array('id', $fieldKeys)) {
                     $fieldKeys[] = 'id';
                 }
 
@@ -646,10 +646,10 @@ class PayloadConfigurator
                             }
                         }
                         // Assicurati che 'id' sia sempre incluso per le relazioni annidate
-                        if (!isset($nestedFiltered['id']) && isset($relationData[$nestedRelation]['id'])) {
+                        if (! isset($nestedFiltered['id']) && isset($relationData[$nestedRelation]['id'])) {
                             $nestedFiltered['id'] = $relationData[$nestedRelation]['id'];
                         }
-                        if (!empty($nestedFiltered)) {
+                        if (! empty($nestedFiltered)) {
                             $filtered[$nestedRelation] = $nestedFiltered;
                         }
                     } elseif (isset($relationData[$nestedRelation . '_id']) && $relationData[$nestedRelation . '_id']) {
@@ -677,10 +677,10 @@ class PayloadConfigurator
                                                     }
                                                 }
                                                 // Assicurati che 'id' sia sempre incluso
-                                                if (!isset($nestedFiltered['id'])) {
+                                                if (! isset($nestedFiltered['id'])) {
                                                     $nestedFiltered['id'] = $nestedModel->id;
                                                 }
-                                                if (!empty($nestedFiltered)) {
+                                                if (! empty($nestedFiltered)) {
                                                     $filtered[$nestedRelation] = $nestedFiltered;
                                                 }
                                             }
@@ -701,11 +701,11 @@ class PayloadConfigurator
 
             [$parentKey, $relationName] = $this->parseLegacyRelationKey($formKey);
 
-            if (!$parentKey || !$relationName) {
+            if (! $parentKey || ! $relationName) {
                 continue;
             }
 
-            if (!isset($payload[$parentKey][$relationName]) || !is_array($payload[$parentKey][$relationName])) {
+            if (! isset($payload[$parentKey][$relationName]) || ! is_array($payload[$parentKey][$relationName])) {
                 continue;
             }
 
@@ -788,7 +788,7 @@ class PayloadConfigurator
             // Naviga nel payload fino al punto giusto
             $target = &$payload;
             foreach ($parts as $part) {
-                if (!isset($target[$part]) || !is_array($target[$part])) {
+                if (! isset($target[$part]) || ! is_array($target[$part])) {
                     continue 2; // Salta questa relazione se il percorso non esiste
                 }
                 $target = &$target[$part];
@@ -798,7 +798,7 @@ class PayloadConfigurator
             if (isset($target[$idField]) && $target[$idField] && is_numeric($target[$idField])) {
                 $relationField = str_replace('_id', '', $idField);
 
-                if (!isset($target[$relationField]) || !is_array($target[$relationField]) || !isset($target[$relationField]['name'])) {
+                if (! isset($target[$relationField]) || ! is_array($target[$relationField]) || ! isset($target[$relationField]['name'])) {
                     try {
                         if (class_exists($modelClass)) {
                             $model = $modelClass::find($target[$idField]);
@@ -810,7 +810,7 @@ class PayloadConfigurator
                                 ];
 
                                 // Se ci sono relazioni annidate da espandere, espandile
-                                if (isset($expandNested[$nestedIdField]) && !empty($expandNested[$nestedIdField])) {
+                                if (isset($expandNested[$nestedIdField]) && ! empty($expandNested[$nestedIdField])) {
                                     $this->expandNestedRelationsInModel($target[$relationField], $expandNested[$nestedIdField], $modelClass);
                                 }
                             }
@@ -833,7 +833,7 @@ class PayloadConfigurator
         foreach ($relationsToExpand as $relationName) {
             $idField = $relationName . '_id';
 
-            if (!isset($modelData[$idField]) || !$modelData[$idField]) {
+            if (! isset($modelData[$idField]) || ! $modelData[$idField]) {
                 continue;
             }
 
@@ -846,7 +846,7 @@ class PayloadConfigurator
             // Indovina la classe del modello
             $modelClass = $this->guessModelClass($idField, $parentModelClass);
 
-            if (!$modelClass || !class_exists($modelClass)) {
+            if (! $modelClass || ! class_exists($modelClass)) {
                 continue;
             }
 
@@ -881,7 +881,7 @@ class PayloadConfigurator
 
                     // Rimuovi duplicati e assicurati che 'id' sia sempre incluso
                     $fieldsToInclude = array_unique($fieldsToInclude);
-                    if (!in_array('id', $fieldsToInclude)) {
+                    if (! in_array('id', $fieldsToInclude)) {
                         array_unshift($fieldsToInclude, 'id');
                     }
 
@@ -957,7 +957,7 @@ class PayloadConfigurator
      */
     protected function recursiveExpand(mixed &$data, array $relations, array $expandNested = [], string $currentPath = ''): void
     {
-        if (!is_array($data)) {
+        if (! is_array($data)) {
             return;
         }
 
@@ -972,7 +972,7 @@ class PayloadConfigurator
 
                 // Se la relazione non è già presente o è solo un ID
                 $hasOnlyId = isset($data[$relationField]) && is_array($data[$relationField]) && count($data[$relationField]) === 1 && isset($data[$relationField]['id']);
-                $notPresent = !isset($data[$relationField]) || !is_array($data[$relationField]);
+                $notPresent = ! isset($data[$relationField]) || ! is_array($data[$relationField]);
 
                 // IMPORTANTE: Se la relazione è già presente con più di solo 'id', NON espanderla
                 // perché significa che è già stata filtrata da filterRelationFields o caricata con tutti i campi
@@ -1012,7 +1012,7 @@ class PayloadConfigurator
                             break;
                         }
                     }
-                    if (!empty($nestedToExpand)) {
+                    if (! empty($nestedToExpand)) {
                         $this->expandNestedRelationsInModel($data[$relationField], $nestedToExpand, $modelClass);
                     }
                 }
@@ -1040,7 +1040,7 @@ class PayloadConfigurator
                 $nestedModelClass = $relations[$key] ?? null;
 
                 // Se la relazione non è già caricata come oggetto
-                if (!isset($data[$relationKey]) || !is_array($data[$relationKey])) {
+                if (! isset($data[$relationKey]) || ! is_array($data[$relationKey])) {
                     if ($nestedModelClass && class_exists($nestedModelClass)) {
                         try {
                             $model = $nestedModelClass::find($value);
@@ -1121,7 +1121,7 @@ class PayloadConfigurator
 
         // Se non trovato, cerca la prima chiave che ha un array con 'id'
         foreach ($payload as $key => $value) {
-            if (is_array($value) && isset($value['id']) && !in_array($key, ['previousStatus', 'currentStatus', 'metadata'])) {
+            if (is_array($value) && isset($value['id']) && ! in_array($key, ['previousStatus', 'currentStatus', 'metadata'])) {
                 return $key;
             }
         }
@@ -1138,7 +1138,7 @@ class PayloadConfigurator
     protected function findMainModelClass(array $payload, array $relationMetaMap): ?string
     {
         $mainKey = $this->findMainKey($payload);
-        if (!$mainKey) {
+        if (! $mainKey) {
             return null;
         }
 
@@ -1172,12 +1172,12 @@ class PayloadConfigurator
     protected function expandNestedRelationsFromConfig(array $payload, array $relationFields, array $relationMetaMap): array
     {
         foreach ($relationFields as $formKey => $selectedFields) {
-            if (!is_array($selectedFields)) {
+            if (! is_array($selectedFields)) {
                 continue;
             }
 
             $meta = $relationMetaMap[$formKey] ?? null;
-            if (!$meta || ($meta['mode'] ?? 'direct') === 'reverse') {
+            if (! $meta || ($meta['mode'] ?? 'direct') === 'reverse') {
                 continue;
             }
 
@@ -1186,11 +1186,11 @@ class PayloadConfigurator
             $relationName = $meta['relation_name'] ?? $alias ?? null;
             $parentModelClass = $meta['parent_model_class'] ?? null;
 
-            if (!$parentKey || !$alias || !$parentModelClass || !$relationName) {
+            if (! $parentKey || ! $alias || ! $parentModelClass || ! $relationName) {
                 continue;
             }
 
-            if (!isset($payload[$parentKey][$alias]) || !is_array($payload[$parentKey][$alias])) {
+            if (! isset($payload[$parentKey][$alias]) || ! is_array($payload[$parentKey][$alias])) {
                 continue;
             }
 
@@ -1202,7 +1202,7 @@ class PayloadConfigurator
                 $relationConfig = $parentModelFields['relations'][$relationName];
                 $expandList = $relationConfig['expand'] ?? [];
 
-                if (!empty($expandList)) {
+                if (! empty($expandList)) {
                     // Espandi le relazioni annidate
                     $relationModelClass = $meta['model_class'] ?? null;
                     if ($relationModelClass) {

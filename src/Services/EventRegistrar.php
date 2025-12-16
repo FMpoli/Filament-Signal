@@ -2,20 +2,20 @@
 
 namespace Voodflow\Voodflow\Services;
 
-use Voodflow\Voodflow\Events\EloquentSignalEvent;
-use Voodflow\Voodflow\Models\Workflow;
-use Voodflow\Voodflow\Support\EloquentEventMap;
-use Voodflow\Voodflow\Support\EventRegistry;
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Throwable;
+use Voodflow\Voodflow\Events\EloquentSignalEvent;
+use Voodflow\Voodflow\Models\Workflow;
+use Voodflow\Voodflow\Support\EloquentEventMap;
+use Voodflow\Voodflow\Support\EventRegistry;
 
 /**
  * Event Registrar
- * 
+ *
  * Registers Laravel event listeners for workflows.
  * Updated to use WorkflowExecutor instead of legacy EventProcessor.
  */
@@ -26,8 +26,7 @@ class EventRegistrar
         protected WorkflowExecutor $workflowExecutor,
         protected EventRegistry $eventRegistry,
         protected EloquentEventMap $eloquentEventMap
-    ) {
-    }
+    ) {}
 
     public function register(): void
     {
@@ -49,10 +48,11 @@ class EventRegistrar
             $this->dispatcher->listen($eventName, function (...$payload) use ($eventName): void {
                 $event = $this->wrapEventPayload($eventName, $payload);
 
-                if (!$event) {
+                if (! $event) {
                     Log::debug('Voodflow: Event wrapped to null, skipping', [
                         'event_name' => $eventName,
                     ]);
+
                     return;
                 }
 
@@ -111,7 +111,7 @@ class EventRegistrar
         if (Str::startsWith($eventName, 'eloquent.')) {
             $model = $payload[0] ?? null;
 
-            if (!$model instanceof Model) {
+            if (! $model instanceof Model) {
                 return null;
             }
 

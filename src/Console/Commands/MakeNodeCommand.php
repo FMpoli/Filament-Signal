@@ -21,7 +21,7 @@ class MakeNodeCommand extends Command
         $force = $this->option('force');
 
         // Validate node name
-        if (!Str::endsWith($name, 'Node')) {
+        if (! Str::endsWith($name, 'Node')) {
             $name .= 'Node';
         }
 
@@ -29,8 +29,9 @@ class MakeNodeCommand extends Command
         $nodeDir = base_path("packages/Voodflow/Voodflow/src/Nodes/{$nodeClass}");
 
         // Check if exists
-        if (is_dir($nodeDir) && !$force) {
+        if (is_dir($nodeDir) && ! $force) {
             $this->error("Node {$nodeClass} already exists! Use --force to overwrite.");
+
             return self::FAILURE;
         }
 
@@ -44,25 +45,25 @@ class MakeNodeCommand extends Command
         $this->info("✅ Node {$nodeClass} created successfully!");
         $this->newLine();
         $this->info("📁 Location: {$nodeDir}");
-        $this->info("📝 Files created:");
+        $this->info('📝 Files created:');
         $this->line("   - {$nodeClass}.php");
         $this->line("   - components/{$nodeClass}.jsx");
         $this->newLine();
-        $this->info("🚀 Next steps:");
+        $this->info('🚀 Next steps:');
         $this->line("   1. Implement execute() method in {$nodeClass}.php");
         $this->line("   2. Customize React component in components/{$nodeClass}.jsx");
-        $this->line("   3. Run: npm run build");
+        $this->line('   3. Run: npm run build');
 
         return self::SUCCESS;
     }
 
     protected function createDirectoryStructure(string $nodeDir): void
     {
-        if (!is_dir($nodeDir)) {
+        if (! is_dir($nodeDir)) {
             mkdir($nodeDir, 0755, true);
         }
 
-        if (!is_dir($nodeDir . '/components')) {
+        if (! is_dir($nodeDir . '/components')) {
             mkdir($nodeDir . '/components', 0755, true);
         }
     }

@@ -6,7 +6,7 @@ use Voodflow\Voodflow\Contracts\NodeInterface;
 
 /**
  * Filter Node Handler
- * 
+ *
  * Type: filter
  * Description: Filters data based on conditions
  */
@@ -73,8 +73,8 @@ class FilterNode implements NodeInterface
 
     /**
      * Validate the node configuration
-     * 
-     * @param array $config The node configuration
+     *
+     * @param  array  $config  The node configuration
      * @return array Array of validation errors, empty if valid
      */
     public function validate(array $config): array

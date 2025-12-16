@@ -7,11 +7,11 @@ namespace Voodflow\Voodflow;
 // use Voodflow\Voodflow\Filament\Resources\TemplateResource;
 // use Voodflow\Voodflow\Filament\Resources\TriggerResource;
 // use Voodflow\Voodflow\Filament\Resources\WorkflowResource;
+use Filament\Contracts\Plugin;
+use Filament\Panel;
 use Voodflow\Voodflow\Filament\Resources\ExecutionResource;
 use Voodflow\Voodflow\Filament\Resources\ModelIntegrationResource;
 use Voodflow\Voodflow\Filament\Resources\WorkflowResource;
-use Filament\Contracts\Plugin;
-use Filament\Panel;
 
 class VoodflowPlugin implements Plugin
 {

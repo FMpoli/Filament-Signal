@@ -3,13 +3,6 @@
 namespace Voodflow\Voodflow\Filament\Resources;
 
 use BackedEnum;
-use Voodflow\Voodflow\Filament\Infolists\Components\ActionsListEntry;
-use Voodflow\Voodflow\Filament\Infolists\Components\FiltersListEntry;
-use Voodflow\Voodflow\Filament\Resources\TriggerResource\Pages;
-use Voodflow\Voodflow\Voodflow;
-use Voodflow\Voodflow\Models\SignalTrigger;
-use Voodflow\Voodflow\Support\PayloadFieldAnalyzer;
-use Voodflow\Voodflow\Support\WebhookTemplateRegistry;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
@@ -32,12 +25,19 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Schema as DatabaseSchema;
 use Illuminate\Support\Str;
+use Voodflow\Voodflow\Filament\Infolists\Components\ActionsListEntry;
+use Voodflow\Voodflow\Filament\Infolists\Components\FiltersListEntry;
+use Voodflow\Voodflow\Filament\Resources\TriggerResource\Pages;
+use Voodflow\Voodflow\Models\SignalTrigger;
+use Voodflow\Voodflow\Support\PayloadFieldAnalyzer;
+use Voodflow\Voodflow\Support\WebhookTemplateRegistry;
+use Voodflow\Voodflow\Voodflow;
 
 class TriggerResource extends Resource
 {
     protected static ?string $model = SignalTrigger::class;
 
-    protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-sparkles';
+    protected static BackedEnum | string | null $navigationIcon = 'heroicon-o-sparkles';
 
     public static function getNavigationGroup(): ?string
     {
@@ -77,7 +77,7 @@ class TriggerResource extends Resource
                                 ->label(__('voodflow::signal.fields.description'))
                                 ->hiddenLabel()
                                 ->placeholder('—')
-                                ->visible(fn(SignalTrigger $record) => !empty($record->description))
+                                ->visible(fn (SignalTrigger $record) => ! empty($record->description))
                                 ->columnSpanFull(),
                             TextEntry::make('event_display_name')
                                 ->label(__('voodflow::signal.fields.event_source'))
@@ -110,7 +110,7 @@ class TriggerResource extends Resource
                             ActionsListEntry::make('actions')
                                 ->label(__('voodflow::signal.fields.actions'))
                                 ->hiddenLabel()
-                                ->state(fn(SignalTrigger $record) => $record->actions->toArray()),
+                                ->state(fn (SignalTrigger $record) => $record->actions->toArray()),
                         ]),
                 ])
                     ->columnSpan(8),
@@ -208,7 +208,7 @@ class TriggerResource extends Resource
                                             return $results;
                                         })
                                         ->getOptionLabelUsing(function (?string $value): ?string {
-                                            if (!$value) {
+                                            if (! $value) {
                                                 return null;
                                             }
 
@@ -271,7 +271,7 @@ class TriggerResource extends Resource
                             Repeater::make('actions')
                                 ->cloneable()
                                 ->cloneAction(
-                                    fn($action) => $action
+                                    fn ($action) => $action
                                         ->after(function (array $arguments, Repeater $component): void {
                                             // Dopo che Filament ha clonato l'item, personalizzalo
                                             $state = $component->getState();
@@ -279,11 +279,11 @@ class TriggerResource extends Resource
 
                                             // Trova l'item appena clonato (quello senza ID o con ID null)
                                             foreach ($state as $id => $data) {
-                                                if ($id !== $itemId && (!isset($data['id']) || $data['id'] === null)) {
+                                                if ($id !== $itemId && (! isset($data['id']) || $data['id'] === null)) {
                                                     $copySuffix = __('voodflow::signal.actions.copy_suffix');
 
                                                     // Aggiungi "(Copy)" al nome se non è già presente
-                                                    if (isset($data['name']) && !str_ends_with($data['name'], $copySuffix)) {
+                                                    if (isset($data['name']) && ! str_ends_with($data['name'], $copySuffix)) {
                                                         $state[$id]['name'] = $data['name'] . $copySuffix;
                                                     }
 
@@ -304,7 +304,7 @@ class TriggerResource extends Resource
                                     if (isset($data['configuration']) && is_string($data['configuration'])) {
                                         $data['configuration'] = json_decode($data['configuration'], true) ?? [];
                                     }
-                                    if (!isset($data['configuration']) || !is_array($data['configuration'])) {
+                                    if (! isset($data['configuration']) || ! is_array($data['configuration'])) {
                                         $data['configuration'] = [];
                                     }
 
@@ -338,7 +338,7 @@ class TriggerResource extends Resource
 
                                             if (isset($state[$itemId])) {
                                                 $currentActive = $state[$itemId]['is_active'] ?? true;
-                                                $state[$itemId]['is_active'] = !$currentActive;
+                                                $state[$itemId]['is_active'] = ! $currentActive;
                                                 $component->state($state);
                                             }
                                         }),
@@ -405,7 +405,7 @@ class TriggerResource extends Resource
         // Eventi dal config
         $configuredEvents = config('voodflow.registered_events', []);
         foreach ($configuredEvents as $eventClass) {
-            if (is_string($eventClass) && !isset($options[$eventClass])) {
+            if (is_string($eventClass) && ! isset($options[$eventClass])) {
                 // Se non è già registrato con un nome, usa il nome della classe
                 $shortName = class_basename($eventClass);
                 $options[$eventClass] = $shortName;
@@ -423,7 +423,7 @@ class TriggerResource extends Resource
                 ->toArray();
 
             foreach ($databaseEvents as $eventClass) {
-                if (!isset($options[$eventClass])) {
+                if (! isset($options[$eventClass])) {
                     // Se non è già presente, usa il nome della classe
                     $shortName = class_basename($eventClass);
                     $options[$eventClass] = $shortName;
@@ -443,7 +443,7 @@ class TriggerResource extends Resource
     {
         $template = app(WebhookTemplateRegistry::class)->find($templateId);
 
-        if (!$template) {
+        if (! $template) {
             return;
         }
 
@@ -508,7 +508,7 @@ class TriggerResource extends Resource
      */
     public static function getActionTypeSchema(?string $actionType): array
     {
-        if (!$actionType) {
+        if (! $actionType) {
             return [];
         }
 
@@ -554,12 +554,12 @@ class TriggerResource extends Resource
                     '@md' => 2,
                     '@xl' => 2,
                 ])
-                ->visible(fn(Get $get): bool => $get('action_type') === 'webhook')
+                ->visible(fn (Get $get): bool => $get('action_type') === 'webhook')
                 ->schema([
                     Forms\Components\TextInput::make('configuration.url')
                         ->label(__('voodflow::signal.fields.endpoint_url'))
                         ->url()
-                        ->required(fn(Get $get): bool => $get('action_type') === 'webhook')
+                        ->required(fn (Get $get): bool => $get('action_type') === 'webhook')
                         ->columnSpanFull(),
                     Forms\Components\Select::make('configuration.method')
                         ->label(__('voodflow::signal.fields.http_method'))
@@ -582,7 +582,7 @@ class TriggerResource extends Resource
                         ->label(__('voodflow::signal.fields.signing_secret'))
                         ->password()
                         ->revealable()
-                        ->default(fn() => config('voodflow.webhook.secret') ?: Str::random(40))
+                        ->default(fn () => config('voodflow.webhook.secret') ?: Str::random(40))
                         ->helperText(__('voodflow::signal.helpers.signing_secret'))
                         ->columnSpan(2),
                 ]),
@@ -677,7 +677,7 @@ class TriggerResource extends Resource
                     '@md' => 2,
                     '@xl' => 2,
                 ])
-                ->visible(fn(Get $get): bool => $get('action_type') === 'log')
+                ->visible(fn (Get $get): bool => $get('action_type') === 'log')
                 ->schema([
                     Forms\Components\Select::make('configuration.body')
                         ->label(__('voodflow::signal.fields.payload_mode'))
@@ -697,7 +697,7 @@ class TriggerResource extends Resource
                     Text::make('log_info')
                         ->content(__('voodflow::signal.helpers.log_info')),
                 ])
-                ->visible(fn(Get $get): bool => $get('action_type') === 'log')
+                ->visible(fn (Get $get): bool => $get('action_type') === 'log')
                 ->columnSpanFull(),
         ];
     }
@@ -752,7 +752,7 @@ class TriggerResource extends Resource
     {
         $set('configuration.method', 'POST');
         $set('configuration.body', 'event');
-        if (!config('voodflow.webhook.secret')) {
+        if (! config('voodflow.webhook.secret')) {
             $set('configuration.secret', Str::random(40));
         }
     }
@@ -811,7 +811,7 @@ class TriggerResource extends Resource
                             ->label(__('voodflow::signal.fields.essential_fields'))
                             ->options(function (Get $get) use ($findEventClass): array {
                                 $eventClass = $findEventClass($get);
-                                if (!$eventClass) {
+                                if (! $eventClass) {
                                     return [];
                                 }
 
@@ -850,7 +850,7 @@ class TriggerResource extends Resource
                             ->afterStateHydrated(function ($state, callable $set, Get $get) use ($findEventClass) {
                                 // Pulisci i valori non validi quando viene caricato lo stato
                                 $eventClass = $findEventClass($get);
-                                if (!$eventClass || !is_array($state)) {
+                                if (! $eventClass || ! is_array($state)) {
                                     return;
                                 }
 
@@ -864,7 +864,7 @@ class TriggerResource extends Resource
                                         $parts = explode('.', $field);
                                         if (count($parts) === 2) {
                                             $fieldName = $parts[1];
-                                            if (!in_array($fieldName, ['created_at', 'updated_at', 'attachments'])) {
+                                            if (! in_array($fieldName, ['created_at', 'updated_at', 'attachments'])) {
                                                 $validFields[] = $field;
                                             }
                                         } else {
@@ -881,7 +881,7 @@ class TriggerResource extends Resource
                             ->afterStateUpdated(function ($state, callable $set, Get $get) use ($findEventClass) {
                                 // Pulisci i valori che non sono più nelle opzioni disponibili quando cambia l'evento
                                 $eventClass = $findEventClass($get);
-                                if (!$eventClass || !is_array($state)) {
+                                if (! $eventClass || ! is_array($state)) {
                                     return;
                                 }
 
@@ -895,7 +895,7 @@ class TriggerResource extends Resource
                                         $parts = explode('.', $field);
                                         if (count($parts) === 2) {
                                             $fieldName = $parts[1];
-                                            if (!in_array($fieldName, ['created_at', 'updated_at', 'attachments'])) {
+                                            if (! in_array($fieldName, ['created_at', 'updated_at', 'attachments'])) {
                                                 $validFields[] = $field;
                                             }
                                         } else {
@@ -917,7 +917,7 @@ class TriggerResource extends Resource
                         $analyzer = app(PayloadFieldAnalyzer::class);
                         $analysis = $analyzer->analyzeEvent($eventClass);
 
-                        if (!empty($analysis['relations'])) {
+                        if (! empty($analysis['relations'])) {
                             foreach ($analysis['relations'] as $relation) {
                                 $fieldOptions = $relation['field_options'] ?? [];
                                 if (empty($fieldOptions)) {
@@ -979,7 +979,7 @@ class TriggerResource extends Resource
                                         }
                                     })
                                     ->afterStateUpdated(function ($state, callable $set) use ($options, $formKey): void {
-                                        if (!is_array($state)) {
+                                        if (! is_array($state)) {
                                             return;
                                         }
 
@@ -1051,16 +1051,16 @@ class TriggerResource extends Resource
             ])
             ->actions([
                 ViewAction::make()
-                    ->url(fn(SignalTrigger $record): string => static::getUrl('view', ['record' => $record]))
+                    ->url(fn (SignalTrigger $record): string => static::getUrl('view', ['record' => $record]))
                     ->openUrlInNewTab(false),
                 EditAction::make()
-                    ->url(fn(SignalTrigger $record): string => static::getUrl('edit', ['record' => $record]))
+                    ->url(fn (SignalTrigger $record): string => static::getUrl('edit', ['record' => $record]))
                     ->openUrlInNewTab(false),
                 Action::make('flow')
                     ->label(__('voodflow::signal.actions.flow_view'))
                     ->icon('heroicon-o-squares-2x2')
                     ->color('info')
-                    ->url(fn(SignalTrigger $record): string => static::getUrl('flow', ['record' => $record]))
+                    ->url(fn (SignalTrigger $record): string => static::getUrl('flow', ['record' => $record]))
                     ->openUrlInNewTab(false),
                 Action::make('clone')
                     ->label(__('voodflow::signal.actions.clone'))
@@ -1126,7 +1126,7 @@ class TriggerResource extends Resource
                 ->schema([
                     Forms\Components\Select::make('field')
                         ->label(__('voodflow::signal.fields.field'))
-                        ->options(fn(Get $get): array => static::getFilterFieldOptions($get))
+                        ->options(fn (Get $get): array => static::getFilterFieldOptions($get))
                         ->searchable()
                         ->preload()
                         ->required()
@@ -1141,7 +1141,7 @@ class TriggerResource extends Resource
                 ->schema([
                     Forms\Components\Select::make('field')
                         ->label(__('voodflow::signal.fields.field'))
-                        ->options(fn(Get $get): array => static::getFilterFieldOptions($get))
+                        ->options(fn (Get $get): array => static::getFilterFieldOptions($get))
                         ->searchable()
                         ->preload()
                         ->required()
@@ -1156,7 +1156,7 @@ class TriggerResource extends Resource
                 ->schema([
                     Forms\Components\Select::make('field')
                         ->label(__('voodflow::signal.fields.field'))
-                        ->options(fn(Get $get): array => static::getFilterFieldOptions($get))
+                        ->options(fn (Get $get): array => static::getFilterFieldOptions($get))
                         ->searchable()
                         ->preload()
                         ->required()
@@ -1171,7 +1171,7 @@ class TriggerResource extends Resource
                 ->schema([
                     Forms\Components\Select::make('field')
                         ->label(__('voodflow::signal.fields.field'))
-                        ->options(fn(Get $get): array => static::getFilterFieldOptions($get))
+                        ->options(fn (Get $get): array => static::getFilterFieldOptions($get))
                         ->searchable()
                         ->preload()
                         ->required()
@@ -1186,7 +1186,7 @@ class TriggerResource extends Resource
                 ->schema([
                     Forms\Components\Select::make('field')
                         ->label(__('voodflow::signal.fields.field'))
-                        ->options(fn(Get $get): array => static::getFilterFieldOptions($get))
+                        ->options(fn (Get $get): array => static::getFilterFieldOptions($get))
                         ->searchable()
                         ->preload()
                         ->required()
@@ -1201,7 +1201,7 @@ class TriggerResource extends Resource
                 ->schema([
                     Forms\Components\Select::make('field')
                         ->label(__('voodflow::signal.fields.field'))
-                        ->options(fn(Get $get): array => static::getFilterFieldOptions($get))
+                        ->options(fn (Get $get): array => static::getFilterFieldOptions($get))
                         ->searchable()
                         ->preload()
                         ->required()
@@ -1216,7 +1216,7 @@ class TriggerResource extends Resource
                 ->schema([
                     Forms\Components\Select::make('field')
                         ->label(__('voodflow::signal.fields.field'))
-                        ->options(fn(Get $get): array => static::getFilterFieldOptions($get))
+                        ->options(fn (Get $get): array => static::getFilterFieldOptions($get))
                         ->searchable()
                         ->preload()
                         ->required()
@@ -1231,7 +1231,7 @@ class TriggerResource extends Resource
                 ->schema([
                     Forms\Components\Select::make('field')
                         ->label(__('voodflow::signal.fields.field'))
-                        ->options(fn(Get $get): array => static::getFilterFieldOptions($get))
+                        ->options(fn (Get $get): array => static::getFilterFieldOptions($get))
                         ->searchable()
                         ->preload()
                         ->required()
@@ -1246,7 +1246,7 @@ class TriggerResource extends Resource
                 ->schema([
                     Forms\Components\Select::make('field')
                         ->label(__('voodflow::signal.fields.field'))
-                        ->options(fn(Get $get): array => static::getFilterFieldOptions($get))
+                        ->options(fn (Get $get): array => static::getFilterFieldOptions($get))
                         ->searchable()
                         ->preload()
                         ->required()
@@ -1262,7 +1262,7 @@ class TriggerResource extends Resource
                 ->schema([
                     Forms\Components\Select::make('field')
                         ->label(__('voodflow::signal.fields.field'))
-                        ->options(fn(Get $get): array => static::getFilterFieldOptions($get))
+                        ->options(fn (Get $get): array => static::getFilterFieldOptions($get))
                         ->searchable()
                         ->preload()
                         ->required()
@@ -1324,7 +1324,7 @@ class TriggerResource extends Resource
                 }
 
                 // Se non trovato, prova a ottenere dal record corrente (modo edit)
-                if (!$eventClass) {
+                if (! $eventClass) {
                     try {
                         $record = request()->route('record');
                         if ($record && method_exists($record, 'getAttribute')) {
@@ -1451,7 +1451,7 @@ class TriggerResource extends Resource
 
                 // Ottieni il nome reale del campo dal database se disponibile
                 $realFieldName = $field;
-                if (!empty($realColumnNames) && count($parts) === 2) {
+                if (! empty($realColumnNames) && count($parts) === 2) {
                     $theoreticalFieldName = $parts[1];
                     foreach ($realColumnNames as $realColumn) {
                         if (str_ends_with($theoreticalFieldName, '_id')) {
@@ -1485,7 +1485,7 @@ class TriggerResource extends Resource
             }
 
             // Aggiungi anche i campi delle relazioni
-            if (!empty($analysis['relations'])) {
+            if (! empty($analysis['relations'])) {
                 foreach ($analysis['relations'] as $relation) {
                     $fieldOptions = $relation['field_options'] ?? [];
                     if (empty($fieldOptions)) {
@@ -1547,10 +1547,10 @@ class TriggerResource extends Resource
                     if ($realForeignKeyName && $parentProperty) {
                         $idFieldPath = "{$parentProperty}.{$realForeignKeyName}";
                         $relationLabel = $relation['label'] ?? $relationName;
-                        if (!isset($options[$idFieldPath])) {
+                        if (! isset($options[$idFieldPath])) {
                             $options[$idFieldPath] = "{$relationLabel} → ID";
                         }
-                    } elseif (isset($relation['id_field']) && !isset($options[$relation['id_field']])) {
+                    } elseif (isset($relation['id_field']) && ! isset($options[$relation['id_field']])) {
                         $relationLabel = $relation['label'] ?? $alias;
                         $options[$relation['id_field']] = "{$relationLabel} → ID";
                     }
@@ -1624,7 +1624,7 @@ class TriggerResource extends Resource
             }
 
             // Campi delle relazioni
-            if (!empty($analysis['relations'])) {
+            if (! empty($analysis['relations'])) {
                 foreach ($analysis['relations'] as $relation) {
                     $fieldOptions = $relation['field_options'] ?? [];
                     if (empty($fieldOptions)) {
@@ -1705,7 +1705,7 @@ class TriggerResource extends Resource
         foreach ($paths as $path) {
             try {
                 $value = $get($path);
-                if ($value && is_string($value) && !empty($value)) {
+                if ($value && is_string($value) && ! empty($value)) {
                     $eventClass = $value;
 
                     break;
@@ -1717,7 +1717,7 @@ class TriggerResource extends Resource
         }
 
         // Se non trovato, prova a ottenere dal record corrente (modo edit)
-        if (!$eventClass) {
+        if (! $eventClass) {
             try {
                 $record = $get('record');
                 if ($record) {
@@ -1735,7 +1735,7 @@ class TriggerResource extends Resource
         }
 
         // Se ancora non trovato, prova a ottenere dalla richiesta (modo create)
-        if (!$eventClass) {
+        if (! $eventClass) {
             try {
                 // Prova dal form state della richiesta
                 $requestData = request()->input('data');
@@ -1747,7 +1747,7 @@ class TriggerResource extends Resource
             }
         }
 
-        if (!$eventClass) {
+        if (! $eventClass) {
             return [];
         }
 
@@ -1805,7 +1805,7 @@ class TriggerResource extends Resource
 
                 // Ottieni il nome reale del campo dal database se disponibile
                 $realFieldName = $field;
-                if (!empty($realColumnNames) && count($parts) === 2) {
+                if (! empty($realColumnNames) && count($parts) === 2) {
                     $theoreticalFieldName = $parts[1];
                     // Cerca il campo reale nel database (potrebbe essere diverso, es: author_id vs blog_author_id)
                     foreach ($realColumnNames as $realColumn) {
@@ -1845,7 +1845,7 @@ class TriggerResource extends Resource
             }
 
             // Aggiungi anche i campi delle relazioni (come nella payload configuration)
-            if (!empty($analysis['relations'])) {
+            if (! empty($analysis['relations'])) {
                 foreach ($analysis['relations'] as $relation) {
                     $fieldOptions = $relation['field_options'] ?? [];
                     if (empty($fieldOptions)) {
@@ -1914,10 +1914,10 @@ class TriggerResource extends Resource
                     if ($realForeignKeyName && $parentProperty) {
                         $idFieldPath = "{$parentProperty}.{$realForeignKeyName}";
                         $relationLabel = $relation['label'] ?? $relationName;
-                        if (!isset($options[$idFieldPath])) {
+                        if (! isset($options[$idFieldPath])) {
                             $options[$idFieldPath] = "{$relationLabel} → ID";
                         }
-                    } elseif (isset($relation['id_field']) && !isset($options[$relation['id_field']])) {
+                    } elseif (isset($relation['id_field']) && ! isset($options[$relation['id_field']])) {
                         $relationLabel = $relation['label'] ?? $alias;
                         $options[$relation['id_field']] = "{$relationLabel} → ID";
                     }

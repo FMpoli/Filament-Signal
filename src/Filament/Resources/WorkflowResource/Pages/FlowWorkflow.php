@@ -2,8 +2,6 @@
 
 namespace Voodflow\Voodflow\Filament\Resources\WorkflowResource\Pages;
 
-use Voodflow\Voodflow\Filament\Resources\WorkflowResource;
-use Voodflow\Voodflow\Models\Workflow;
 use Filament\Actions\Action;
 use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\Contracts\HasActions;
@@ -14,6 +12,8 @@ use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Resources\Pages\Page;
 use Illuminate\Support\Str;
+use Voodflow\Voodflow\Filament\Resources\WorkflowResource;
+use Voodflow\Voodflow\Models\Workflow;
 
 class FlowWorkflow extends Page implements HasActions, HasForms
 {
@@ -38,6 +38,7 @@ class FlowWorkflow extends Page implements HasActions, HasForms
     {
         // Use new Services NodeRegistry
         $registry = app(\Voodflow\Voodflow\Services\NodeRegistry::class);
+
         return $registry->getMetadataForReact();
     }
 
@@ -63,7 +64,7 @@ class FlowWorkflow extends Page implements HasActions, HasForms
         $registry = app(\Voodflow\Voodflow\Services\NodeRegistry::class);
         $class = $registry->get($type);
 
-        if (!$class) {
+        if (! $class) {
             return;
         }
 
@@ -161,6 +162,7 @@ class FlowWorkflow extends Page implements HasActions, HasForms
         // If nodeId is provided, delete only that node (and connected edges)
         if ($nodeId) {
             $this->deleteNode($nodeId);
+
             return;
         }
 
@@ -250,7 +252,7 @@ class FlowWorkflow extends Page implements HasActions, HasForms
     public function updateNodeConfig(array $data): void
     {
         $nodeId = $data['nodeId'] ?? null;
-        if (!$nodeId) {
+        if (! $nodeId) {
             return;
         }
 
@@ -279,7 +281,7 @@ class FlowWorkflow extends Page implements HasActions, HasForms
     public function updateFilterConfig(array $data): void
     {
         $nodeId = $data['nodeId'] ?? null;
-        if (!$nodeId) {
+        if (! $nodeId) {
             return;
         }
 
@@ -302,20 +304,18 @@ class FlowWorkflow extends Page implements HasActions, HasForms
         }
     }
 
-
-
     // Store current editing node
     public ?string $editingNodeId = null;
 
     // Helper to calculate position based on source node and handle
     private function calculateNewNodePosition(?string $sourceNodeId, ?string $sourceHandle = null): array
     {
-        if (!$sourceNodeId) {
+        if (! $sourceNodeId) {
             return ['x' => 400, 'y' => 100]; // Default fallback
         }
 
         $sourceNode = $this->record->nodes()->where('node_id', $sourceNodeId)->first();
-        if (!$sourceNode || empty($sourceNode->position)) {
+        if (! $sourceNode || empty($sourceNode->position)) {
             return ['x' => 400, 'y' => 100];
         }
 
@@ -506,7 +506,7 @@ class FlowWorkflow extends Page implements HasActions, HasForms
     public function editTriggerAction(): Action
     {
         return Action::make('editTrigger')
-            ->modalHeading(fn() => $this->editingNodeId ? 'Edit Trigger' : 'Create Trigger')
+            ->modalHeading(fn () => $this->editingNodeId ? 'Edit Trigger' : 'Create Trigger')
             ->modalWidth('2xl')
             ->fillForm(function (): array {
                 // If editing existing node, load its data
@@ -567,7 +567,7 @@ class FlowWorkflow extends Page implements HasActions, HasForms
                         return $results;
                     })
                     ->getOptionLabelUsing(function (?string $value): ?string {
-                        if (!$value) {
+                        if (! $value) {
                             return null;
                         }
 

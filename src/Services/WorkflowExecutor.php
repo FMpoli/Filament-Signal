@@ -2,17 +2,16 @@
 
 namespace Voodflow\Voodflow\Services;
 
+use Illuminate\Support\Facades\Log;
+use Voodflow\Voodflow\Execution\ExecutionContext;
+use Voodflow\Voodflow\Execution\ExecutionResult;
 use Voodflow\Voodflow\Models\Execution;
 use Voodflow\Voodflow\Models\ExecutionNode;
 use Voodflow\Voodflow\Models\Workflow;
-use Voodflow\Voodflow\Execution\ExecutionContext;
-use Voodflow\Voodflow\Execution\ExecutionResult;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 
 /**
  * Workflow Executor
- * 
+ *
  * Generic workflow execution engine.
  * Executes nodes sequentially through node->execute()
  * without knowing about specific node types.
@@ -21,8 +20,7 @@ class WorkflowExecutor
 {
     public function __construct(
         protected NodeRegistry $nodeRegistry
-    ) {
-    }
+    ) {}
 
     /**
      * Execute a workflow
@@ -49,7 +47,7 @@ class WorkflowExecutor
             foreach ($nodes as $node) {
                 $result = $this->executeNode($execution, $node, $currentPayload, $eventClass);
 
-                if (!$result->success) {
+                if (! $result->success) {
                     // Node failed - stop execution
                     $execution->update([
                         'status' => 'failed',
@@ -113,12 +111,12 @@ class WorkflowExecutor
             // Get node class from registry
             $nodeClass = $this->nodeRegistry->get($node->type);
 
-            if (!$nodeClass) {
+            if (! $nodeClass) {
                 throw new \Exception("Unknown node type: {$node->type}");
             }
 
             // Instantiate and execute node
-            $nodeInstance = new $nodeClass();
+            $nodeInstance = new $nodeClass;
 
             // Build execution context
             $context = new ExecutionContext(

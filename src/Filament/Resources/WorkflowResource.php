@@ -3,8 +3,6 @@
 namespace Voodflow\Voodflow\Filament\Resources;
 
 use BackedEnum;
-use Voodflow\Voodflow\Filament\Resources\WorkflowResource\Pages;
-use Voodflow\Voodflow\Models\Workflow;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
@@ -18,12 +16,14 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Voodflow\Voodflow\Filament\Resources\WorkflowResource\Pages;
+use Voodflow\Voodflow\Models\Workflow;
 
 class WorkflowResource extends Resource
 {
     protected static ?string $model = Workflow::class;
 
-    protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-sparkles';
+    protected static BackedEnum | string | null $navigationIcon = 'heroicon-o-sparkles';
 
     public static function getNavigationGroup(): ?string
     {
@@ -39,12 +39,12 @@ class WorkflowResource extends Resource
                     Section::make()
                         ->icon('heroicon-o-bolt')
                         ->compact()
-                        ->heading(fn(Workflow $record) => $record->name)
+                        ->heading(fn (Workflow $record) => $record->name)
                         ->schema([
                             TextEntry::make('description')
                                 ->label(__('voodflow::signal.fields.description'))
                                 ->placeholder('—')
-                                ->visible(fn(Workflow $record) => !empty($record->description))
+                                ->visible(fn (Workflow $record) => ! empty($record->description))
                                 ->columnSpanFull(),
                         ]),
                 ])
@@ -114,7 +114,7 @@ class WorkflowResource extends Resource
                 Action::make('flow')
                     ->label('Editor')
                     ->icon('heroicon-o-cpu-chip')
-                    ->url(fn(Workflow $record) => static::getUrl('flow', ['record' => $record])),
+                    ->url(fn (Workflow $record) => static::getUrl('flow', ['record' => $record])),
                 ViewAction::make(),
                 EditAction::make(),
             ])

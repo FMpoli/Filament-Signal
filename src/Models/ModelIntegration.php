@@ -2,14 +2,14 @@
 
 namespace Voodflow\Voodflow\Models;
 
-use Voodflow\Voodflow\Voodflow;
-use Voodflow\Voodflow\Support\EloquentEventMap;
-use Voodflow\Voodflow\Support\EventRegistry;
-use Voodflow\Voodflow\Support\ModelRegistry;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
+use Voodflow\Voodflow\Support\EloquentEventMap;
+use Voodflow\Voodflow\Support\EventRegistry;
+use Voodflow\Voodflow\Support\ModelRegistry;
+use Voodflow\Voodflow\Voodflow;
 
 class ModelIntegration extends Model
 {
@@ -37,9 +37,9 @@ class ModelIntegration extends Model
 
     protected static function booted(): void
     {
-        static::saved(fn(self $integration) => $integration->refreshSignalRegistrations());
-        static::deleted(fn(self $integration) => $integration->unregisterFromSignal());
-        static::forceDeleted(fn(self $integration) => $integration->unregisterFromSignal());
+        static::saved(fn (self $integration) => $integration->refreshSignalRegistrations());
+        static::deleted(fn (self $integration) => $integration->unregisterFromSignal());
+        static::forceDeleted(fn (self $integration) => $integration->unregisterFromSignal());
     }
 
     public function refreshSignalRegistrations(): void
@@ -59,7 +59,7 @@ class ModelIntegration extends Model
     {
         $fields = $this->getNormalizedFields();
 
-        if (!empty($fields)) {
+        if (! empty($fields)) {
             Voodflow::registerModelFields($this->model_class, $fields, $this->getAlias());
         }
 
@@ -130,7 +130,7 @@ class ModelIntegration extends Model
 
         foreach ($essential as $field) {
             $fieldName = $field['field'] ?? null;
-            if (!$fieldName) {
+            if (! $fieldName) {
                 continue;
             }
 
@@ -150,7 +150,7 @@ class ModelIntegration extends Model
 
             if ($mode === 'reverse') {
                 $descriptor = $relation['relation_descriptor'] ?? null;
-                if (!$descriptor) {
+                if (! $descriptor) {
                     continue;
                 }
 
@@ -165,7 +165,7 @@ class ModelIntegration extends Model
             }
 
             $name = $relation['name'] ?? null;
-            if (!$name) {
+            if (! $name) {
                 continue;
             }
 
@@ -189,7 +189,7 @@ class ModelIntegration extends Model
 
         foreach ($fields as $field) {
             $fieldName = $field['field'] ?? null;
-            if (!$fieldName) {
+            if (! $fieldName) {
                 continue;
             }
 
@@ -248,7 +248,7 @@ class ModelIntegration extends Model
 
         foreach ($this->custom_events ?? [] as $event) {
             $class = $event['class'] ?? null;
-            if (!$class) {
+            if (! $class) {
                 continue;
             }
 

@@ -4,7 +4,7 @@ namespace Voodflow\Voodflow\Contracts;
 
 /**
  * Interface for Signal workflow nodes.
- * 
+ *
  * Implement this interface when creating custom nodes.
  */
 interface NodeInterface
@@ -31,20 +31,16 @@ interface NodeInterface
 
     /**
      * Execute the node logic with ExecutionContext
-     * 
+     *
      * Modern signature using ExecutionContext and ExecutionResult
-     * 
-     * @param \Voodflow\Voodflow\Execution\ExecutionContext $context
-     * @return \Voodflow\Voodflow\Execution\ExecutionResult
      */
     public function execute(\Voodflow\Voodflow\Execution\ExecutionContext $context): \Voodflow\Voodflow\Execution\ExecutionResult;
 
     /**
      * Validate the node configuration
-     * 
-     * @param array $config The node configuration
+     *
+     * @param  array  $config  The node configuration
      * @return array Array of validation errors, empty if valid
      */
     public function validate(array $config): array;
 }
-

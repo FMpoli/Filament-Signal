@@ -2,9 +2,9 @@
 
 namespace Voodflow\Voodflow\Filament\Resources\WorkflowResource\Pages;
 
-use Voodflow\Voodflow\Filament\Resources\WorkflowResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
+use Voodflow\Voodflow\Filament\Resources\WorkflowResource;
 
 class ListWorkflows extends ListRecords
 {

@@ -2,20 +2,6 @@
 
 namespace Voodflow\Voodflow;
 
-
-use Voodflow\Voodflow\Models\ModelIntegration;
-use Voodflow\Voodflow\Services\EventRegistrar;
-use Voodflow\Voodflow\Console\Commands\FilamentSignalCommand;
-use Voodflow\Voodflow\Console\Commands\MakeSignalNodeCommand;
-use Voodflow\Voodflow\Console\Commands\MakeNodeCommand;
-use Voodflow\Voodflow\Support\EloquentEventMap;
-use Voodflow\Voodflow\Support\ReverseRelationRegistrar;
-use Voodflow\Voodflow\Support\ReverseRelationRegistry;
-use Voodflow\Voodflow\Support\ReverseRelationWarmup;
-use Voodflow\Voodflow\Support\EventRegistry;
-use Voodflow\Voodflow\Support\ModelRegistry;
-use Voodflow\Voodflow\Support\PayloadFieldAnalyzer;
-use Voodflow\Voodflow\Testing\TestsFilamentSignal;
 use Filament\Support\Assets\Asset;
 use Filament\Support\Assets\Css;
 use Filament\Support\Assets\Js;
@@ -27,6 +13,18 @@ use Livewire\Features\SupportTesting\Testable;
 use Spatie\LaravelPackageTools\Commands\InstallCommand;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
+use Voodflow\Voodflow\Console\Commands\MakeNodeCommand;
+use Voodflow\Voodflow\Console\Commands\MakeSignalNodeCommand;
+use Voodflow\Voodflow\Models\ModelIntegration;
+use Voodflow\Voodflow\Services\EventRegistrar;
+use Voodflow\Voodflow\Support\EloquentEventMap;
+use Voodflow\Voodflow\Support\EventRegistry;
+use Voodflow\Voodflow\Support\ModelRegistry;
+use Voodflow\Voodflow\Support\PayloadFieldAnalyzer;
+use Voodflow\Voodflow\Support\ReverseRelationRegistrar;
+use Voodflow\Voodflow\Support\ReverseRelationRegistry;
+use Voodflow\Voodflow\Support\ReverseRelationWarmup;
+use Voodflow\Voodflow\Testing\TestsFilamentSignal;
 
 class VoodflowServiceProvider extends PackageServiceProvider
 {
@@ -72,19 +70,19 @@ class VoodflowServiceProvider extends PackageServiceProvider
 
     public function packageRegistered(): void
     {
-        $this->app->singleton(EventRegistry::class, fn(): EventRegistry => new EventRegistry);
-        $this->app->singleton(ModelRegistry::class, fn(): ModelRegistry => new ModelRegistry);
-        $this->app->singleton(ReverseRelationRegistry::class, fn(): ReverseRelationRegistry => new ReverseRelationRegistry);
-        $this->app->singleton(ReverseRelationRegistrar::class, fn($app): ReverseRelationRegistrar => new ReverseRelationRegistrar(
+        $this->app->singleton(EventRegistry::class, fn (): EventRegistry => new EventRegistry);
+        $this->app->singleton(ModelRegistry::class, fn (): ModelRegistry => new ModelRegistry);
+        $this->app->singleton(ReverseRelationRegistry::class, fn (): ReverseRelationRegistry => new ReverseRelationRegistry);
+        $this->app->singleton(ReverseRelationRegistrar::class, fn ($app): ReverseRelationRegistrar => new ReverseRelationRegistrar(
             $app->make(ReverseRelationRegistry::class)
         ));
-        $this->app->singleton(ReverseRelationWarmup::class, fn($app): ReverseRelationWarmup => new ReverseRelationWarmup(
+        $this->app->singleton(ReverseRelationWarmup::class, fn ($app): ReverseRelationWarmup => new ReverseRelationWarmup(
             $app->make(EventRegistry::class),
             $app->make(PayloadFieldAnalyzer::class),
             $app->make(ModelRegistry::class),
             $app->make(ReverseRelationRegistrar::class)
         ));
-        $this->app->singleton(EloquentEventMap::class, fn(): EloquentEventMap => new EloquentEventMap);
+        $this->app->singleton(EloquentEventMap::class, fn (): EloquentEventMap => new EloquentEventMap);
     }
 
     public function packageBooted(): void
@@ -140,13 +138,13 @@ class VoodflowServiceProvider extends PackageServiceProvider
 
     protected function bootModelIntegrations(): void
     {
-        if (!class_exists(ModelIntegration::class)) {
+        if (! class_exists(ModelIntegration::class)) {
             return;
         }
 
         try {
             $table = config('voodflow.table_names.model_integrations', 'signal_model_integrations');
-            if (!Schema::hasTable($table)) {
+            if (! Schema::hasTable($table)) {
                 return;
             }
         } catch (\Throwable $exception) {

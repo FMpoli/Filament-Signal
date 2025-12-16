@@ -2,9 +2,9 @@
 
 namespace Voodflow\Voodflow\Filament\Resources\ModelIntegrationResource\Pages;
 
-use Voodflow\Voodflow\Filament\Resources\ModelIntegrationResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
+use Voodflow\Voodflow\Filament\Resources\ModelIntegrationResource;
 
 class ListModelIntegrations extends ListRecords
 {

@@ -7,7 +7,7 @@ use Voodflow\Voodflow\Models\Node;
 
 /**
  * Execution Context
- * 
+ *
  * Contains all data needed for a node to execute:
  * - Current workflow execution
  * - Current node configuration
@@ -22,8 +22,7 @@ class ExecutionContext
         public array $input,
         public array $config,
         public string $eventClass,
-    ) {
-    }
+    ) {}
 
     /**
      * Get a config value with optional default

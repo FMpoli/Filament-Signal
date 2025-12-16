@@ -2,13 +2,13 @@
 
 namespace Voodflow\Voodflow\Filament\Resources\TriggerResource\Pages;
 
-use Voodflow\Voodflow\Filament\Resources\TriggerResource;
 use Filament\Actions\Action;
 use Filament\Forms;
 use Filament\Forms\Components\Builder;
 use Filament\Resources\Pages\EditRecord;
 use Filament\Schemas\Schema;
 use Filament\Support\Enums\Width;
+use Voodflow\Voodflow\Filament\Resources\TriggerResource;
 
 class FlowTrigger extends EditRecord
 {
@@ -36,7 +36,7 @@ class FlowTrigger extends EditRecord
         return $this->record->name ?? __('voodflow::signal.actions.flow_view');
     }
 
-    public function getMaxContentWidth(): Width|string|null
+    public function getMaxContentWidth(): Width | string | null
     {
         return Width::Full;
     }
