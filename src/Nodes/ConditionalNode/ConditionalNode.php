@@ -21,6 +21,8 @@ class ConditionalNode implements NodeInterface
         return [
             'author' => 'Voodflow',
             'version' => '1.0.0',
+            'category' => 'flow',
+            'description' => 'Branch workflow based on conditions',
             'color' => 'warning',
             'icon' => 'heroicon-o-arrows-pointing-out',
             'group' => 'Logic',

@@ -50,6 +50,8 @@ class FilterProNode implements NodeInterface
         return [
             'author' => 'Voodflow',
             'version' => '1.0.0',
+            'category' => 'transform',
+            'description' => 'Advanced filtering with complex conditions',
             'color' => 'purple',
             'icon' => 'heroicon-o-filter',
             'group' => 'Filters',

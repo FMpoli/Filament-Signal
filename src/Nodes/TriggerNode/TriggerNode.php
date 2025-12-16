@@ -49,6 +49,8 @@ class TriggerNode implements NodeInterface
         return [
             'author' => 'Voodflow',
             'version' => '1.0.0',
+            'category' => 'trigger',
+            'description' => 'Start workflow on events',
             'color' => 'orange',
             'icon' => 'heroicon-o-bolt',
             'group' => 'Triggers',

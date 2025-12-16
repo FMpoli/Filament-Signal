@@ -49,6 +49,8 @@ class FilterNode implements NodeInterface
         return [
             'author' => 'Voodflow',
             'version' => '1.0.0',
+            'category' => 'transform',
+            'description' => 'Filter data based on conditions',
             'color' => 'purple',
             'icon' => 'heroicon-o-funnel',
             'group' => 'Filters',
