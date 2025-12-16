@@ -456,20 +456,16 @@ function FlowCanvas({ initialNodes, initialEdges, initialViewport, livewireId, e
             {/* Empty State */}
             {isEmpty && (
                 <EmptyCanvasState
-                    availableNodes={availableNodesList}
+                    availableNodes={availableNodesMap}
                     onAddNode={(nodeType) => {
                         if (!window.Livewire || !livewireId) return;
-                        const component = window.Livewire.find(livewireId);
-
-                        let flowPos = { x: 400, y: 200 };
-
-                        if (component) {
-                            component.call('createGenericNode', {
-                                type: nodeType,
-                                position: flowPos,
-                                sourceNodeId: null
-                            });
-                        }
+                        const livewire = window.Livewire.find(livewireId);
+                        const position = { x: 400, y: 200 };
+                        livewire && livewire.call('createGenericNode', {
+                            type: nodeType,
+                            position,
+                            sourceNodeId: null
+                        });
                     }}
                 />
             )}
