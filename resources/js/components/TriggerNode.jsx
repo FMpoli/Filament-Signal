@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Handle, Position, useStore, useReactFlow } from 'reactflow';
 import ConfirmModal from './ConfirmModal';
 import AddNodeButton from './AddNodeButton';
+import VoodflowLogo from './VoodflowLogo';
 
 const TriggerNode = ({ id, data, selected }) => {
     const { setNodes } = useReactFlow();
@@ -220,8 +221,13 @@ const TriggerNode = ({ id, data, selected }) => {
                                 </div>
                             )}
                             {!formData.description && !formData.eventClass && (
-                                <div className="text-slate-400 dark:text-slate-500 text-sm italic mt-2">
-                                    Click arrow to configure...
+                                <div className="flex flex-col items-center justify-center py-2">
+                                    <div className="opacity-50 mb-2">
+                                        <VoodflowLogo width={50} height={50} />
+                                    </div>
+                                    <div className="text-slate-400 dark:text-slate-500 text-sm italic">
+                                        Click to configure...
+                                    </div>
                                 </div>
                             )}
                         </div>

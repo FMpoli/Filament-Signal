@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Handle, Position, useReactFlow, useEdges, useNodes } from 'reactflow';
 import ConfirmModal from './ConfirmModal';
 import AddNodeButton from './AddNodeButton';
+import VoodflowLogo from './VoodflowLogo';
 
 /**
  * SendWebhook Node Component
@@ -298,20 +299,29 @@ const SendWebhookNode = ({ id, data }) => {
                 {/* Body */}
                 <div className="p-4 relative">
                     {!isExpanded ? (
-                        <div
-                            className="cursor-pointer group flex flex-col gap-1"
-                            onClick={() => setIsExpanded(true)}
-                        >
-                            <div className="font-medium text-slate-700 dark:text-slate-200 flex items-center justify-between">
-                                <span>{label}</span>
-                                <span className="text-xs px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-500 font-mono">
-                                    {method}
-                                </span>
+                        !edges.some(edge => edge.target === id) ? (
+                            <div className="text-center py-4">
+                                <div className="flex justify-center opacity-50 mb-2">
+                                    <VoodflowLogo width={60} height={60} />
+                                </div>
+                                <div className="text-blue-500 font-medium text-sm">Connect data</div>
                             </div>
-                            <div className="text-xs font-mono text-slate-400 truncate max-w-[350px]">
-                                {url || 'No URL configured'}
+                        ) : (
+                            <div
+                                className="cursor-pointer group flex flex-col gap-1"
+                                onClick={() => setIsExpanded(true)}
+                            >
+                                <div className="font-medium text-slate-700 dark:text-slate-200 flex items-center justify-between">
+                                    <span>{label}</span>
+                                    <span className="text-xs px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-500 font-mono">
+                                        {method}
+                                    </span>
+                                </div>
+                                <div className="text-xs font-mono text-slate-400 truncate max-w-[350px]">
+                                    {url || 'No URL configured'}
+                                </div>
                             </div>
-                        </div>
+                        )
                     ) : (
                         <div className="nodrag space-y-4">
                             {/* Row 1: Name & URL */}
