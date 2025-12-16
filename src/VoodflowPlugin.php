@@ -10,9 +10,9 @@ namespace Voodflow\Voodflow;
 use Filament\Contracts\Plugin;
 use Filament\Panel;
 use Voodflow\Voodflow\Filament\Resources\ExecutionResource;
+use Voodflow\Voodflow\Filament\Resources\InstalledPackageResource;
 use Voodflow\Voodflow\Filament\Resources\ModelIntegrationResource;
 use Voodflow\Voodflow\Filament\Resources\WorkflowResource;
-use Voodflow\Voodflow\Filament\Resources\InstalledPackageResource;
 
 class VoodflowPlugin implements Plugin
 {
@@ -20,6 +20,7 @@ class VoodflowPlugin implements Plugin
     {
         return 'voodflow';
     }
+
     public function register(Panel $panel): void
     {
         $panel->resources([
