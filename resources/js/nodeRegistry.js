@@ -1,5 +1,5 @@
 // Auto-generated node registry
-// Generated at: 2025-12-16T17:15:57.202Z
+// Generated at: 2025-12-16T20:26:41.778Z
 // Do not edit manually - this file is regenerated on build
 
 import FilterNode from '../../src/Nodes/FilterNode/components/FilterNode';

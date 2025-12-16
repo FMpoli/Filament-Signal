@@ -76,7 +76,7 @@ export default function ContextMenu({ id, top, left, right, bottom, availableNod
                 }}
                 onClose={props.onClick}
                 title="Add to Flow"
-                className="w-[500px] max-h-[500px]"
+                className="w-[600px] max-h-[80vh]"
             />
         </div>
     );

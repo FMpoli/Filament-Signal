@@ -422,7 +422,7 @@ const FilterNode = ({ id, data }) => {
                                     onChange={(e) => handleMatchTypeChange(e.target.value)}
                                     className="w-full px-3 py-2 text-sm border border-slate-300 dark:border-slate-600 rounded-md 
                                         bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100
-                                        focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none cursor-pointer"
+                                        focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none cursor-pointer appearance-none"
                                 >
                                     <option value="all">All conditions must match (AND)</option>
                                     <option value="any">Any condition must match (OR)</option>
@@ -472,7 +472,7 @@ const FilterNode = ({ id, data }) => {
                                                             onChange={(e) => handleFilterChange(index, 'field', e.target.value)}
                                                             className="w-full px-2 py-1.5 text-xs border border-slate-300 dark:border-slate-600 rounded 
                                                                 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100
-                                                                focus:ring-1 focus:ring-purple-500 focus:border-purple-500 outline-none"
+                                                                focus:ring-1 focus:ring-purple-500 focus:border-purple-500 outline-none appearance-none"
                                                         >
                                                             <option value="">Select field...</option>
                                                             {Object.entries(availableFields).map(([value, info]) => (
@@ -488,7 +488,7 @@ const FilterNode = ({ id, data }) => {
                                                             onChange={(e) => handleFilterChange(index, 'type', e.target.value)}
                                                             className="w-full px-2 py-1.5 text-xs border border-slate-300 dark:border-slate-600 rounded 
                                                                 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100
-                                                                focus:ring-1 focus:ring-purple-500 focus:border-purple-500 outline-none"
+                                                                focus:ring-1 focus:ring-purple-500 focus:border-purple-500 outline-none appearance-none"
                                                         >
                                                             {operators.map(op => (
                                                                 <option key={op.value} value={op.value}>{op.label}</option>

@@ -26,7 +26,7 @@ class MakeNodeCommand extends Command
         $nodeDir = base_path("packages/Voodflow/Voodflow/src/Nodes/{$nodeClass}");
 
         // Check if exists
-        if (is_dir($nodeDir) && ! $nodeInfo['force']) {
+        if (is_dir($nodeDir) && !$nodeInfo['force']) {
             $this->error("Node {$nodeClass} already exists! Use --force to overwrite.");
 
             return self::FAILURE;
@@ -62,12 +62,12 @@ class MakeNodeCommand extends Command
     {
         $name = $this->argument('name');
 
-        if (! $name) {
+        if (!$name) {
             $name = $this->ask('Node name (e.g., SlackNode, DatabaseNode)');
         }
 
         // Ensure name ends with 'Node'
-        if (! Str::endsWith($name, 'Node')) {
+        if (!Str::endsWith($name, 'Node')) {
             $name .= 'Node';
         }
 
@@ -138,11 +138,11 @@ class MakeNodeCommand extends Command
 
     protected function createDirectoryStructure(string $nodeDir): void
     {
-        if (! is_dir($nodeDir)) {
+        if (!is_dir($nodeDir)) {
             mkdir($nodeDir, 0755, true);
         }
 
-        if (! is_dir($nodeDir . '/components')) {
+        if (!is_dir($nodeDir . '/components')) {
             mkdir($nodeDir . '/components', 0755, true);
         }
     }
@@ -295,7 +295,7 @@ PHP;
 
     protected function buildPositioningCode(array $nodeInfo): string
     {
-        if (! $nodeInfo['has_multiple_outputs']) {
+        if (!$nodeInfo['has_multiple_outputs']) {
             return "'positioning' => [
                 'input' => true,
                 'output' => true,
@@ -538,7 +538,9 @@ const {$nodeClass} = ({ id, data }) => {
                 <div className="p-4">
                     {!isConnected ? (
                         <div className="text-center py-4">
-                            <VoodflowLogo className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                            <div className="text-slate-400 dark:text-slate-500 text-sm mb-2 flex justify-center opacity-50">
+                                <VoodflowLogo width={60} height={60} />
+                            </div>
                             <div className="text-{$color}-500 font-medium text-sm">Connect data</div>
                         </div>
                     ) : !isExpanded ? (

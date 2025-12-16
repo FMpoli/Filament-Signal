@@ -276,7 +276,7 @@ const TriggerNode = ({ id, data, selected }) => {
                                     onChange={(e) => handleChange('eventClass', e.target.value)}
                                     className="w-full px-3 py-2 text-sm border border-slate-300 dark:border-slate-600 rounded-md 
                                     bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100
-                                    focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none cursor-pointer"
+                                    focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none cursor-pointer appearance-none"
                                 >
                                     <option value="">Select an event...</option>
                                     {Object.entries(eventOptions).map(([value, label]) => (
@@ -295,7 +295,7 @@ const TriggerNode = ({ id, data, selected }) => {
                                     onChange={(e) => handleChange('status', e.target.value)}
                                     className="w-full px-3 py-2 text-sm border border-slate-300 dark:border-slate-600 rounded-md 
                                     bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100
-                                    focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none cursor-pointer"
+                                    focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none cursor-pointer appearance-none"
                                 >
                                     <option value="draft">Draft</option>
                                     <option value="active">Active</option>

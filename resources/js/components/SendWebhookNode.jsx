@@ -363,7 +363,7 @@ const SendWebhookNode = ({ id, data }) => {
                                         value={method}
                                         onChange={(e) => handleMethodChange(e.target.value)}
                                         className="w-full px-3 py-2 text-sm border border-slate-300 dark:border-slate-600 rounded-md 
-                                            bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 outline-none focus:ring-2 focus:ring-blue-500"
+                                            bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 outline-none focus:ring-2 focus:ring-blue-500 appearance-none"
                                     >
                                         <option value="POST">POST</option>
                                         <option value="PUT">PUT</option>
@@ -380,7 +380,7 @@ const SendWebhookNode = ({ id, data }) => {
                                         value={payloadMode}
                                         onChange={(e) => handlePayloadModeChange(e.target.value)}
                                         className="w-full px-3 py-2 text-sm border border-slate-300 dark:border-slate-600 rounded-md 
-                                            bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 outline-none focus:ring-2 focus:ring-blue-500"
+                                            bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 outline-none focus:ring-2 focus:ring-blue-500 appearance-none"
                                     >
                                         <option value="payload">Event Payload</option>
                                         <option value="envelope">Payload + Envelope</option>

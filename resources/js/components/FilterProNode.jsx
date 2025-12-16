@@ -383,7 +383,7 @@ const FilterProNode = ({ id, data }) => {
                                                                 onChange={(e) => handleFilterChange(index, 'field', e.target.value)}
                                                                 className="w-full px-2 py-1.5 text-xs border border-slate-300 dark:border-slate-600 rounded 
                                                                     bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100
-                                                                    focus:ring-1 focus:ring-purple-500 focus:border-purple-500 outline-none"
+                                                                    focus:ring-1 focus:ring-purple-500 focus:border-purple-500 outline-none appearance-none"
                                                             >
                                                                 <option value="">Select field...</option>
                                                                 {Object.entries(availableFields).map(([value, info]) => (
@@ -399,7 +399,7 @@ const FilterProNode = ({ id, data }) => {
                                                                 onChange={(e) => handleFilterChange(index, 'type', e.target.value)}
                                                                 className="w-full px-2 py-1.5 text-xs border border-slate-300 dark:border-slate-600 rounded 
                                                                     bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100
-                                                                    focus:ring-1 focus:ring-purple-500 focus:border-purple-500 outline-none"
+                                                                    focus:ring-1 focus:ring-purple-500 focus:border-purple-500 outline-none appearance-none"
                                                             >
                                                                 {operators.map(op => (
                                                                     <option key={op.value} value={op.value}>{op.label}</option>
