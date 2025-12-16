@@ -52,15 +52,16 @@ class NodeRegistry
 
             if ($manifest && isset($manifest['php']['namespace'], $manifest['php']['class'])) {
                 $className = $manifest['php']['namespace'] . '\\' . $manifest['php']['class'];
-                
+
                 // Try to load file manually to support drop-in without composer dump-autoload
                 $classFile = $path . '/' . $manifest['php']['class'] . '.php';
                 if (File::exists($classFile)) {
                     require_once $classFile;
                 }
-                
+
                 if (class_exists($className) && in_array(NodeInterface::class, class_implements($className))) {
                     $this->register($className);
+
                     return;
                 }
             }
@@ -77,10 +78,10 @@ class NodeRegistry
             // Simple heuristic mapping: src/Nodes/Dir/File.php -> NodeNamespace\Dir\File
             // This assumes standard PSR-4 structure inside Nodes dir if no manifest
             $relativePath = str_replace(realpath(__DIR__ . '/../Nodes') . '/', '', $file->getRealPath());
-            
+
             // Fix path separators for Windows compatibility
             $relativePath = str_replace(DIRECTORY_SEPARATOR, '/', $relativePath);
-            
+
             $className = 'Voodflow\\Voodflow\\Nodes\\' . str_replace(
                 ['/', '.php'],
                 ['\\', ''],

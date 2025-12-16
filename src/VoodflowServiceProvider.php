@@ -14,12 +14,12 @@ use Spatie\LaravelPackageTools\Commands\InstallCommand;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
 use Voodflow\Voodflow\Console\Commands\MakeNodeCommand;
+use Voodflow\Voodflow\Console\Commands\MakeSignalNodeCommand;
 use Voodflow\Voodflow\Console\Commands\PackageNodeCommand;
 use Voodflow\Voodflow\Console\Commands\TestPackageCommand;
-use Voodflow\Voodflow\Console\Commands\MakeSignalNodeCommand;
 use Voodflow\Voodflow\Models\ModelIntegration;
-use Voodflow\Voodflow\Services\EventRegistrar;
 use Voodflow\Voodflow\Services\DynamicNodeLoader;
+use Voodflow\Voodflow\Services\EventRegistrar;
 use Voodflow\Voodflow\Support\EloquentEventMap;
 use Voodflow\Voodflow\Support\EventRegistry;
 use Voodflow\Voodflow\Support\ModelRegistry;
@@ -218,7 +218,7 @@ class VoodflowServiceProvider extends PackageServiceProvider
     protected function getScriptData(): array
     {
         $nodeLoader = app(DynamicNodeLoader::class);
-        
+
         return [
             'dynamicNodeBundles' => $nodeLoader->getInstalledNodeBundles(),
         ];

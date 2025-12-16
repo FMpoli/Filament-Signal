@@ -19,6 +19,7 @@ class PackageNodeCommand extends Command
 
         if (! File::isDirectory($nodeDir)) {
             $this->error("Node directory not found: {$nodeDir}");
+
             return self::FAILURE;
         }
 
@@ -43,6 +44,7 @@ class PackageNodeCommand extends Command
         $this->info('Building JavaScript bundle...');
         if (! $this->buildJavaScriptBundle($nodeDir, $nodeClass)) {
             $this->error('Failed to build JavaScript bundle');
+
             return self::FAILURE;
         }
 
@@ -52,16 +54,17 @@ class PackageNodeCommand extends Command
 
         if ($zipPath) {
             $this->info("✅ Package created successfully: {$zipPath}");
-            $this->info("📦 You can now distribute this package!");
-            
+            $this->info('📦 You can now distribute this package!');
+
             if ($manifest['tier'] === 'PREMIUM' || $manifest['tier'] === 'PRO') {
                 $this->warn('⚠️  This is a paid node. Make sure to set up licensing on Anystack.');
             }
-            
+
             return self::SUCCESS;
         }
 
         $this->error('Failed to create package');
+
         return self::FAILURE;
     }
 
@@ -69,41 +72,41 @@ class PackageNodeCommand extends Command
     {
         $this->info('📝 Creating manifest for ' . $nodeClass);
         $this->newLine();
-        
+
         $kebabName = $this->toKebabCase($nodeClass);
-        
+
         // Basic Info
         $displayName = $this->ask('Display name', $nodeClass);
         $description = $this->ask('Description', "Description of {$nodeClass}");
         $author = $this->ask('Author name', 'Your Name');
         $authorUrl = $this->ask('Author URL', 'https://yourwebsite.com');
         $version = $this->ask('Version', '1.0.0');
-        
+
         // Category
         $category = $this->choice(
             'Category',
             ['action', 'trigger', 'flow-control', 'data', 'integration', 'utility'],
             0
         );
-        
+
         // Tier
         $tier = $this->choice(
             'Tier (pricing)',
             ['FREE', 'CORE', 'PRO', 'PREMIUM'],
             0
         );
-        
+
         // Icon
         $this->info('💡 Tip: Use Heroicons (e.g., heroicon-o-envelope, heroicon-o-cube)');
         $icon = $this->ask('Icon', 'heroicon-o-cube');
-        
+
         // Color
         $color = $this->choice(
             'Color',
             ['blue', 'green', 'red', 'yellow', 'purple', 'pink', 'indigo', 'gray'],
             0
         );
-        
+
         $template = [
             'name' => $kebabName,
             'display_name' => $displayName,
@@ -127,27 +130,27 @@ class PackageNodeCommand extends Command
                 'bundle' => "dist/{$kebabName}.js",
             ],
         ];
-        
+
         // Licensing (only for paid tiers)
         if (in_array($tier, ['PRO', 'PREMIUM'])) {
             $this->newLine();
             $this->warn('⚠️  This is a paid node. License configuration required.');
-            
+
             $licenseType = $this->choice(
                 'License type',
                 ['commercial', 'subscription'],
                 0
             );
-            
+
             $requiresActivation = $this->confirm('Requires activation?', true);
-            
+
             if ($requiresActivation) {
                 $anystackProductId = $this->ask('Anystack Product ID (e.g., prod_abc123)');
                 $validationUrl = $this->ask(
                     'License validation URL',
                     'https://api.anystack.sh/v1/licenses/validate'
                 );
-                
+
                 $template['license'] = [
                     'type' => $licenseType,
                     'requires_activation' => true,
@@ -161,45 +164,45 @@ class PackageNodeCommand extends Command
                 ];
             }
         }
-        
+
         // Config Schema
         if ($this->confirm('Add configuration fields?', false)) {
             $this->info('💡 You can add more fields later by editing manifest.json');
             $template['config_schema'] = [];
-            
+
             while (true) {
                 $fieldName = $this->ask('Field name (leave empty to finish)');
                 if (empty($fieldName)) {
                     break;
                 }
-                
+
                 $fieldLabel = $this->ask('Field label');
                 $fieldType = $this->choice(
                     'Field type',
                     ['string', 'number', 'boolean', 'select', 'textarea'],
                     0
                 );
-                
+
                 $required = $this->confirm('Required?', false);
                 $encrypted = $this->confirm('Encrypted? (for sensitive data)', false);
-                
+
                 $template['config_schema'][$fieldName] = [
                     'type' => $fieldType,
                     'label' => $fieldLabel,
                     'required' => $required,
                 ];
-                
+
                 if ($encrypted) {
                     $template['config_schema'][$fieldName]['encrypted'] = true;
                 }
-                
+
                 $description = $this->ask('Field description (optional)');
                 if ($description) {
                     $template['config_schema'][$fieldName]['description'] = $description;
                 }
             }
         }
-        
+
         // Distribution options
         $this->newLine();
         $this->info('📦 Distribution Options');
@@ -211,7 +214,7 @@ class PackageNodeCommand extends Command
             ],
             $tier === 'FREE' || $tier === 'CORE' ? 'yes' : 'no'
         );
-        
+
         $template['distribution'] = [
             'include_source' => $includeSource === 'yes',
         ];
@@ -220,7 +223,7 @@ class PackageNodeCommand extends Command
             $nodeDir . '/manifest.json',
             json_encode($template, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)
         );
-        
+
         $this->newLine();
         $this->info('✅ Manifest created successfully!');
         $this->line('   Location: ' . $nodeDir . '/manifest.json');
@@ -229,22 +232,25 @@ class PackageNodeCommand extends Command
     protected function validateManifest(array $manifest): bool
     {
         $required = ['name', 'version', 'author', 'tier', 'php', 'javascript'];
-        
+
         foreach ($required as $field) {
             if (! isset($manifest[$field])) {
                 $this->error("Missing required field in manifest: {$field}");
+
                 return false;
             }
         }
 
         $validTiers = ['FREE', 'CORE', 'PRO', 'PREMIUM'];
         if (! in_array($manifest['tier'], $validTiers)) {
-            $this->error("Invalid tier. Must be one of: " . implode(', ', $validTiers));
+            $this->error('Invalid tier. Must be one of: ' . implode(', ', $validTiers));
+
             return false;
         }
 
         if (in_array($manifest['tier'], ['PRO', 'PREMIUM']) && ! isset($manifest['license'])) {
             $this->error('Paid nodes must include a license section in manifest');
+
             return false;
         }
 
@@ -254,9 +260,10 @@ class PackageNodeCommand extends Command
     protected function buildJavaScriptBundle(string $nodeDir, string $nodeClass): bool
     {
         $componentPath = $nodeDir . '/components/' . $nodeClass . '.jsx';
-        
+
         if (! File::exists($componentPath)) {
             $this->error("Component not found: {$componentPath}");
+
             return false;
         }
 
@@ -281,6 +288,7 @@ class PackageNodeCommand extends Command
 
         if ($returnCode !== 0) {
             $this->error('esbuild failed: ' . implode("\n", $output));
+
             return false;
         }
 
@@ -297,7 +305,7 @@ class PackageNodeCommand extends Command
         // Ensure directory exists
         File::ensureDirectoryExists(dirname($packagePath));
 
-        $zip = new ZipArchive();
+        $zip = new ZipArchive;
         if ($zip->open($packagePath, ZipArchive::CREATE | ZipArchive::OVERWRITE) !== true) {
             return null;
         }
@@ -308,7 +316,7 @@ class PackageNodeCommand extends Command
             $nodeClass . '.php',
             'dist/' . $kebabName . '.js',
         ];
-        
+
         // Include JSX source if specified in manifest
         $includeSource = $manifest['distribution']['include_source'] ?? true;
         if ($includeSource) {
