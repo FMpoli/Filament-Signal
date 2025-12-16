@@ -93,11 +93,19 @@ class FlowWorkflow extends Page implements HasActions, HasForms
             'position' => $position,
         ]);
 
+        // Get filter fields map and available nodes for the new node
+        $filterFieldsMap = $this->getFilterFieldsMapProperty();
+        $availableNodesMap = app(\Voodflow\Voodflow\Services\NodeRegistry::class)->getMetadataForReact();
+
         $this->dispatch('node-added', [
             'id' => $nodeId,
             'type' => $class::type(),
             'position' => $position,
-            'data' => array_merge($config, ['livewireId' => $this->getId()]),
+            'data' => array_merge($config, [
+                'livewireId' => $this->getId(),
+                'filterFieldsMap' => $filterFieldsMap,
+                'availableNodes' => $availableNodesMap, // Pass grouped object
+            ]),
         ]);
 
         if ($sourceNodeId) {
