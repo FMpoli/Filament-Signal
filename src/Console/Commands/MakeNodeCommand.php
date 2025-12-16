@@ -26,7 +26,7 @@ class MakeNodeCommand extends Command
         $nodeDir = base_path("packages/Voodflow/Voodflow/src/Nodes/{$nodeClass}");
 
         // Check if exists
-        if (is_dir($nodeDir) && !$nodeInfo['force']) {
+        if (is_dir($nodeDir) && ! $nodeInfo['force']) {
             $this->error("Node {$nodeClass} already exists! Use --force to overwrite.");
 
             return self::FAILURE;
@@ -62,12 +62,12 @@ class MakeNodeCommand extends Command
     {
         $name = $this->argument('name');
 
-        if (!$name) {
+        if (! $name) {
             $name = $this->ask('Node name (e.g., SlackNode, DatabaseNode)');
         }
 
         // Ensure name ends with 'Node'
-        if (!Str::endsWith($name, 'Node')) {
+        if (! Str::endsWith($name, 'Node')) {
             $name .= 'Node';
         }
 
@@ -138,11 +138,11 @@ class MakeNodeCommand extends Command
 
     protected function createDirectoryStructure(string $nodeDir): void
     {
-        if (!is_dir($nodeDir)) {
+        if (! is_dir($nodeDir)) {
             mkdir($nodeDir, 0755, true);
         }
 
-        if (!is_dir($nodeDir . '/components')) {
+        if (! is_dir($nodeDir . '/components')) {
             mkdir($nodeDir . '/components', 0755, true);
         }
     }
@@ -295,7 +295,7 @@ PHP;
 
     protected function buildPositioningCode(array $nodeInfo): string
     {
-        if (!$nodeInfo['has_multiple_outputs']) {
+        if (! $nodeInfo['has_multiple_outputs']) {
             return "'positioning' => [
                 'input' => true,
                 'output' => true,
