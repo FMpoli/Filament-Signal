@@ -116,6 +116,8 @@ class NodeRegistry
                 'type' => $type,
                 'name' => $class::name(),
                 'description' => $metadata['description'] ?? '',
+                'author' => $metadata['author'] ?? 'Unknown',
+                'tier' => $metadata['tier'] ?? 'FREE',
                 'icon' => $metadata['icon'] ?? 'heroicon-o-cube',
                 'color' => $metadata['color'] ?? 'gray',
                 'category' => $categoryName,

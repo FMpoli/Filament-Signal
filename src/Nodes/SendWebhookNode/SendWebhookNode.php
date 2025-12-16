@@ -45,6 +45,7 @@ class SendWebhookNode implements NodeInterface
         return [
             'author' => 'Voodflow',
             'version' => '2.0.0',
+            'tier' => 'CORE',
             'color' => 'blue',
             'icon' => 'heroicon-o-paper-airplane',
             'group' => 'Actions',

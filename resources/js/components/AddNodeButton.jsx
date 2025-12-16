@@ -221,35 +221,56 @@ const AddNodeButton = ({ sourceNodeId, position, onAddNode, availableNodes = {} 
                         </div>
                     ) : (
                         <div className="space-y-1">
-                            {currentNodes.map((node) => (
-                                <button
-                                    key={node.type}
-                                    onClick={() => {
-                                        onAddNode(node.type, sourceNodeId);
-                                        setIsOpen(false);
-                                        setSearchQuery('');
-                                    }}
-                                    className={`
-                                        w-full p-3 rounded-lg text-left
-                                        bg-white dark:bg-slate-700/50
-                                        border ${currentColors.card}
-                                        transition-all duration-150
-                                        hover:shadow-md
-                                    `}
-                                >
-                                    <div className="flex items-center gap-2">
-                                        <span className="text-2xl">{getIconForNode(node.icon)}</span>
-                                        <div className="flex-1 min-w-0">
-                                            <h5 className="font-medium text-sm text-slate-700 dark:text-slate-200">
-                                                {node.name}
-                                            </h5>
-                                            <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
-                                                {node.description || `Add ${node.name}`}
-                                            </p>
+                            {currentNodes.map((node) => {
+                                // Tier badge configuration
+                                const tierColors = {
+                                    'CORE': 'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-600',
+                                    'PRO': 'bg-gradient-to-r from-purple-500 to-pink-500 text-white border-0',
+                                    'FREE': 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 border border-emerald-300',
+                                };
+                                const tierClass = tierColors[node.tier] || tierColors['FREE'];
+
+                                return (
+                                    <button
+                                        key={node.type}
+                                        onClick={() => {
+                                            onAddNode(node.type, sourceNodeId);
+                                            setIsOpen(false);
+                                            setSearchQuery('');
+                                        }}
+                                        className={`
+                                            w-full p-3 rounded-lg text-left
+                                            bg-white dark:bg-slate-700/50
+                                            border ${currentColors.card}
+                                            transition-all duration-150
+                                            hover:shadow-md
+                                        `}
+                                    >
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-2xl">{getIconForNode(node.icon)}</span>
+                                            <div className="flex-1 min-w-0">
+                                                <div className="flex items-center justify-between gap-2 mb-0.5">
+                                                    <h5 className="font-medium text-sm text-slate-700 dark:text-slate-200">
+                                                        {node.name}
+                                                    </h5>
+                                                    <span className={`
+                                                        px-1.5 py-0.5 rounded text-xs font-bold
+                                                        flex-shrink-0 ${tierClass}
+                                                    `}>
+                                                        {node.tier || 'FREE'}
+                                                    </span>
+                                                </div>
+                                                <p className="text-xs text-slate-500 dark:text-slate-400 truncate mb-0.5">
+                                                    {node.description || `Add ${node.name}`}
+                                                </p>
+                                                <p className="text-xs text-slate-400 dark:text-slate-500 italic">
+                                                    by {node.author || 'Unknown'}
+                                                </p>
+                                            </div>
                                         </div>
-                                    </div>
-                                </button>
-                            ))}
+                                    </button>
+                                );
+                            })}
                         </div>
                     )}
                 </div>

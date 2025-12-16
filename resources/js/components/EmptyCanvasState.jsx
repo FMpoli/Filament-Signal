@@ -248,38 +248,59 @@ const EmptyCanvasState = ({ availableNodes = {}, onAddNode }) => {
                                 </div>
                             ) : (
                                 <div className="grid grid-cols-2 gap-3">
-                                    {currentNodes.map((node) => (
-                                        <button
-                                            key={node.type}
-                                            onClick={() => {
-                                                onAddNode(node.type);
-                                                setShowNodePicker(false);
-                                                setSearchQuery('');
-                                            }}
-                                            className={`
-                                                p-4 rounded-lg text-left
-                                                bg-white dark:bg-slate-700/50
-                                                border-2 ${currentColors.card}
-                                                transition-all duration-150
-                                                hover:shadow-md hover:scale-102
-                                                group
-                                            `}
-                                        >
-                                            <div className="flex items-start gap-3">
-                                                <span className="text-3xl flex-shrink-0" title={node.icon}>
-                                                    {getIconForNode(node.icon)}
-                                                </span>
-                                                <div className="flex-1 min-w-0">
-                                                    <h4 className="font-semibold text-slate-700 dark:text-slate-200 mb-1">
-                                                        {node.name}
-                                                    </h4>
-                                                    <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2">
-                                                        {node.description || `Add ${node.name}`}
-                                                    </p>
+                                    {currentNodes.map((node) => {
+                                        // Tier badge configuration
+                                        const tierColors = {
+                                            'CORE': 'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-600',
+                                            'PRO': 'bg-gradient-to-r from-purple-500 to-pink-500 text-white border-0',
+                                            'FREE': 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-700',
+                                        };
+                                        const tierClass = tierColors[node.tier] || tierColors['FREE'];
+
+                                        return (
+                                            <button
+                                                key={node.type}
+                                                onClick={() => {
+                                                    onAddNode(node.type);
+                                                    setShowNodePicker(false);
+                                                    setSearchQuery('');
+                                                }}
+                                                className={`
+                                                    p-4 rounded-lg text-left
+                                                    bg-white dark:bg-slate-700/50
+                                                    border-2 ${currentColors.card}
+                                                    transition-all duration-150
+                                                    hover:shadow-md hover:scale-102
+                                                    group
+                                                `}
+                                            >
+                                                <div className="flex items-start gap-3">
+                                                    <span className="text-3xl flex-shrink-0" title={node.icon}>
+                                                        {getIconForNode(node.icon)}
+                                                    </span>
+                                                    <div className="flex-1 min-w-0">
+                                                        <div className="flex items-start justify-between gap-2 mb-1">
+                                                            <h4 className="font-semibold text-slate-700 dark:text-slate-200">
+                                                                {node.name}
+                                                            </h4>
+                                                            <span className={`
+                                                                px-1.5 py-0.5 rounded text-xs font-bold
+                                                                flex-shrink-0 ${tierClass}
+                                                            `}>
+                                                                {node.tier || 'FREE'}
+                                                            </span>
+                                                        </div>
+                                                        <p className="text-xs text-slate-500 dark:text-slate-400 mb-1.5 line-clamp-2">
+                                                            {node.description || `Add ${node.name}`}
+                                                        </p>
+                                                        <p className="text-xs text-slate-400 dark:text-slate-500 italic">
+                                                            by {node.author || 'Unknown'}
+                                                        </p>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        </button>
-                                    ))}
+                                            </button>
+                                        );
+                                    })}
                                 </div>
                             )}
                         </div>
