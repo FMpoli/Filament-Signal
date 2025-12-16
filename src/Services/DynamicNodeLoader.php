@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\File;
 
 /**
  * Dynamic Node Loader Service
- * 
+ *
  * Scans for installed nodes and makes their bundles available
  */
 class DynamicNodeLoader
@@ -17,14 +17,14 @@ class DynamicNodeLoader
     public function getInstalledNodeBundles(): array
     {
         $bundles = [];
-        
+
         $paths = [
             __DIR__ . '/../Nodes',
             storage_path('app/voodflow/nodes'),
         ];
 
         foreach ($paths as $nodesDir) {
-            if (!File::isDirectory($nodesDir)) {
+            if (! File::isDirectory($nodesDir)) {
                 continue;
             }
 
@@ -32,8 +32,8 @@ class DynamicNodeLoader
 
             foreach ($nodeDirs as $nodeDir) {
                 $manifest = $this->loadManifest($nodeDir);
-                
-                if (!$manifest) {
+
+                if (! $manifest) {
                     continue;
                 }
 
@@ -41,20 +41,20 @@ class DynamicNodeLoader
                 $name = $manifest['name'] ?? null;
                 if ($name && \Illuminate\Support\Facades\Schema::hasTable('voodflow_installed_packages')) {
                     $package = \Voodflow\Voodflow\Models\InstalledPackage::where('name', $name)->first();
-                    if ($package && !$package->is_active) {
+                    if ($package && ! $package->is_active) {
                         continue;
                     }
                 }
 
                 $bundlePath = $nodeDir . '/' . ($manifest['javascript']['bundle'] ?? '');
-                
-                if (!File::exists($bundlePath)) {
+
+                if (! File::exists($bundlePath)) {
                     continue;
                 }
 
                 // Copy bundle to public if not already there
                 $publicPath = $this->publishBundle($bundlePath, $manifest['name']);
-                
+
                 if ($publicPath) {
                     $bundles[] = [
                         'type' => $this->getNodeType($manifest),
@@ -77,8 +77,8 @@ class DynamicNodeLoader
     protected function loadManifest(string $nodeDir): ?array
     {
         $manifestPath = $nodeDir . '/manifest.json';
-        
-        if (!File::exists($manifestPath)) {
+
+        if (! File::exists($manifestPath)) {
             return null;
         }
 
@@ -98,8 +98,8 @@ class DynamicNodeLoader
     protected function publishBundle(string $bundlePath, string $nodeName): ?string
     {
         $publicDir = public_path('js/voodflow/nodes');
-        
-        if (!File::isDirectory($publicDir)) {
+
+        if (! File::isDirectory($publicDir)) {
             File::makeDirectory($publicDir, 0755, true);
         }
 
@@ -107,7 +107,7 @@ class DynamicNodeLoader
         $publicPath = $publicDir . '/' . $fileName;
 
         // Copy bundle to public
-        if (!File::exists($publicPath) || File::lastModified($bundlePath) > File::lastModified($publicPath)) {
+        if (! File::exists($publicPath) || File::lastModified($bundlePath) > File::lastModified($publicPath)) {
             File::copy($bundlePath, $publicPath);
         }
 
@@ -134,7 +134,7 @@ class DynamicNodeLoader
     public function generateJavaScriptConfig(): string
     {
         $bundles = $this->getInstalledNodeBundles();
-        
+
         return 'window.VoodflowNodeBundles = ' . json_encode($bundles, JSON_PRETTY_PRINT) . ';';
     }
 }

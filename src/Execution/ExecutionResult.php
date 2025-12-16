@@ -58,12 +58,13 @@ class ExecutionResult
 
     /**
      * Route output to a specific handle (for nodes with multiple outputs)
-     * 
+     *
      * Example: return ExecutionResult::success($data)->toOutput('true');
      */
     public function toOutput(string $handleId): self
     {
         $this->outputHandle = $handleId;
+
         return $this;
     }
 }

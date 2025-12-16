@@ -28,6 +28,7 @@ class MakeNodeCommand extends Command
         // Check if exists
         if (is_dir($nodeDir) && ! $nodeInfo['force']) {
             $this->error("Node {$nodeClass} already exists! Use --force to overwrite.");
+
             return self::FAILURE;
         }
 
@@ -58,8 +59,8 @@ class MakeNodeCommand extends Command
     protected function collectNodeInfo(): array
     {
         $name = $this->argument('name');
-        
-        if (!$name) {
+
+        if (! $name) {
             $name = $this->ask('Node name (e.g., SlackNode, DatabaseNode)');
         }
 
@@ -81,7 +82,7 @@ class MakeNodeCommand extends Command
         );
 
         $author = $this->ask('Author name', 'Voodflow');
-        
+
         $description = $this->ask('Short description', 'Custom node for workflow automation');
 
         $authorUrl = null;
@@ -100,15 +101,15 @@ class MakeNodeCommand extends Command
 
         if ($type === 'flow') {
             $hasMultipleOutputs = $this->confirm('Does this node have multiple outputs (like IF/Switch)?', true);
-            
+
             if ($hasMultipleOutputs) {
                 $numOutputs = (int) $this->ask('How many outputs?', 2);
-                
+
                 for ($i = 0; $i < $numOutputs; $i++) {
                     $handleId = $this->ask("Output #{$i} ID", $i === 0 ? 'true' : 'false');
                     $handleLabel = $this->ask("Output #{$i} Label", ucfirst($handleId));
                     $handleColor = $this->ask("Output #{$i} Color (optional)", $i === 0 ? 'green' : 'red');
-                    
+
                     $outputHandles[] = [
                         'id' => $handleId,
                         'label' => $handleLabel,
@@ -157,7 +158,7 @@ class MakeNodeCommand extends Command
         ];
 
         $category = $categoryMap[$nodeInfo['type']] ?? 'Actions';
-        
+
         $colorMap = [
             'trigger' => 'orange',
             'action' => 'blue',
@@ -292,7 +293,7 @@ PHP;
 
     protected function buildPositioningCode(array $nodeInfo): string
     {
-        if (!$nodeInfo['has_multiple_outputs']) {
+        if (! $nodeInfo['has_multiple_outputs']) {
             return "'positioning' => [
                 'input' => true,
                 'output' => true,
@@ -327,7 +328,7 @@ PHP;
     protected function generateReactComponent(string $nodeDir, string $nodeClass, array $nodeInfo): void
     {
         $hasMultipleOutputs = $nodeInfo['has_multiple_outputs'];
-        
+
         // Determine color based on type
         $colorMap = [
             'trigger' => 'orange',
@@ -336,7 +337,7 @@ PHP;
             'flow' => 'yellow',
         ];
         $color = $colorMap[$nodeInfo['type']] ?? 'blue';
-        
+
         // Icon SVG based on type
         $iconMap = [
             'trigger' => '<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />',
@@ -345,11 +346,11 @@ PHP;
             'flow' => '<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />',
         ];
         $iconSvg = $iconMap[$nodeInfo['type']] ?? '<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />';
-        
+
         // Build output handles code
         $outputHandlesCode = '';
         $addNodeButtonCode = '';
-        
+
         if ($hasMultipleOutputs) {
             // Multiple outputs - no AddNodeButton
             foreach ($nodeInfo['output_handles'] as $index => $handle) {
@@ -371,7 +372,7 @@ PHP;
                     className={\"!bg-{$color}-500 !w-3 !h-3 !border-2 !border-white \" + (!isOutputConnected ? \"opacity-0\" : \"opacity-100\")}
                     style={{ right: '-6px', top: '50%' }}
                 />";
-            
+
             $addNodeButtonCode = "
                 {/* Add Button */}
                 {!isOutputConnected && (
@@ -609,4 +610,3 @@ JSX;
         file_put_contents($nodeDir . "/components/{$nodeClass}.jsx", $template);
     }
 }
-

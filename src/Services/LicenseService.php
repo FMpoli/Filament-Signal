@@ -2,13 +2,13 @@
 
 namespace Voodflow\Voodflow\Services;
 
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\Http;
 
 /**
  * License Validation Service
- * 
+ *
  * Validates node licenses against Anystack or custom license servers
  */
 class LicenseService
@@ -20,14 +20,14 @@ class LicenseService
     {
         // Check cache first (valid for 24 hours)
         $cacheKey = "voodflow_license_{$nodeName}_{$licenseKey}";
-        
+
         if (Cache::has($cacheKey)) {
             return Cache::get($cacheKey);
         }
 
         // Get node manifest
         $manifest = $this->getNodeManifest($nodeName);
-        
+
         if (! $manifest || ! isset($manifest['license'])) {
             return [
                 'valid' => true, // Free nodes are always valid
@@ -71,7 +71,7 @@ class LicenseService
 
             if ($response->successful()) {
                 $data = $response->json();
-                
+
                 return [
                     'valid' => $data['valid'] ?? false,
                     'tier' => $data['tier'] ?? 'PREMIUM',
@@ -103,7 +103,7 @@ class LicenseService
     public function storeLicense(string $nodeName, string $licenseKey): void
     {
         $encrypted = Crypt::encryptString($licenseKey);
-        
+
         Cache::forever("voodflow_node_license_{$nodeName}", $encrypted);
     }
 
@@ -113,7 +113,7 @@ class LicenseService
     public function getLicense(string $nodeName): ?string
     {
         $encrypted = Cache::get("voodflow_node_license_{$nodeName}");
-        
+
         if (! $encrypted) {
             return null;
         }
@@ -131,20 +131,20 @@ class LicenseService
     public function isLicensed(string $nodeName): bool
     {
         $licenseKey = $this->getLicense($nodeName);
-        
+
         if (! $licenseKey) {
             // Check if node requires license
             $manifest = $this->getNodeManifest($nodeName);
-            
+
             if (! $manifest || $manifest['tier'] === 'FREE' || $manifest['tier'] === 'CORE') {
                 return true; // Free nodes don't need license
             }
-            
+
             return false;
         }
 
         $result = $this->validate($nodeName, $licenseKey);
-        
+
         return $result['valid'] ?? false;
     }
 
@@ -170,7 +170,7 @@ class LicenseService
     public function clearCache(string $nodeName): void
     {
         $licenseKey = $this->getLicense($nodeName);
-        
+
         if ($licenseKey) {
             Cache::forget("voodflow_license_{$nodeName}_{$licenseKey}");
         }

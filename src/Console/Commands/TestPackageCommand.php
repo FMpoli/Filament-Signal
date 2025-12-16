@@ -15,14 +15,15 @@ class TestPackageCommand extends Command
     public function handle(): int
     {
         $packagePath = $this->argument('package');
-        
+
         // Support relative paths
-        if (!str_starts_with($packagePath, '/')) {
+        if (! str_starts_with($packagePath, '/')) {
             $packagePath = base_path($packagePath);
         }
 
-        if (!File::exists($packagePath)) {
+        if (! File::exists($packagePath)) {
             $this->error("Package not found: {$packagePath}");
+
             return self::FAILURE;
         }
 
@@ -32,8 +33,8 @@ class TestPackageCommand extends Command
 
         // Extract to temp directory
         $tempDir = sys_get_temp_dir() . '/voodflow-test-' . uniqid();
-        
-        if (!$this->extractPackage($packagePath, $tempDir)) {
+
+        if (! $this->extractPackage($packagePath, $tempDir)) {
             return self::FAILURE;
         }
 
@@ -42,6 +43,7 @@ class TestPackageCommand extends Command
         if (count($dirs) !== 1) {
             $this->error('Invalid package structure. Expected single root directory.');
             File::deleteDirectory($tempDir);
+
             return self::FAILURE;
         }
 
@@ -94,14 +96,16 @@ class TestPackageCommand extends Command
         // Summary
         $this->newLine();
         $this->line('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-        
+
         if ($failed === 0) {
             $this->info("✅ All tests passed! ({$passed}/{$passed})");
             $this->info('📦 This package is ready for distribution!');
+
             return self::SUCCESS;
         } else {
             $this->error("❌ Some tests failed ({$passed} passed, {$failed} failed)");
             $this->warn('⚠️  Fix the issues before distributing this package.');
+
             return self::FAILURE;
         }
     }
@@ -110,20 +114,23 @@ class TestPackageCommand extends Command
     {
         $this->line('→ Extracting package...');
 
-        $zip = new ZipArchive();
+        $zip = new ZipArchive;
         if ($zip->open($packagePath) !== true) {
             $this->error('  ✗ Failed to open ZIP file');
+
             return false;
         }
 
-        if (!$zip->extractTo($tempDir)) {
+        if (! $zip->extractTo($tempDir)) {
             $this->error('  ✗ Failed to extract ZIP file');
             $zip->close();
+
             return false;
         }
 
         $zip->close();
         $this->info('  ✓ Package extracted');
+
         return true;
     }
 
@@ -132,31 +139,34 @@ class TestPackageCommand extends Command
         $this->line('→ Testing manifest.json...');
 
         $manifestPath = $nodeDir . '/manifest.json';
-        
-        if (!File::exists($manifestPath)) {
+
+        if (! File::exists($manifestPath)) {
             $this->error('  ✗ manifest.json not found');
+
             return false;
         }
 
         $manifest = json_decode(File::get($manifestPath), true);
-        
+
         if (json_last_error() !== JSON_ERROR_NONE) {
             $this->error('  ✗ Invalid JSON: ' . json_last_error_msg());
+
             return false;
         }
 
         // Check required fields
         $required = ['name', 'version', 'author', 'tier', 'php', 'javascript'];
         $missing = [];
-        
+
         foreach ($required as $field) {
-            if (!isset($manifest[$field])) {
+            if (! isset($manifest[$field])) {
                 $missing[] = $field;
             }
         }
 
-        if (!empty($missing)) {
+        if (! empty($missing)) {
             $this->error('  ✗ Missing required fields: ' . implode(', ', $missing));
+
             return false;
         }
 
@@ -165,7 +175,7 @@ class TestPackageCommand extends Command
         $this->line('    Version: ' . $manifest['version']);
         $this->line('    Tier: ' . $manifest['tier']);
         $this->line('    Author: ' . $manifest['author']);
-        
+
         return true;
     }
 
@@ -176,27 +186,31 @@ class TestPackageCommand extends Command
         $manifest = json_decode(File::get($nodeDir . '/manifest.json'), true);
         $phpClass = $manifest['php']['class'] ?? null;
 
-        if (!$phpClass) {
+        if (! $phpClass) {
             $this->error('  ✗ PHP class not specified in manifest');
+
             return false;
         }
 
         $phpFile = $nodeDir . '/' . $phpClass . '.php';
-        
-        if (!File::exists($phpFile)) {
+
+        if (! File::exists($phpFile)) {
             $this->error("  ✗ PHP file not found: {$phpClass}.php");
+
             return false;
         }
 
         $content = File::get($phpFile);
-        
+
         // Basic validation
-        if (!str_contains($content, "class {$phpClass}")) {
+        if (! str_contains($content, "class {$phpClass}")) {
             $this->error("  ✗ Class {$phpClass} not found in PHP file");
+
             return false;
         }
 
         $this->info("  ✓ PHP class exists: {$phpClass}.php");
+
         return true;
     }
 
@@ -207,22 +221,25 @@ class TestPackageCommand extends Command
         $manifest = json_decode(File::get($nodeDir . '/manifest.json'), true);
         $bundlePath = $manifest['javascript']['bundle'] ?? null;
 
-        if (!$bundlePath) {
+        if (! $bundlePath) {
             $this->error('  ✗ Bundle path not specified in manifest');
+
             return false;
         }
 
         $fullBundlePath = $nodeDir . '/' . $bundlePath;
-        
-        if (!File::exists($fullBundlePath)) {
+
+        if (! File::exists($fullBundlePath)) {
             $this->error("  ✗ Bundle not found: {$bundlePath}");
+
             return false;
         }
 
         $size = File::size($fullBundlePath);
         $sizeKb = round($size / 1024, 2);
-        
+
         $this->info("  ✓ Bundle exists: {$bundlePath} ({$sizeKb} KB)");
+
         return true;
     }
 
@@ -232,41 +249,44 @@ class TestPackageCommand extends Command
 
         $manifest = json_decode(File::get($nodeDir . '/manifest.json'), true);
         $bundlePath = $nodeDir . '/' . $manifest['javascript']['bundle'];
-        
+
         $content = File::get($bundlePath);
-        
+
         // Check if it looks like JavaScript
         if (strlen($content) < 10) {
             $this->error('  ✗ Bundle is too small (likely empty)');
+
             return false;
         }
 
         // Check for common JS patterns
-        $hasValidJs = str_contains($content, 'function') || 
+        $hasValidJs = str_contains($content, 'function') ||
                      str_contains($content, '=>') ||
                      str_contains($content, 'var ') ||
                      str_contains($content, 'const ') ||
                      str_contains($content, 'let ');
 
-        if (!$hasValidJs) {
+        if (! $hasValidJs) {
             $this->warn('  ⚠ Bundle might not contain valid JavaScript');
+
             return false;
         }
 
         $this->info('  ✓ Bundle appears to be valid JavaScript');
+
         return true;
     }
 
     protected function showPackageContents(string $nodeDir): void
     {
         $files = File::allFiles($nodeDir);
-        
+
         foreach ($files as $file) {
             $relativePath = str_replace($nodeDir . '/', '', $file->getPathname());
             $size = $file->getSize();
             $sizeKb = $size > 1024 ? round($size / 1024, 2) . ' KB' : $size . ' B';
-            
-            $icon = match(true) {
+
+            $icon = match (true) {
                 str_ends_with($relativePath, '.json') => '📄',
                 str_ends_with($relativePath, '.php') => '🐘',
                 str_ends_with($relativePath, '.jsx') => '⚛️ ',
@@ -274,7 +294,7 @@ class TestPackageCommand extends Command
                 str_ends_with($relativePath, '.md') => '📝',
                 default => '📄',
             };
-            
+
             $this->line("   {$icon} {$relativePath} ({$sizeKb})");
         }
     }

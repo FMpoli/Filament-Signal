@@ -24,8 +24,11 @@ class InstalledPackageResource extends Resource
     protected static ?string $model = InstalledPackage::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-puzzle-piece';
+
     protected static ?string $navigationLabel = 'Node Plugins';
+
     protected static ?string $modelLabel = 'Plugin';
+
     protected static ?string $navigationGroup = 'Settings';
 
     public static function form(Schema $schema): Schema
@@ -83,7 +86,7 @@ class InstalledPackageResource extends Resource
                                 ->directory('voodflow-temp')
                                 ->acceptedFileTypes(['application/zip'])
                                 ->required(),
-                         ]);
+                        ]);
                     })
                     ->action(function (array $data) {
                         try {
@@ -108,14 +111,14 @@ class InstalledPackageResource extends Resource
     public static function installFromZip(string $zipPath)
     {
         $zip = new ZipArchive;
-        if ($zip->open($zipPath) !== TRUE) {
-            throw new \Exception("Could not open ZIP file");
+        if ($zip->open($zipPath) !== true) {
+            throw new \Exception('Could not open ZIP file');
         }
 
         // Search for manifest.json
         $manifestContent = null;
         $rootPrefix = '';
-        
+
         for ($i = 0; $i < $zip->numFiles; $i++) {
             $filename = $zip->getNameIndex($i);
             if (str_ends_with($filename, 'manifest.json')) {
@@ -124,53 +127,60 @@ class InstalledPackageResource extends Resource
                 if (count($parts) <= 2) {
                     $manifestContent = $zip->getFromIndex($i);
                     $rootPrefix = dirname($filename) == '.' ? '' : dirname($filename) . '/';
+
                     break;
                 }
             }
         }
 
-        if (!$manifestContent) {
+        if (! $manifestContent) {
             $zip->close();
-            throw new \Exception("manifest.json not found in the package");
+
+            throw new \Exception('manifest.json not found in the package');
         }
 
         $manifest = json_decode($manifestContent, true);
-        if (!$manifest || !isset($manifest['name'])) {
+        if (! $manifest || ! isset($manifest['name'])) {
             $zip->close();
-            throw new \Exception("Invalid manifest.json: name is required");
+
+            throw new \Exception('Invalid manifest.json: name is required');
         }
 
         $pluginName = $manifest['name'];
 
         // Installation path: storage/app/voodflow/nodes/package-name
         $installPath = storage_path('app/voodflow/nodes/' . $pluginName);
-        
-        if (!File::isDirectory($installPath)) {
+
+        if (! File::isDirectory($installPath)) {
             File::makeDirectory($installPath, 0755, true);
         }
 
         // Extract files
         for ($i = 0; $i < $zip->numFiles; $i++) {
             $filename = $zip->getNameIndex($i);
-            
+
             // Skip directories
-            if (str_ends_with($filename, '/')) continue;
-            
+            if (str_ends_with($filename, '/')) {
+                continue;
+            }
+
             // Handle root prefix (strip it if extracting content directly)
             $relativePath = $filename;
             if ($rootPrefix && str_starts_with($filename, $rootPrefix)) {
                 $relativePath = substr($filename, strlen($rootPrefix));
             }
-            
-            if (!$relativePath) continue;
+
+            if (! $relativePath) {
+                continue;
+            }
 
             $destPath = $installPath . '/' . $relativePath;
             $destDir = dirname($destPath);
-            
-            if (!File::isDirectory($destDir)) {
+
+            if (! File::isDirectory($destDir)) {
                 File::makeDirectory($destDir, 0755, true);
             }
-            
+
             copy("zip://{$zipPath}#{$filename}", $destPath);
         }
 

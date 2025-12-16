@@ -42,7 +42,7 @@ class ExecutionContext
 
     /**
      * Get the execution result from another node in this workflow
-     * 
+     *
      * Used by conditional/routing nodes to check results from action nodes
      */
     public function getNodeResult(string $nodeId): array
@@ -52,7 +52,7 @@ class ExecutionContext
             ->where('node_id', $nodeId)
             ->first();
 
-        if (!$executionNode) {
+        if (! $executionNode) {
             return ['success' => false, 'error' => 'Node not executed yet'];
         }
 

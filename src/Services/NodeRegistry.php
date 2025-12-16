@@ -43,27 +43,27 @@ class NodeRegistry
         if (File::isDirectory($storageNodesPath)) {
             $directories = File::directories($storageNodesPath);
             foreach ($directories as $directory) {
-                 // Check DB status if table exists
-                 $manifestPath = $directory . '/manifest.json';
-                 if (File::exists($manifestPath)) {
-                      $content = File::get($manifestPath);
-                      $manifest = json_decode($content, true);
-                      $name = $manifest['name'] ?? null;
-                      
-                      try {
-                          if ($name && \Illuminate\Support\Facades\Schema::hasTable('voodflow_installed_packages')) {
-                              $package = \Voodflow\Voodflow\Models\InstalledPackage::where('name', $name)->first();
-                              // If found regarding DB records, reuse logic. If not found, assume active (manually placed)? 
-                              // Or if manually placed in storage, maybe treat as active.
-                              // But if logic is 'installed via UI', it should be in DB.
-                              if ($package && !$package->is_active) {
-                                  continue; 
-                              }
-                          }
-                      } catch (\Exception $e) {
-                          // Fallback if DB issue
-                      }
-                 }
+                // Check DB status if table exists
+                $manifestPath = $directory . '/manifest.json';
+                if (File::exists($manifestPath)) {
+                    $content = File::get($manifestPath);
+                    $manifest = json_decode($content, true);
+                    $name = $manifest['name'] ?? null;
+
+                    try {
+                        if ($name && \Illuminate\Support\Facades\Schema::hasTable('voodflow_installed_packages')) {
+                            $package = \Voodflow\Voodflow\Models\InstalledPackage::where('name', $name)->first();
+                            // If found regarding DB records, reuse logic. If not found, assume active (manually placed)?
+                            // Or if manually placed in storage, maybe treat as active.
+                            // But if logic is 'installed via UI', it should be in DB.
+                            if ($package && ! $package->is_active) {
+                                continue;
+                            }
+                        }
+                    } catch (\Exception $e) {
+                        // Fallback if DB issue
+                    }
+                }
                 $this->processDirectory($directory);
             }
         }
@@ -82,15 +82,16 @@ class NodeRegistry
 
             if ($manifest && isset($manifest['php']['namespace'], $manifest['php']['class'])) {
                 $className = $manifest['php']['namespace'] . '\\' . $manifest['php']['class'];
-                
+
                 // Try to load file manually to support drop-in without composer dump-autoload
                 $classFile = $path . '/' . $manifest['php']['class'] . '.php';
                 if (File::exists($classFile)) {
                     require_once $classFile;
                 }
-                
+
                 if (class_exists($className) && in_array(NodeInterface::class, class_implements($className))) {
                     $this->register($className);
+
                     return;
                 }
             }
@@ -107,10 +108,10 @@ class NodeRegistry
             // Simple heuristic mapping: src/Nodes/Dir/File.php -> NodeNamespace\Dir\File
             // This assumes standard PSR-4 structure inside Nodes dir if no manifest
             $relativePath = str_replace(realpath(__DIR__ . '/../Nodes') . '/', '', $file->getRealPath());
-            
+
             // Fix path separators for Windows compatibility
             $relativePath = str_replace(DIRECTORY_SEPARATOR, '/', $relativePath);
-            
+
             $className = 'Voodflow\\Voodflow\\Nodes\\' . str_replace(
                 ['/', '.php'],
                 ['\\', ''],
