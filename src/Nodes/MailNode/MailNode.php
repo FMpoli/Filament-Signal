@@ -1,35 +1,35 @@
 <?php
 
-namespace Voodflow\Voodflow\Nodes\EmailNode;
+namespace Voodflow\Voodflow\Nodes\MailNode;
 
 use Voodflow\Voodflow\Contracts\NodeInterface;
 use Voodflow\Voodflow\Execution\ExecutionContext;
 use Voodflow\Voodflow\Execution\ExecutionResult;
 
 /**
- * Email Node
+ * Mail Node
  * 
  * Custom node for workflow automation
  * 
  * @author Voodflow
  * @version 1.0.0
  */
-class EmailNode implements NodeInterface
+class MailNode implements NodeInterface
 {
     public static function type(): string
     {
-        return 'email_node';
+        return 'mail_node';
     }
     
     public static function name(): string
     {
-        return 'Email Node';
+        return 'Mail Node';
     }
     
     public static function defaultConfig(): array
     {
         return [
-            'label' => 'Email Node',
+            'label' => 'Mail Node',
             'description' => '',
             // Add your configuration fields here
         ];
@@ -40,13 +40,14 @@ class EmailNode implements NodeInterface
         return [
             'author' => 'Voodflow',
             'version' => '1.0.0',
-            'tier' => 'CORE',
+            'tier' => 'PRO',
             'color' => 'blue',
             'icon' => 'heroicon-o-paper-airplane',
             'group' => 'Actions',
             'category' => 'action',
             'description' => 'Custom node for workflow automation',
             'license' => 'MIT',
+            'requires_license' => true,
             
             'positioning' => [
                 'input' => true,

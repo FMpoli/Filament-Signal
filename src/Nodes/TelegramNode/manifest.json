@@ -1,0 +1,38 @@
+{
+    "name": "telegram-node",
+    "display_name": "TelegramNode",
+    "version": "1.0.0",
+    "author": "Voodflow",
+    "author_url": "https://www.voodflow.com",
+    "description": "Description of TelegramNode",
+    "icon": "heroicon-o-cube",
+    "color": "pink",
+    "category": "action",
+    "tier": "PREMIUM",
+    "voodflow": {
+        "min_version": "1.0.0"
+    },
+    "php": {
+        "class": "TelegramNode",
+        "namespace": "Voodflow\\Voodflow\\Nodes\\TelegramNode"
+    },
+    "javascript": {
+        "component": "TelegramNode",
+        "bundle": "dist/telegram-node.js"
+    },
+    "license": {
+        "type": "commercial",
+        "requires_activation": true,
+        "anystack_product_id": "prod_abc123",
+        "validation_url": "https://api.anystack.sh/v1/licenses/validate"
+    },
+    "config_schema": {
+        "custom_field": {
+            "type": "string",
+            "label": "Custom field",
+            "required": false,
+            "encrypted": true,
+            "description": "desc custom field"
+        }
+    }
+}

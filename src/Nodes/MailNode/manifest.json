@@ -1,0 +1,23 @@
+{
+    "name": "mail-node",
+    "display_name": "MailNode",
+    "version": "1.0.0",
+    "author": "Voodflow",
+    "author_url": "https://voodflow.com",
+    "description": "Send email from your workflow",
+    "icon": "heroicon-o-envelope",
+    "color": "blue",
+    "category": "action",
+    "tier": "FREE",
+    "voodflow": {
+        "min_version": "1.0.0"
+    },
+    "php": {
+        "class": "MailNode",
+        "namespace": "Voodflow\\Voodflow\\Nodes\\MailNode"
+    },
+    "javascript": {
+        "component": "MailNode",
+        "bundle": "dist/mail-node.js"
+    }
+}

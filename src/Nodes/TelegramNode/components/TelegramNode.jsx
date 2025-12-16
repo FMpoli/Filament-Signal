@@ -4,19 +4,19 @@ import ConfirmModal from '../../../../resources/js/components/ConfirmModal';
 import AddNodeButton from '../../../../resources/js/components/AddNodeButton';
 
 /**
- * EmailNode React Component
+ * TelegramNode React Component
  * 
  * Custom node for workflow automation
  * 
  * @author Voodflow
  * @version 1.0.0
  */
-const EmailNode = ({ id, data }) => {
+const TelegramNode = ({ id, data }) => {
     const { setNodes } = useReactFlow();
     const edges = useEdges();
 
     const [isExpanded, setIsExpanded] = useState(data.isNew || false);
-    const [label, setLabel] = useState(data.label || 'EmailNode');
+    const [label, setLabel] = useState(data.label || 'TelegramNode');
     const [description, setDescription] = useState(data.description || '');
     const [showDeleteModal, setShowDeleteModal] = useState(false);
 
@@ -91,7 +91,7 @@ const EmailNode = ({ id, data }) => {
         <>
             <ConfirmModal
                 isOpen={showDeleteModal}
-                title="Delete EmailNode"
+                title="Delete TelegramNode"
                 message={"Are you sure you want to delete \"" + label + "\"?"}
                 onConfirm={confirmDelete}
                 onCancel={() => setShowDeleteModal(false)}
@@ -230,4 +230,4 @@ const EmailNode = ({ id, data }) => {
     );
 };
 
-export default EmailNode;
+export default TelegramNode;
