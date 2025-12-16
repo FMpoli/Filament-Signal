@@ -155,6 +155,7 @@ export default function ContextMenu({ id, top, left, right, bottom, availableNod
                         placeholder="Search..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
+                        onClick={(e) => e.stopPropagation()}
                         className="
                             w-full pl-8 pr-2 py-1.5
                             bg-slate-50 dark:bg-slate-700/50
