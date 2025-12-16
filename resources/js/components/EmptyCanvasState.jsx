@@ -169,7 +169,7 @@ const EmptyCanvasState = ({ availableNodes = {}, onAddNode }) => {
                     </div>
                 ) : (
                     /* Improved Node Picker with Categories & Search */
-                    <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 w-[600px] max-h-[60vh] overflow-hidden flex flex-col">
+                    <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 w-[550px] max-h-[50vh] overflow-hidden flex flex-col">
                         {/* Header */}
                         <div className="flex items-center justify-between p-4 border-b border-slate-200 dark:border-slate-700">
                             <h3 className="text-lg font-bold text-slate-700 dark:text-slate-200">

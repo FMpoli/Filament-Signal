@@ -87,8 +87,9 @@ class NodeRegistry
 
     /**
      * Get metadata formatted for React frontend - grouped by category
+     * Returns object (stdClass) when empty to ensure proper JSON encoding
      */
-    public function getMetadataForReact(): array
+    public function getMetadataForReact(): array|object
     {
         $nodes = $this->all();
         $grouped = [];
@@ -136,6 +137,12 @@ class NodeRegistry
             if (!isset($sorted[$cat])) {
                 $sorted[$cat] = $nodes;
             }
+        }
+
+        // Ensure it's an object in JSON, not an array
+        // This prevents [0,1,2,3,4] when json_encode is called
+        if (empty($sorted)) {
+            return (object) []; // Empty object
         }
 
         return $sorted;
