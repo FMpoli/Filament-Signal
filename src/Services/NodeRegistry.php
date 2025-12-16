@@ -31,16 +31,56 @@ class NodeRegistry
             return;
         }
 
-        // Get all PHP files in Nodes directory
-        $files = File::allFiles($nodesPath);
+        // Get all subdirectories
+        $directories = File::directories($nodesPath);
+
+        foreach ($directories as $directory) {
+            $this->processDirectory($directory);
+        }
+    }
+
+    /**
+     * Process a node directory
+     */
+    protected function processDirectory(string $path): void
+    {
+        // 1. Try manifest.json first (Preferred)
+        $manifestPath = $path . '/manifest.json';
+        if (File::exists($manifestPath)) {
+            $content = File::get($manifestPath);
+            $manifest = json_decode($content, true);
+
+            if ($manifest && isset($manifest['php']['namespace'], $manifest['php']['class'])) {
+                $className = $manifest['php']['namespace'] . '\\' . $manifest['php']['class'];
+                
+                // Try to load file manually to support drop-in without composer dump-autoload
+                $classFile = $path . '/' . $manifest['php']['class'] . '.php';
+                if (File::exists($classFile)) {
+                    require_once $classFile;
+                }
+                
+                if (class_exists($className) && in_array(NodeInterface::class, class_implements($className))) {
+                    $this->register($className);
+                    return;
+                }
+            }
+        }
+
+        // 2. Fallback: Scan PHP files in directory
+        $files = File::allFiles($path);
 
         foreach ($files as $file) {
             if ($file->getExtension() !== 'php') {
                 continue;
             }
 
-            // Build class name from file path
-            $relativePath = str_replace($nodesPath . '/', '', $file->getPathname());
+            // Simple heuristic mapping: src/Nodes/Dir/File.php -> NodeNamespace\Dir\File
+            // This assumes standard PSR-4 structure inside Nodes dir if no manifest
+            $relativePath = str_replace(realpath(__DIR__ . '/../Nodes') . '/', '', $file->getRealPath());
+            
+            // Fix path separators for Windows compatibility
+            $relativePath = str_replace(DIRECTORY_SEPARATOR, '/', $relativePath);
+            
             $className = 'Voodflow\\Voodflow\\Nodes\\' . str_replace(
                 ['/', '.php'],
                 ['\\', ''],

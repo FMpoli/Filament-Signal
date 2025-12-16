@@ -24,67 +24,52 @@ import EmptyCanvasState from './EmptyCanvasState';
 import ContextMenu from './ContextMenu';
 import { nodeRegistry } from '../nodeRegistry';
 
+import { loadDynamicNodeBundles } from '../utils/dynamicNodeLoader';
+
 console.log('[NodeRegistry] Loaded nodes:', Object.keys(nodeRegistry));
 
-// Static node types (legacy/core nodes + discovered nodes)
-const staticNodeTypes = {
-    // Current types (voodflow_ prefix)
+// Static node types (core system nodes)
+const coreNodeTypes = {
     trigger: TriggerNode,
     filter: FilterNode,
     filter_pro: FilterProNode,
     send_webhook: SendWebhookNode,
     conditional: ConditionalNode,
 
-    // Namespaced types with voodflow prefix
+    // Voodflow namespace
     voodflow_trigger: TriggerNode,
     voodflow_filter: FilterNode,
     voodflow_filter_pro: FilterProNode,
     voodflow_send_webhook: SendWebhookNode,
     voodflow_conditional: ConditionalNode,
 
-    // Legacy namespaced types (for backwards compatibility with old data)
+    // Legacy namespace
     base33_trigger: TriggerNode,
     base33_filter: FilterNode,
     base33_filter_pro: FilterProNode,
     base33_send_webhook: SendWebhookNode,
     base33_conditional: ConditionalNode,
-
-    // Add all discovered nodes from registry
-    ...nodeRegistry,
 };
 
-// Fallback component for unknown node types
+// Fallback component for unknown node types/loading state
 const FallbackNode = ({ data, type }) => (
     <div style={{
         padding: '12px',
-        border: '2px solid #ef4444',
+        border: '2px dashed #9ca3af',
         borderRadius: '8px',
-        background: 'white',
-        minWidth: '200px'
+        background: '#f3f4f6',
+        minWidth: '200px',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        gap: '8px'
     }}>
-        <div style={{ fontWeight: 'bold', color: '#ef4444' }}>⚠️ Unknown Node</div>
-        <div style={{ fontSize: '12px', color: '#666', marginTop: '4px' }}>
-            Type: {type}
-        </div>
-        <div style={{ fontSize: '11px', color: '#999', marginTop: '2px' }}>
-            Component not found
+        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600"></div>
+        <div style={{ fontSize: '12px', color: '#666' }}>
+            Loading {type}...
         </div>
     </div>
 );
-
-// Create a Proxy to handle unknown node types with dynamic loading
-const nodeTypes = new Proxy(staticNodeTypes, {
-    get(target, prop) {
-        // If it's a known static type, return it
-        if (prop in target) {
-            return target[prop];
-        }
-
-        // Otherwise, return DynamicNodeLoader which will try to load it
-        console.log(`[NodeTypes] Unknown type "${prop}", using DynamicNodeLoader`);
-        return (props) => <DynamicNodeLoader type={prop} {...props} />;
-    }
-});
 
 function FlowCanvas({ initialNodes, initialEdges, initialViewport, livewireId, eventOptions, filterFieldsMap, availableNodesMap }) {
 
@@ -131,6 +116,34 @@ function FlowCanvas({ initialNodes, initialEdges, initialViewport, livewireId, e
 
         return savedTheme === 'dark' ? 'dark' : 'light';
     }, []);
+
+    // Dynamic Nodes Loading
+    const [dynamicNodeTypes, setDynamicNodeTypes] = useState({});
+
+    useEffect(() => {
+        loadDynamicNodeBundles().then(loadedBundles => {
+            if (Object.keys(loadedBundles).length > 0) {
+                setDynamicNodeTypes(loadedBundles);
+            }
+        });
+    }, []);
+
+    const nodeTypes = useMemo(() => {
+        const allTypes = {
+            ...coreNodeTypes,
+            ...nodeRegistry,
+            ...dynamicNodeTypes
+        };
+
+        return new Proxy(allTypes, {
+            get(target, prop) {
+                if (prop in target) {
+                    return target[prop];
+                }
+                return (props) => <FallbackNode type={String(prop)} {...props} />;
+            }
+        });
+    }, [dynamicNodeTypes]);
 
     const [colorMode, setColorMode] = useState(getThemeFromFilament);
 

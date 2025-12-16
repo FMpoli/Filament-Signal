@@ -15,9 +15,11 @@ use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
 use Voodflow\Voodflow\Console\Commands\MakeNodeCommand;
 use Voodflow\Voodflow\Console\Commands\PackageNodeCommand;
+use Voodflow\Voodflow\Console\Commands\TestPackageCommand;
 use Voodflow\Voodflow\Console\Commands\MakeSignalNodeCommand;
 use Voodflow\Voodflow\Models\ModelIntegration;
 use Voodflow\Voodflow\Services\EventRegistrar;
+use Voodflow\Voodflow\Services\DynamicNodeLoader;
 use Voodflow\Voodflow\Support\EloquentEventMap;
 use Voodflow\Voodflow\Support\EventRegistry;
 use Voodflow\Voodflow\Support\ModelRegistry;
@@ -84,6 +86,7 @@ class VoodflowServiceProvider extends PackageServiceProvider
             $app->make(ReverseRelationRegistrar::class)
         ));
         $this->app->singleton(EloquentEventMap::class, fn (): EloquentEventMap => new EloquentEventMap);
+        $this->app->singleton(DynamicNodeLoader::class, fn (): DynamicNodeLoader => new DynamicNodeLoader);
     }
 
     public function packageBooted(): void
@@ -189,6 +192,7 @@ class VoodflowServiceProvider extends PackageServiceProvider
             MakeSignalNodeCommand::class,
             MakeNodeCommand::class,
             PackageNodeCommand::class,
+            TestPackageCommand::class,
         ];
     }
 
@@ -213,7 +217,11 @@ class VoodflowServiceProvider extends PackageServiceProvider
      */
     protected function getScriptData(): array
     {
-        return [];
+        $nodeLoader = app(DynamicNodeLoader::class);
+        
+        return [
+            'dynamicNodeBundles' => $nodeLoader->getInstalledNodeBundles(),
+        ];
     }
 
     /**
