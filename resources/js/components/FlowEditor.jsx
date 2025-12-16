@@ -355,12 +355,14 @@ function FlowCanvas({ initialNodes, initialEdges, initialViewport, livewireId, e
                     type: data.type,
                     position: data.position || { x: 400, y: 100 },
                     data: {
-                        ...data.data,
+                        ...nodeData.config,
+                        id: nodeData.node_id,
+                        nodeId: nodeData.node_id,
                         livewireId,
                         eventOptions,
                         filterFieldsMap,
-                        availableNodes: availableNodesList
-                    }
+                        availableNodes: availableNodesMap, // Use grouped object
+                    },
                 };
                 console.log('[FlowEditor] Adding new node:', newNode);
                 setNodes(nds => [...nds, newNode]);
