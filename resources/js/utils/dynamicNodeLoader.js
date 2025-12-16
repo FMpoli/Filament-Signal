@@ -14,7 +14,12 @@ export async function loadDynamicNodeBundles() {
             await loadScript(bundle.url);
 
             // The bundle should register itself globally
-            const NodeComponent = window[bundle.globalName];
+            let NodeComponent = window[bundle.globalName];
+
+            // Handle default export (common in UMD/ESM interop)
+            if (NodeComponent && NodeComponent.default) {
+                NodeComponent = NodeComponent.default;
+            }
 
             if (NodeComponent) {
                 loadedNodes[bundle.type] = NodeComponent;

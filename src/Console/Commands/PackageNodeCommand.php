@@ -269,18 +269,66 @@ class PackageNodeCommand extends Command
         $kebabName = $this->toKebabCase($nodeClass);
         $bundlePath = $distDir . '/' . $kebabName . '.js';
 
-        // Use esbuild to create standalone bundle
-        $esbuildCmd = sprintf(
-            'npx esbuild %s --bundle --format=iife --global-name=%s --outfile=%s --minify',
-            escapeshellarg($componentPath),
-            escapeshellarg($nodeClass),
-            escapeshellarg($bundlePath)
-        );
+        // Generate temporary Vite config for correct UMD build with externals
+        $viteConfigContent = <<<JS
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import { resolve } from 'path';
 
-        exec($esbuildCmd, $output, $returnCode);
+export default defineConfig({
+    plugins: [react()],
+    publicDir: false,
+    build: {
+        outDir: '{$nodeDir}/dist',
+        emptyOutDir: false, // Don't delete dist folder itself, just overwrite file
+        lib: {
+            entry: '{$componentPath}',
+            name: '{$nodeClass}',
+            fileName: () => '{$kebabName}.js',
+            formats: ['umd'],
+        },
+        rollupOptions: {
+            external: ['react', 'react-dom', 'react-dom/client', 'reactflow'],
+            output: {
+                globals: {
+                    react: 'React',
+                    'react-dom': 'ReactDOM',
+                    'react-dom/client': 'ReactDOM',
+                    reactflow: 'ReactFlow',
+                },
+                exports: 'named',
+            }
+        },
+        minify: 'esbuild',
+    },
+    define: {
+        'process.env.NODE_ENV': '"production"'
+    }
+});
+JS;
 
+        // Create temporary config in PROJECT ROOT to use project's node_modules
+        $configFile = base_path('vite.config.tmp.js');
+        File::put($configFile, $viteConfigContent);
+
+        $this->info('Running Vite build...');
+        
+        // Execute Vite build
+        // redirection of stderr to stdout to capture errors
+        $cmd = "npx vite build --config " . escapeshellarg($configFile) . " 2>&1";
+        exec($cmd, $output, $returnCode);
+
+        // Cleanup config file
+        if (File::exists($configFile)) {
+            File::delete($configFile);
+        }
+
+        // Check result
         if ($returnCode !== 0) {
-            $this->error('esbuild failed: ' . implode("\n", $output));
+            $this->error('Vite build failed:');
+            foreach ($output as $line) {
+                $this->line($line);
+            }
             return false;
         }
 
