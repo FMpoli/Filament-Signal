@@ -130,6 +130,7 @@ const AddNodeButton = ({ sourceNodeId, position, onAddNode, availableNodes = {} 
 
             {/* Menu */}
             <div
+                onClick={(e) => e.stopPropagation()}
                 className="
                     fixed z-50
                     bg-white dark:bg-slate-800 

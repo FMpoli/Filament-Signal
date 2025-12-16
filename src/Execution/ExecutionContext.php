@@ -39,4 +39,27 @@ class ExecutionContext
     {
         return data_get($this->input, $key, $default);
     }
+
+    /**
+     * Get the execution result from another node in this workflow
+     * 
+     * Used by conditional/routing nodes to check results from action nodes
+     */
+    public function getNodeResult(string $nodeId): array
+    {
+        $executionNode = $this->execution
+            ->executionNodes()
+            ->where('node_id', $nodeId)
+            ->first();
+
+        if (!$executionNode) {
+            return ['success' => false, 'error' => 'Node not executed yet'];
+        }
+
+        return [
+            'success' => $executionNode->status === 'completed',
+            'output' => $executionNode->output ?? [],
+            'error' => $executionNode->error,
+        ];
+    }
 }

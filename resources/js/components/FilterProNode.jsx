@@ -1,12 +1,12 @@
-import React, { useState, useMemo } from 'react';
-import { Handle, Position, useNodes, useEdges, useReactFlow } from 'reactflow';
+import React, { useState } from 'react';
+import { Handle, Position, useEdges, useReactFlow } from 'reactflow';
+import { useAvailableFields } from '../hooks';
 import ConfirmModal from './ConfirmModal';
 import AddNodeButton from './AddNodeButton';
 
 const FilterProNode = ({ id, data }) => {
     const { setNodes } = useReactFlow();
     const edges = useEdges();
-    const allNodes = useNodes();
 
     const [isExpanded, setIsExpanded] = useState(data.isNew || false);
     const [filters, setFilters] = useState(Array.isArray(data.filters) ? data.filters : []);
@@ -37,52 +37,8 @@ const FilterProNode = ({ id, data }) => {
     const isConnected = edges.some(edge => edge.target === id);
     const isOutputConnected = edges.some(edge => edge.source === id);
 
-    // Dynamically get available fields from connected source (trigger or filter)
-    const availableFields = useMemo(() => {
-        // Find the edge that connects to this filter
-        const incomingEdge = edges.find(edge => edge.target === id);
-        if (!incomingEdge) return {};
-
-        // Find the source node
-        const sourceNode = allNodes.find(n => n.id === incomingEdge.source);
-        if (!sourceNode) return {};
-
-        // If source is trigger, get eventClass and look up fields
-        if (sourceNode.type === 'trigger') {
-            const eventClass = sourceNode.data?.eventClass;
-            const filterFieldsMap = data.filterFieldsMap || {};
-            if (!eventClass) return {};
-            return filterFieldsMap[eventClass] || {};
-        }
-
-        // If source is another filter, propagate its available fields
-        if (sourceNode.type.includes('filter')) {
-            // Recursively find the trigger by traversing back
-            const findTriggerEventClass = (nodeId, visited = new Set()) => {
-                if (visited.has(nodeId)) return null;
-                visited.add(nodeId);
-
-                const edge = edges.find(e => e.target === nodeId);
-                if (!edge) return null;
-
-                const node = allNodes.find(n => n.id === edge.source);
-                if (!node) return null;
-
-                if (node.type === 'trigger') {
-                    return node.data?.eventClass;
-                }
-
-                return findTriggerEventClass(node.id, visited);
-            };
-
-            const eventClass = findTriggerEventClass(sourceNode.id);
-            const filterFieldsMap = data.filterFieldsMap || {};
-            if (!eventClass) return {};
-            return filterFieldsMap[eventClass] || {};
-        }
-
-        return {};
-    }, [edges, allNodes, id, data.filterFieldsMap]);
+    // Use the new hook to get available fields automatically
+    const { fields: availableFields } = useAvailableFields(id);
 
     // Standard operators
     const standardOperators = [
@@ -486,8 +442,8 @@ const FilterProNode = ({ id, data }) => {
                                                             <button
                                                                 onClick={() => handleFilterChange(index, 'logic', 'AND')}
                                                                 className={`px-3 py-1 text-[10px] font-bold rounded-md transition-colors ${(filter.logic || 'AND') === 'AND'
-                                                                        ? 'bg-purple-500 text-white shadow-sm'
-                                                                        : 'text-slate-500 hover:text-slate-700 dark:text-slate-400'
+                                                                    ? 'bg-purple-500 text-white shadow-sm'
+                                                                    : 'text-slate-500 hover:text-slate-700 dark:text-slate-400'
                                                                     }`}
                                                             >
                                                                 AND
@@ -495,8 +451,8 @@ const FilterProNode = ({ id, data }) => {
                                                             <button
                                                                 onClick={() => handleFilterChange(index, 'logic', 'OR')}
                                                                 className={`px-3 py-1 text-[10px] font-bold rounded-md transition-colors ${filter.logic === 'OR'
-                                                                        ? 'bg-purple-500 text-white shadow-sm'
-                                                                        : 'text-slate-500 hover:text-slate-700 dark:text-slate-400'
+                                                                    ? 'bg-purple-500 text-white shadow-sm'
+                                                                    : 'text-slate-500 hover:text-slate-700 dark:text-slate-400'
                                                                     }`}
                                                             >
                                                                 OR

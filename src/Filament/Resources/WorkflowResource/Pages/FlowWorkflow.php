@@ -72,7 +72,6 @@ class FlowWorkflow extends Page implements HasActions, HasForms
         $sourceHandle = $data['sourceHandle'] ?? null;
 
         $nodeId = $type . '-' . \Illuminate\Support\Str::uuid();
-        $nodeId = $type . '-' . \Illuminate\Support\Str::uuid();
         $position = $data['position'] ?? $this->calculateNewNodePosition($sourceNodeId, $sourceHandle);
 
         $defaultConfig = $class::defaultConfig();
@@ -126,6 +125,17 @@ class FlowWorkflow extends Page implements HasActions, HasForms
 
             // Remove transient data that shouldn't be saved to DB
             unset($config['eventOptions'], $config['livewireId'], $config['filterFieldsMap'], $config['availableNodes']);
+
+            // Ensure label exists - use node name as fallback
+            if (empty($config['label'])) {
+                // Try to get the node class to get default label
+                $registry = app(\Voodflow\Voodflow\Services\NodeRegistry::class);
+                $nodeClass = $registry->get($nodeData['type']);
+                if ($nodeClass) {
+                    $defaultConfig = $nodeClass::defaultConfig();
+                    $config['label'] = $defaultConfig['label'] ?? $nodeClass::name();
+                }
+            }
 
             $this->record->nodes()->create([
                 'node_id' => $nodeData['id'],
@@ -415,7 +425,6 @@ class FlowWorkflow extends Page implements HasActions, HasForms
             'type' => 'trigger',
             'name' => $config['label'],
             'config' => $config,
-            'config' => $config,
             'position' => $data['position'] ?? ['x' => 100, 'y' => 200],
         ]);
 
@@ -434,7 +443,6 @@ class FlowWorkflow extends Page implements HasActions, HasForms
         $sourceHandle = $data['sourceHandle'] ?? null;
         $actionType = $data['actionType'] ?? 'log';
 
-        $nodeId = 'action-' . Str::uuid();
         $nodeId = 'action-' . Str::uuid();
         $position = $data['position'] ?? $this->calculateNewNodePosition($sourceNodeId, $sourceHandle);
 
@@ -470,8 +478,6 @@ class FlowWorkflow extends Page implements HasActions, HasForms
     {
         $sourceNodeId = $data['sourceNodeId'] ?? null;
         $sourceHandle = $data['sourceHandle'] ?? null;
-        $nodeId = 'sendwebhook-' . \Illuminate\Support\Str::uuid();
-
         $nodeId = 'sendwebhook-' . \Illuminate\Support\Str::uuid();
 
         $position = $data['position'] ?? $this->calculateNewNodePosition($sourceNodeId, $sourceHandle);

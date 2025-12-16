@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { Handle, Position, useStore, useReactFlow, useNodes, useEdges } from 'reactflow';
-import ConfirmModal from './ConfirmModal';
-import AddNodeButton from './AddNodeButton';
+import ConfirmModal from '../../../../resources/js/components/ConfirmModal';
+import AddNodeButton from '../../../../resources/js/components/AddNodeButton';
 
 const FilterNode = ({ id, data }) => {
     const { setNodes } = useReactFlow();

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Handle, Position, useReactFlow, useEdges, useNodes } from 'reactflow';
-import ConfirmModal from './ConfirmModal';
-import AddNodeButton from './AddNodeButton';
+import ConfirmModal from '../../../../resources/js/components/ConfirmModal';
+import AddNodeButton from '../../../../resources/js/components/AddNodeButton';
 
 /**
  * SendWebhook Node Component

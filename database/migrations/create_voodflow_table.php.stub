@@ -8,12 +8,12 @@ return new class extends Migration
 {
     public function up(): void
     {
-        $workflowsTable = config('signal.table_names.workflows', 'signal_workflows');
-        $nodesTable = config('signal.table_names.nodes', 'signal_nodes');
-        $edgesTable = config('signal.table_names.edges', 'signal_edges');
-        $executionsTable = config('signal.table_names.executions', 'signal_executions');
-        $executionNodesTable = config('signal.table_names.execution_nodes', 'signal_execution_nodes');
-        $modelIntegrationsTable = config('signal.table_names.model_integrations', 'signal_model_integrations');
+        $workflowsTable = config('voodflow.table_names.workflows', 'voodflow_workflows');
+        $nodesTable = config('voodflow.table_names.nodes', 'voodflow_nodes');
+        $edgesTable = config('voodflow.table_names.edges', 'voodflow_edges');
+        $executionsTable = config('voodflow.table_names.executions', 'voodflow_executions');
+        $executionNodesTable = config('voodflow.table_names.execution_nodes', 'voodflow_execution_nodes');
+        $modelIntegrationsTable = config('voodflow.table_names.model_integrations', 'voodflow_model_integrations');
 
         // Main Workflow Container
         Schema::create($workflowsTable, function (Blueprint $table): void {
@@ -109,12 +109,12 @@ return new class extends Migration
 
     public function down(): void
     {
-        $workflowsTable = config('signal.table_names.workflows', 'signal_workflows');
-        $nodesTable = config('signal.table_names.nodes', 'signal_nodes');
-        $edgesTable = config('signal.table_names.edges', 'signal_edges');
-        $executionsTable = config('signal.table_names.executions', 'signal_executions');
-        $executionNodesTable = config('signal.table_names.execution_nodes', 'signal_execution_nodes');
-        $modelIntegrationsTable = config('signal.table_names.model_integrations', 'signal_model_integrations');
+        $workflowsTable = config('voodflow.table_names.workflows', 'voodflow_workflows');
+        $nodesTable = config('voodflow.table_names.nodes', 'voodflow_nodes');
+        $edgesTable = config('voodflow.table_names.edges', 'voodflow_edges');
+        $executionsTable = config('voodflow.table_names.executions', 'voodflow_executions');
+        $executionNodesTable = config('voodflow.table_names.execution_nodes', 'voodflow_execution_nodes');
+        $modelIntegrationsTable = config('voodflow.table_names.model_integrations', 'voodflow_model_integrations');
 
         Schema::dropIfExists($modelIntegrationsTable);
         Schema::dropIfExists($executionNodesTable);

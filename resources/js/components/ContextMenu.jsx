@@ -99,6 +99,7 @@ export default function ContextMenu({ id, top, left, right, bottom, availableNod
 
     return (
         <div
+            onClick={(e) => e.stopPropagation()}
             style={{ top, left, right, bottom }}
             className="
                 bg-white dark:bg-slate-800 

@@ -18,6 +18,7 @@ class ExecutionResult
         public array $output = [],
         public ?string $error = null,
         public ?string $nextNodeId = null,
+        public ?string $outputHandle = null, // NEW: For multiple output handles
     ) {}
 
     /**
@@ -53,5 +54,16 @@ class ExecutionResult
             output: $output,
             nextNodeId: $nextNodeId,
         );
+    }
+
+    /**
+     * Route output to a specific handle (for nodes with multiple outputs)
+     * 
+     * Example: return ExecutionResult::success($data)->toOutput('true');
+     */
+    public function toOutput(string $handleId): self
+    {
+        $this->outputHandle = $handleId;
+        return $this;
     }
 }

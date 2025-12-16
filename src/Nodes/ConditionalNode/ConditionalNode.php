@@ -26,10 +26,39 @@ class ConditionalNode implements NodeInterface
             'description' => 'Branch workflow based on conditions',
             'color' => 'warning',
             'icon' => 'heroicon-o-arrows-pointing-out',
-            'group' => 'Logic',
+            'group' => 'Flow Control',
+            
+            // NEW: Multiple output handles
             'positioning' => [
-                'input' => true,
-                'output' => false, // Handles maintained by React component (True/False)
+                'inputs' => [
+                    [
+                        'id' => 'main',
+                        'type' => 'main',
+                        'label' => 'Input',
+                        'required' => true,
+                    ]
+                ],
+                'outputs' => [
+                    [
+                        'id' => 'true',
+                        'type' => 'main',
+                        'label' => 'True',
+                        'color' => 'green',
+                    ],
+                    [
+                        'id' => 'false',
+                        'type' => 'main',
+                        'label' => 'False',
+                        'color' => 'red',
+                    ]
+                ],
+            ],
+            
+            // NEW: Data flow configuration
+            'data_flow' => [
+                'accepts_input' => true,
+                'produces_output' => true,
+                'output_schema' => 'passthrough', // Passes input data unchanged
             ],
         ];
     }
@@ -39,20 +68,46 @@ class ConditionalNode implements NodeInterface
         return [
             'label' => 'Condition',
             'description' => '',
+            'source_node_id' => null, // ID of the action node to evaluate
         ];
     }
 
     public function validate(array $config): array
     {
-        return [];
+        $errors = [];
+        
+        if (empty($config['source_node_id'])) {
+            $errors['source_node_id'] = 'Source action node is required';
+        }
+        
+        return $errors;
     }
 
     /**
-     * Execute the conditional logic with new signature
+     * Execute the conditional logic
+     * 
+     * Routes data to 'true' or 'false' output based on the result
+     * from the connected action node
      */
     public function execute(\Voodflow\Voodflow\Execution\ExecutionContext $context): \Voodflow\Voodflow\Execution\ExecutionResult
     {
-        // For now, just pass through input - conditional logic not yet implemented
-        return \Voodflow\Voodflow\Execution\ExecutionResult::success($context->input);
+        $sourceNodeId = $context->getConfig('source_node_id');
+        
+        if (!$sourceNodeId) {
+            return \Voodflow\Voodflow\Execution\ExecutionResult::failure(
+                'No source action node configured'
+            );
+        }
+        
+        // Get the result from the source action node
+        // This would be stored in the execution context or execution_nodes table
+        $actionResult = $context->getNodeResult($sourceNodeId);
+        
+        // Determine which output to route to
+        $isTrue = $actionResult['success'] ?? false;
+        
+        // Route to appropriate output handle
+        return \Voodflow\Voodflow\Execution\ExecutionResult::success($context->input)
+            ->toOutput($isTrue ? 'true' : 'false');
     }
 }

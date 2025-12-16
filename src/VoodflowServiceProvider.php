@@ -220,7 +220,7 @@ class VoodflowServiceProvider extends PackageServiceProvider
     protected function getMigrations(): array
     {
         return [
-            'create_signal_table',
+            'create_voodflow_table',
         ];
     }
 }

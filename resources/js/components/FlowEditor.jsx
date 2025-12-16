@@ -14,6 +14,7 @@ import ReactFlow, {
 } from 'reactflow';
 
 
+
 import TriggerNode from './TriggerNode';
 import FilterNode from './FilterNode';
 import FilterProNode from './FilterProNode';
@@ -21,8 +22,12 @@ import SendWebhookNode from './SendWebhookNode';
 import ConditionalNode from './ConditionalNode';
 import EmptyCanvasState from './EmptyCanvasState';
 import ContextMenu from './ContextMenu';
+import { nodeRegistry } from '../nodeRegistry';
 
-const nodeTypes = {
+console.log('[NodeRegistry] Loaded nodes:', Object.keys(nodeRegistry));
+
+// Static node types (legacy/core nodes + discovered nodes)
+const staticNodeTypes = {
     // Current types (voodflow_ prefix)
     trigger: TriggerNode,
     filter: FilterNode,
@@ -43,7 +48,43 @@ const nodeTypes = {
     base33_filter_pro: FilterProNode,
     base33_send_webhook: SendWebhookNode,
     base33_conditional: ConditionalNode,
+
+    // Add all discovered nodes from registry
+    ...nodeRegistry,
 };
+
+// Fallback component for unknown node types
+const FallbackNode = ({ data, type }) => (
+    <div style={{
+        padding: '12px',
+        border: '2px solid #ef4444',
+        borderRadius: '8px',
+        background: 'white',
+        minWidth: '200px'
+    }}>
+        <div style={{ fontWeight: 'bold', color: '#ef4444' }}>⚠️ Unknown Node</div>
+        <div style={{ fontSize: '12px', color: '#666', marginTop: '4px' }}>
+            Type: {type}
+        </div>
+        <div style={{ fontSize: '11px', color: '#999', marginTop: '2px' }}>
+            Component not found
+        </div>
+    </div>
+);
+
+// Create a Proxy to handle unknown node types with dynamic loading
+const nodeTypes = new Proxy(staticNodeTypes, {
+    get(target, prop) {
+        // If it's a known static type, return it
+        if (prop in target) {
+            return target[prop];
+        }
+
+        // Otherwise, return DynamicNodeLoader which will try to load it
+        console.log(`[NodeTypes] Unknown type "${prop}", using DynamicNodeLoader`);
+        return (props) => <DynamicNodeLoader type={prop} {...props} />;
+    }
+});
 
 function FlowCanvas({ initialNodes, initialEdges, initialViewport, livewireId, eventOptions, filterFieldsMap, availableNodesMap }) {
 
@@ -174,7 +215,7 @@ function FlowCanvas({ initialNodes, initialEdges, initialViewport, livewireId, e
             ...n.data,
             livewireId,
             eventOptions,
-            availableNodes: availableNodesList
+            availableNodes: availableNodesMap // Pass categorized object, not flat array
         };
         // Pass filterFieldsMap to all nodes for dynamic field lookup
         baseData.filterFieldsMap = filterFieldsMap;
@@ -361,7 +402,7 @@ function FlowCanvas({ initialNodes, initialEdges, initialViewport, livewireId, e
                         livewireId,
                         eventOptions,
                         filterFieldsMap,
-                        availableNodes: availableNodesMap, // Use grouped object
+                        availableNodes: availableNodesMap, // Use categorized object
                     },
                 };
                 console.log('[FlowEditor] Adding new node:', newNode);
@@ -452,6 +493,8 @@ function FlowCanvas({ initialNodes, initialEdges, initialViewport, livewireId, e
 
     const hasTrigger = nodes.some(n => n.type === 'trigger');
     const isEmpty = nodes.length === 0;
+
+    console.log('[FlowCanvas] isEmpty:', isEmpty, 'nodes:', nodes.length);
 
     return (
         <div ref={ref} style={{ width: '100%', height: '100%', position: 'relative' }}>

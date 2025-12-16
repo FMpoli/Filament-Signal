@@ -7,6 +7,7 @@
         "build:styles": "npx tailwindcss -i resources/css/index.css -o resources/dist/filament-signal.css --postcss --minify",
         "build:scripts": "node bin/build.js",
         "purge": "filament-purge -i resources/dist/filament-signal.css -o resources/dist/filament-signal.css -v 3.x",
+        "prebuild": "node bin/generate-node-registry.js",
         "dev": "npm-run-all --parallel dev:*",
         "build": "npm-run-all build:*",
         "postbuild": "mkdir -p ../../../public/js/voodflow/voodflow && cp resources/dist/filament-signal.js ../../../public/js/voodflow/voodflow/voodflow-scripts.js && mkdir -p ../../../public/css/voodflow/voodflow && cp resources/dist/filament-signal.css ../../../public/css/voodflow/voodflow/voodflow-styles.css && echo 'Assets copied to public directory'"
