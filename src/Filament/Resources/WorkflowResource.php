@@ -126,14 +126,14 @@ class WorkflowResource extends Resource
                         $triggerNode = $record->getTriggerNode();
                         
                         if (!$triggerNode) {
-                            return 'Not set';
+                            return 'None';
                         }
                         
-                        $data = $triggerNode->data ?? [];
-                        $event = $data['selectedEvent'] ?? null;
+                        $config = $triggerNode->config ?? [];
+                        $event = $config['selectedEvent'] ?? null;
                         
                         if (!$event) {
-                            return 'Not set';
+                            return 'Unconfigured';
                         }
                         
                         $parts = explode('\\', $event);
@@ -158,6 +158,7 @@ class WorkflowResource extends Resource
                         'Webhook' => 'success',
                         'Database' => 'warning',
                         'Event' => 'gray',
+                        'Unconfigured' => 'danger',
                         default => 'gray',
                     })
                     ->icon(fn (string $state): string => match($state) {
@@ -165,6 +166,7 @@ class WorkflowResource extends Resource
                         'Webhook' => 'heroicon-o-globe-alt',
                         'Database' => 'heroicon-o-database',
                         'Event' => 'heroicon-o-bolt',
+                        'Unconfigured' => 'heroicon-o-exclamation-triangle',
                         default => 'heroicon-o-minus-circle',
                     })
                     ->wrap(false)

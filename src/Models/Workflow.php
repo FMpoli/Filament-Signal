@@ -69,8 +69,8 @@ class Workflow extends Model
             return null;
         }
 
-        $data = $triggerNode->data ?? [];
-        return $data['selectedEvent'] ?? null;
+        $config = $triggerNode->config ?? [];
+        return $config['selectedEvent'] ?? null;
     }
 
     /**
@@ -85,8 +85,8 @@ class Workflow extends Model
             ->map(function ($node) {
                 return [
                     'type' => $node->type,
-                    'data' => $node->data,
-                    'icon' => $this->getNodeIcon($node->type, $node->data),
+                    'config' => $node->config,
+                    'icon' => $this->getNodeIcon($node->type, $node->config),
                 ];
             })
             ->toArray();
