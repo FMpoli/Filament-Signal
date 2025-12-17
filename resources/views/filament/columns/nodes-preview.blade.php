@@ -1,37 +1,34 @@
 @php
-    $maxDisplay = 4; // Display max 4 nodes, then +X indicator
+    $maxDisplay = 4;
+    $nodes = array_slice($nodesPreview, 0, $maxDisplay);
+    $remaining = count($nodesPreview) - $maxDisplay;
 @endphp
 
-<div class="flex items-center gap-1">
-    @forelse(array_slice($nodesPreview, 0, $maxDisplay) as $index => $nodeInfo)
+<div class="flex items-center gap-1.5">
+    @foreach($nodes as $nodeInfo)
         @php
-            $icon = $nodeInfo['icon'] ?? 'heroicon-o-puzzle-piece';
             $type = $nodeInfo['type'] ?? 'unknown';
+            $icon = $nodeInfo['icon'] ?? 'heroicon-o-puzzle-piece';
             $bgColor = match($type) {
-                'trigger' => 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400',
-                'action' => 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400',
-                'filter' => 'bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400',
-                'conditional' => 'bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400',
-                default => 'bg-gray-100 dark:bg-gray-900/30 text-gray-600 dark:text-gray-400',
+                'trigger' => 'bg-blue-500/10 text-blue-600 dark:text-blue-400',
+                'action' => 'bg-green-500/10 text-green-600 dark:text-green-400',
+                'filter' => 'bg-purple-500/10 text-purple-600 dark:text-purple-400',
+                'conditional' => 'bg-amber-500/10 text-amber-600 dark:text-amber-400',
+                default => 'bg-gray-500/10 text-gray-600 dark:text-gray-400',
             };
         @endphp
-        
-        <div 
-            class="flex items-center justify-center w-8 h-8 rounded-full {{ $bgColor }} transition-all duration-200 hover:scale-110"
-            title="{{ ucfirst($type) }}"
-        >
-            <x-filament::icon 
-                :icon="$icon" 
-                class="w-4 h-4"
-            />
+        <div class="flex items-center justify-center w-7 h-7 rounded-full {{ $bgColor }}" title="{{ ucfirst($type) }}">
+            <x-filament::icon :icon="$icon" class="w-3.5 h-3.5" />
         </div>
-    @empty
-        <span class="text-sm text-gray-400 dark:text-gray-600">No nodes</span>
-    @endforelse
+    @endforeach
     
-    @if(count($nodesPreview) > $maxDisplay)
-        <div class="flex items-center justify-center w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-800 text-gray-600 dark:text-gray-400 text-xs font-medium">
-            +{{ count($nodesPreview) - $maxDisplay }}
+    @if($remaining > 0)
+        <div class="flex items-center justify-center w-7 h-7 rounded-full bg-gray-500/10 text-gray-600 dark:text-gray-400 text-[10px] font-semibold">
+            +{{ $remaining }}
         </div>
+    @endif
+    
+    @if(empty($nodesPreview))
+        <span class="text-xs text-gray-400">—</span>
     @endif
 </div>
