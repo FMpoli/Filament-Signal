@@ -130,57 +130,151 @@ class WorkflowResource extends Resource
                         }
                         
                         $config = $triggerNode->config ?? [];
-                        $event = $config['selectedEvent'] ?? null;
+                        
+                        // Try different possible field names
+                        $event = $config['selectedEvent'] 
+                              ?? $config['event'] 
+                              ?? $config['eventClass']
+                              ?? $config['trigger_event']
+                              ?? null;
                         
                         if (!$event) {
+                            // If there's any config, it's configured but we don't recognize the structure
+                            if (!empty($config)) {
+                                return 'Event'; // Generic fallback
+                            }
                             return 'Unconfigured';
                         }
                         
+                        $eventLower = strtolower($event);
                         $parts = explode('\\', $event);
                         $className = end($parts);
                         
-                        if (str_contains(strtolower($event), 'schedule') || str_contains(strtolower($event), 'cron')) {
+                        // Detect trigger type based on event class name
+                        if (str_contains($eventLower, 'schedule') || str_contains($eventLower, 'cron')) {
                             return 'Schedule';
-                        } elseif (str_contains(strtolower($event), 'webhook') || str_contains(strtolower($event), 'http')) {
+                        } elseif (str_contains($eventLower, 'webhook') || str_contains($eventLower, 'http')) {
                             return 'Webhook';
-                        } elseif (str_contains(strtolower($event), 'eloquent') || 
+                        } elseif (str_contains($eventLower, 'subflow') || str_contains($eventLower, 'chain')) {
+                            return 'Subflow';
+                        } elseif (str_contains($eventLower, 'manual') || str_contains($eventLower, 'button')) {
+                            return 'Manual';
+                        } elseif (str_contains($eventLower, 'eloquent') || 
                                  str_contains(strtolower($className), 'created') ||
                                  str_contains(strtolower($className), 'updated') ||
-                                 str_contains(strtolower($className), 'deleted')) {
-                            return 'Database';
+                                 str_contains(strtolower($className), 'deleted') ||
+                                 str_contains(strtolower($className), 'saved')) {
+                            return 'Event';
                         }
                         
+                        // Default to Event for any other internal event
                         return 'Event';
                     })
                     ->badge()
                     ->color(fn (string $state): string => match($state) {
                         'Schedule' => 'info',
                         'Webhook' => 'success',
-                        'Database' => 'warning',
-                        'Event' => 'gray',
+                        'Event' => 'warning',
+                        'Subflow' => 'purple',
+                        'Manual' => 'gray',
                         'Unconfigured' => 'danger',
                         default => 'gray',
                     })
                     ->icon(fn (string $state): string => match($state) {
                         'Schedule' => 'heroicon-o-clock',
                         'Webhook' => 'heroicon-o-globe-alt',
-                        'Database' => 'heroicon-o-database',
                         'Event' => 'heroicon-o-bolt',
+                        'Subflow' => 'heroicon-o-arrow-path',
+                        'Manual' => 'heroicon-o-hand-raised',
                         'Unconfigured' => 'heroicon-o-exclamation-triangle',
                         default => 'heroicon-o-minus-circle',
+                    })
+                    ->tooltip(function (Workflow $record) {
+                        $triggerNode = $record->getTriggerNode();
+                        if (!$triggerNode) return 'No trigger configured';
+                        
+                        $config = $triggerNode->config ?? [];
+                        $event = $config['selectedEvent'] ?? $config['event'] ?? null;
+                        
+                        if ($event) {
+                            $parts = explode('\\', $event);
+                            return end($parts);
+                        }
+                        
+                        return 'Trigger configured';
                     })
                     ->wrap(false)
                     ->alignCenter(),
                 
                 // Execution Count
                 Tables\Columns\TextColumn::make('executions_count')
-                    ->label('Executions')
+                    ->label('Runs')
                     ->counts('executions')
                     ->sortable()
                     ->alignCenter()
                     ->badge()
                     ->color('gray')
                     ->icon('heroicon-o-play'),
+                
+                // Last Run Status
+                Tables\Columns\TextColumn::make('last_execution_status')
+                    ->label('Last Run')
+                    ->state(function (Workflow $record) {
+                        $lastExecution = $record->executions()->latest()->first();
+                        
+                        if (!$lastExecution) {
+                            return 'Never';
+                        }
+                        
+                        return $lastExecution->status ?? 'Unknown';
+                    })
+                    ->badge()
+                    ->color(fn (string $state): string => match($state) {
+                        'completed' => 'success',
+                        'success' => 'success',
+                        'failed' => 'danger',
+                        'error' => 'danger',
+                        'running' => 'info',
+                        'pending' => 'warning',
+                        'Never' => 'gray',
+                        default => 'gray',
+                    })
+                    ->icon(fn (string $state): string => match($state) {
+                        'completed', 'success' => 'heroicon-o-check-circle',
+                        'failed', 'error' => 'heroicon-o-x-circle',
+                        'running' => 'heroicon-o-arrow-path',
+                        'pending' => 'heroicon-o-clock',
+                        default => 'heroicon-o-minus',
+                    })
+                    ->description(function (Workflow $record) {
+                        $lastExecution = $record->executions()->latest()->first();
+                        return $lastExecution?->created_at?->diffForHumans() ?? '—';
+                    })
+                    ->alignCenter(),
+                
+                // Average Duration
+                Tables\Columns\TextColumn::make('avg_duration')
+                    ->label('Avg Time')
+                    ->state(function (Workflow $record) {
+                        $avgDuration = $record->executions()
+                            ->whereNotNull('completed_at')
+                            ->selectRaw('AVG(TIMESTAMPDIFF(SECOND, created_at, completed_at)) as avg_seconds')
+                            ->value('avg_seconds');
+                        
+                        if (!$avgDuration) {
+                            return '—';
+                        }
+                        
+                        if ($avgDuration < 60) {
+                            return round($avgDuration, 1) . 's';
+                        } elseif ($avgDuration < 3600) {
+                            return round($avgDuration / 60, 1) . 'm';
+                        } else {
+                            return round($avgDuration / 3600, 1) . 'h';
+                        }
+                    })
+                    ->alignCenter()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 
                 // Status
                 Tables\Columns\TextColumn::make('status')
