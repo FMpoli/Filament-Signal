@@ -22,6 +22,8 @@ import SendWebhookNode from './SendWebhookNode';
 import ConditionalNode from './ConditionalNode';
 import EmptyCanvasState from './EmptyCanvasState';
 import ContextMenu from './ContextMenu';
+import ExportFlowModal from './ExportFlowModal';
+import ImportFlowModal from './ImportFlowModal';
 import { nodeRegistry } from '../nodeRegistry';
 
 import { loadDynamicNodeBundles } from '../utils/dynamicNodeLoader';
@@ -101,6 +103,29 @@ function FlowCanvas({ initialNodes, initialEdges, initialViewport, livewireId, e
         });
 
         return list;
+    }, [availableNodesMap]);
+
+    // Create a flattened map for node type -> metadata (including tier)
+    const nodeTypeToMetadataMap = useMemo(() => {
+        if (!availableNodesMap || typeof availableNodesMap !== 'object') return {};
+
+        const map = {};
+        Object.entries(availableNodesMap).forEach(([category, nodes]) => {
+            if (Array.isArray(nodes)) {
+                nodes.forEach(node => {
+                    map[node.type] = {
+                        name: node.name,
+                        tier: node.tier || 'CORE',
+                        category: category,
+                        description: node.description,
+                        icon: node.icon,
+                        color: node.color
+                    };
+                });
+            }
+        });
+
+        return map;
     }, [availableNodesMap]);
 
     // Detect theme from Filament's localStorage
@@ -241,8 +266,10 @@ function FlowCanvas({ initialNodes, initialEdges, initialViewport, livewireId, e
 
     const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
     const [menu, setMenu] = useState(null);
+    const [showExportModal, setShowExportModal] = useState(false);
+    const [showImportModal, setShowImportModal] = useState(false);
     const ref = useRef(null);
-    const { getViewport, screenToFlowPosition } = useReactFlow();
+    const { getViewport, screenToFlowPosition, fitView } = useReactFlow();
 
     const onConnect = useCallback((params) => {
         setEdges((eds) => addEdge(params, eds));
@@ -398,6 +425,72 @@ function FlowCanvas({ initialNodes, initialEdges, initialViewport, livewireId, e
         return () => clearTimeout(timer);
     }, [nodes, edges, livewireId, getViewport]);
 
+    // Handle workflow export
+    const handleExport = useCallback((exportData) => {
+        const fileName = `workflow-${Date.now()}.json`;
+        const jsonString = JSON.stringify(exportData, null, 2);
+        const blob = new Blob([jsonString], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = fileName;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+
+        setShowExportModal(false);
+    }, []);
+
+    // Handle workflow import
+    const handleImport = useCallback((importData) => {
+        if (!window.Livewire || !livewireId) return;
+        const component = window.Livewire.find(livewireId);
+
+        if (component) {
+            // Clear current workflow
+            setNodes([]);
+            setEdges([]);
+
+            // Import nodes and edges
+            const importedNodes = importData.nodes.map(node => ({
+                ...node,
+                data: {
+                    ...node.data,
+                    livewireId,
+                    eventOptions,
+                    filterFieldsMap,
+                    availableNodes: availableNodesMap
+                }
+            }));
+
+            setNodes(importedNodes);
+            setEdges(importData.edges || []);
+
+            // Fit view to show all imported nodes
+            // Use setTimeout to ensure nodes are rendered before fitting
+            setTimeout(() => {
+                fitView({
+                    padding: 0.2, // 20% padding around nodes
+                    duration: 800, // Smooth animation
+                    maxZoom: 1.5 // Don't zoom in too much
+                });
+            }, 100);
+
+            // Save to backend
+            const flowData = {
+                nodes: importedNodes,
+                edges: importData.edges || [],
+                viewport: importData.viewport || { x: 0, y: 0, zoom: 1 }
+            };
+
+            component.call('saveFlowData', flowData);
+        }
+
+        setShowImportModal(false);
+    }, [livewireId, eventOptions, filterFieldsMap, availableNodesMap, setNodes, setEdges, fitView]);
+
     // Livewire event listeners for dynamic node updates
     useEffect(() => {
         // Handle new node added - Livewire 3 passes data directly
@@ -482,6 +575,30 @@ function FlowCanvas({ initialNodes, initialEdges, initialViewport, livewireId, e
     // Sync with Livewire (debounced save)
     useEffect(() => {
         const timer = setTimeout(() => {
+            // Get all valid node IDs
+            const validNodeIds = new Set(nodes.map(node => node.id));
+
+            // Filter out orphaned edges (edges that reference non-existent nodes)
+            const cleanedEdges = edges.filter(edge =>
+                validNodeIds.has(edge.source) && validNodeIds.has(edge.target)
+            );
+
+            // Remove duplicate edges
+            const uniqueEdgesMap = new Map();
+            cleanedEdges.forEach(edge => {
+                const key = `${edge.source} -${edge.sourceHandle || 'default'} -${edge.target} -${edge.targetHandle || 'default'} `;
+                if (!uniqueEdgesMap.has(key)) {
+                    uniqueEdgesMap.set(key, edge);
+                }
+            });
+            const uniqueEdges = Array.from(uniqueEdgesMap.values());
+
+            // If we removed orphaned edges, update the state
+            if (uniqueEdges.length !== edges.length) {
+                console.log(`[FlowCanvas] Cleaned ${edges.length - uniqueEdges.length} orphaned / duplicate edges`);
+                setEdges(uniqueEdges);
+            }
+
             const flowData = {
                 nodes: nodes.map(node => ({
                     id: node.id,
@@ -489,7 +606,7 @@ function FlowCanvas({ initialNodes, initialEdges, initialViewport, livewireId, e
                     position: node.position,
                     data: node.data,
                 })),
-                edges: edges.map(edge => ({
+                edges: uniqueEdges.map(edge => ({
                     id: edge.id,
                     source: edge.source,
                     target: edge.target,
@@ -506,15 +623,44 @@ function FlowCanvas({ initialNodes, initialEdges, initialViewport, livewireId, e
         }, 1000); // 1s debounce
 
         return () => clearTimeout(timer);
-    }, [nodes, edges, livewireId]);
+    }, [nodes, edges, livewireId, setEdges]);
 
     const hasTrigger = nodes.some(n => n.type === 'trigger');
     const isEmpty = nodes.length === 0;
 
     console.log('[FlowCanvas] isEmpty:', isEmpty, 'nodes:', nodes.length);
 
+
     return (
         <div ref={ref} style={{ width: '100%', height: '100%', position: 'relative' }}>
+            {/* Export Button - Top Right */}
+            {!isEmpty && (
+                <button
+                    onClick={() => setShowExportModal(true)}
+                    className="
+                        absolute top-4 right-4 z-20
+                        inline-flex items-center gap-2
+                        px-4 py-2
+                        bg-white dark:bg-slate-800
+                        hover:bg-slate-50 dark:hover:bg-slate-700
+                        text-slate-700 dark:text-slate-200
+                        font-medium text-sm
+                        rounded-lg
+                        border border-slate-300 dark:border-slate-600
+                        shadow-lg
+                        transition-all duration-200
+                        hover:shadow-xl
+                    "
+                    title="Export workflow as JSON"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
+                        <path d="M10.75 2.75a.75.75 0 00-1.5 0v8.614L6.295 8.235a.75.75 0 10-1.09 1.03l4.25 4.5a.75.75 0 001.09 0l4.25-4.5a.75.75 0 00-1.09-1.03l-2.955 3.129V2.75z" />
+                        <path d="M3.5 12.75a.75.75 0 00-1.5 0v2.5A2.75 2.75 0 004.75 18h10.5A2.75 2.75 0 0018 15.25v-2.5a.75.75 0 00-1.5 0v2.5c0 .69-.56 1.25-1.25 1.25H4.75c-.69 0-1.25-.56-1.25-1.25v-2.5z" />
+                    </svg>
+                    Export Workflow
+                </button>
+            )}
+
             {/* Empty State */}
             {isEmpty && (
                 <EmptyCanvasState
@@ -529,11 +675,12 @@ function FlowCanvas({ initialNodes, initialEdges, initialViewport, livewireId, e
                             sourceNodeId: null
                         });
                     }}
+                    onImport={() => setShowImportModal(true)}
                 />
             )}
 
             <ReactFlow
-                key={`react-flow-${colorMode}`}
+                key={`react - flow - ${colorMode} `}
                 nodes={nodes}
                 edges={edges}
                 nodeTypes={nodeTypes}
@@ -580,6 +727,31 @@ function FlowCanvas({ initialNodes, initialEdges, initialViewport, livewireId, e
                     />
                 )}
             </ReactFlow>
+
+            {/* Export Modal */}
+            <ExportFlowModal
+                isOpen={showExportModal}
+                onClose={() => setShowExportModal(false)}
+                workflowData={{
+                    nodes,
+                    edges,
+                    viewport: getViewport(),
+                    // These will be filled by the modal
+                    author: '',
+                    license: 'MIT',
+                    description: '',
+                    version: '1.0.0'
+                }}
+                onExport={handleExport}
+                availableNodesMap={nodeTypeToMetadataMap}
+            />
+
+            {/* Import Modal */}
+            <ImportFlowModal
+                isOpen={showImportModal}
+                onClose={() => setShowImportModal(false)}
+                onImport={handleImport}
+            />
         </div>
     );
 }

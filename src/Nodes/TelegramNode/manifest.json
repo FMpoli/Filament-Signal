@@ -1,0 +1,22 @@
+{
+    "name": "telegram-node",
+    "display_name": "TelegramNode",
+    "version": "1.0.0",
+    "author": "Voodflow",
+    "description": "Custom node for workflow automation",
+    "category": "action",
+    "tier": "PRO",
+    "php": {
+        "class": "TelegramNode",
+        "namespace": "Voodflow\\Voodflow\\Nodes\\TelegramNode"
+    },
+    "javascript": {
+        "component": "TelegramNode",
+        "bundle": "dist/telegram-node.js"
+    },
+    "author_url": "https://voodflow.com",
+    "repository": "https://github.com/voodflow/telegramnode",
+    "license": {
+        "type": "proprietary"
+    }
+}

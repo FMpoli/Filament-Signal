@@ -8,7 +8,7 @@ import NodePicker from './NodePicker';
  * Shows an attractive call-to-action when the canvas is empty.
  * Uses NodePicker for selection.
  */
-const EmptyCanvasState = ({ availableNodes = {}, onAddNode }) => {
+const EmptyCanvasState = ({ availableNodes = {}, onAddNode, onImport }) => {
     const [showNodePicker, setShowNodePicker] = useState(false);
 
     return (
@@ -32,30 +32,55 @@ const EmptyCanvasState = ({ availableNodes = {}, onAddNode }) => {
                             Create automation rules by connecting triggers, filters, and actions together.
                         </p>
 
-                        <button
-                            onClick={() => setShowNodePicker(true)}
-                            className="
-                                inline-flex items-center gap-3
-                                px-6 py-3
-                                bg-gradient-to-r from-orange-500 to-orange-600
-                                hover:from-orange-600 hover:to-orange-700
-                                text-white font-semibold text-lg
-                                rounded-xl
-                                shadow-lg shadow-orange-500/25
-                                transition-all duration-200
-                                hover:scale-105
-                                hover:shadow-xl hover:shadow-orange-500/30
-                            "
-                        >
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5">
-                                <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
-                            </svg>
-                            Add First Node
-                        </button>
+                        <div className="flex items-center gap-3">
+                            <button
+                                onClick={() => setShowNodePicker(true)}
+                                className="
+                                    inline-flex items-center gap-3
+                                    px-6 py-3
+                                    bg-gradient-to-r from-orange-500 to-orange-600
+                                    hover:from-orange-600 hover:to-orange-700
+                                    text-white font-semibold text-lg
+                                    rounded-xl
+                                    shadow-lg shadow-orange-500/25
+                                    transition-all duration-200
+                                    hover:scale-105
+                                    hover:shadow-xl hover:shadow-orange-500/30
+                                "
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5">
+                                    <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
+                                </svg>
+                                Add First Node
+                            </button>
+
+                            <button
+                                onClick={onImport}
+                                className="
+                                    inline-flex items-center gap-3
+                                    px-6 py-3
+                                    bg-slate-100 dark:bg-slate-700
+                                    hover:bg-slate-200 dark:hover:bg-slate-600
+                                    text-slate-700 dark:text-slate-200 font-semibold text-lg
+                                    rounded-xl
+                                    border-2 border-slate-300 dark:border-slate-600
+                                    shadow-lg
+                                    transition-all duration-200
+                                    hover:scale-105
+                                "
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5">
+                                    <path d="M9.25 13.25a.75.75 0 001.5 0V4.636l2.955 3.129a.75.75 0 001.09-1.03l-4.25-4.5a.75.75 0 00-1.09 0l-4.25 4.5a.75.75 0 101.09 1.03L9.25 4.636v8.614z" />
+                                    <path d="M3.5 12.75a.75.75 0 00-1.5 0v2.5A2.75 2.75 0 004.75 18h10.5A2.75 2.75 0 0018 15.25v-2.5a.75.75 0 00-1.5 0v2.5c0 .69-.56 1.25-1.25 1.25H4.75c-.69 0-1.25-.56-1.25-1.25v-2.5z" />
+                                </svg>
+                                Import Workflow
+                            </button>
+                        </div>
 
                         <p className="text-xs text-slate-400 dark:text-slate-500 mt-4">
                             Tip: Start with a Trigger to respond to events automatically
                         </p>
+
                     </div>
                 ) : (
                     /* Node Picker */
