@@ -57,14 +57,41 @@ const SendWebhookNode = ({ id, data }) => {
         }));
     };
 
-    // Handle collapse and update isNew and SAVE
+    // Handle collapse/expand toggle and update isNew and SAVE
     const handleCollapse = () => {
-        setIsExpanded(false);
-        if (data.isNew) {
+        const newExpandedState = !isExpanded;
+        setIsExpanded(newExpandedState);
+
+        // Bring node to front when expanding
+        if (newExpandedState) {
+            setNodes((nds) => nds.map((node) => {
+                if (node.id === id) {
+                    return {
+                        ...node,
+                        style: { ...node.style, zIndex: 1000 }
+                    };
+                }
+                return node;
+            }));
+        } else {
+            // Reset Z-Index on collapse
+            setNodes((nds) => nds.map((node) => {
+                if (node.id === id && node.style?.zIndex === 1000) {
+                    const newStyle = { ...node.style };
+                    delete newStyle.zIndex;
+                    return { ...node, style: newStyle };
+                }
+                return node;
+            }));
+        }
+
+        if (data.isNew && !newExpandedState) {
             updateNodeData({ isNew: false });
         }
         // Ensure everything is saved when collapsing
-        save(label, description, url, method, payloadMode, signingSecret, selectedPayloadFields);
+        if (!newExpandedState) {
+            save(label, description, url, method, payloadMode, signingSecret, selectedPayloadFields);
+        }
     };
 
     // Check connection
@@ -82,7 +109,11 @@ const SendWebhookNode = ({ id, data }) => {
             sourceHandle: null // Single handle
         });
 
-        handleCollapse();
+        setIsExpanded(false);
+        if (data.isNew) {
+            updateNodeData({ isNew: false });
+        }
+        save(label, description, url, method, payloadMode, signingSecret, selectedPayloadFields);
     };
 
     // Save configuration to backend
@@ -253,6 +284,7 @@ const SendWebhookNode = ({ id, data }) => {
                 border-blue-500
                 shadow-lg min-w-[500px] max-w-[600px]
                 transition-all duration-200
+                ${isExpanded ? 'z-50' : ''}
             `}>
                 <Handle
                     type="target"
@@ -308,8 +340,7 @@ const SendWebhookNode = ({ id, data }) => {
                             </div>
                         ) : (
                             <div
-                                className="cursor-pointer group flex flex-col gap-1"
-                                onClick={() => setIsExpanded(true)}
+                                className="flex flex-col gap-1"
                             >
                                 <div className="font-medium text-slate-700 dark:text-slate-200 flex items-center justify-between">
                                     <span>{label}</span>

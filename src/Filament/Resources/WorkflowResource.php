@@ -88,32 +88,92 @@ class WorkflowResource extends Resource
     {
         return $table
             ->columns([
+                // Node Icons Preview (first 3-5 nodes)
+                Tables\Columns\TextColumn::make('nodes_preview')
+                    ->label('Nodes')
+                    ->formatStateUsing(function ($state, Workflow $record) {
+                        return view('voodflow::filament.columns.nodes-preview', [
+                            'record' => $record,
+                            'nodesPreview' => $record->nodes_preview,
+                        ]);
+                    })
+                    ->html()
+                    ->width('120px'),
+                
+                // Workflow Name
                 Tables\Columns\TextColumn::make('name')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->weight('medium')
+                    ->description(fn (Workflow $record) => $record->description)
+                    ->limit(30),
+                
+                // Author
+                Tables\Columns\TextColumn::make('user.name')
+                    ->label('Author')
+                    ->searchable()
+                    ->sortable()
+                    ->icon('heroicon-o-user')
+                    ->default('—'),
+                
+                // Trigger Type (with icon and tooltip)
+                Tables\Columns\TextColumn::make('trigger_info')
+                    ->label('Trigger')
+                    ->formatStateUsing(function ($state, Workflow $record) {
+                        return view('voodflow::filament.columns.trigger-type', [
+                            'record' => $record,
+                        ]);
+                    })
+                    ->html()
+                    ->width('100px')
+                    ->alignCenter(),
+                
+                // Execution Count
+                Tables\Columns\TextColumn::make('executions_count')
+                    ->label('Executions')
+                    ->counts('executions')
+                    ->sortable()
+                    ->alignCenter()
+                    ->badge()
+                    ->color('gray')
+                    ->icon('heroicon-o-play'),
+                
+                // Status
                 Tables\Columns\TextColumn::make('status')
                     ->badge()
                     ->colors([
                         'warning' => 'draft',
                         'success' => 'active',
                         'danger' => 'disabled',
-                    ]),
+                    ])
+                    ->sortable(),
+                
+                // Created At
                 Tables\Columns\TextColumn::make('created_at')
-                    ->dateTime()
+                    ->label('Created')
+                    ->dateTime('d M Y')
                     ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->description(fn (Workflow $record) => $record->created_at?->diffForHumans()),
+                
                 Tables\Columns\TextColumn::make('updated_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
+            ->defaultSort('created_at', 'desc')
             ->filters([
-                //
+                Tables\Filters\SelectFilter::make('status')
+                    ->options([
+                        'draft' => 'Draft',
+                        'active' => 'Active',
+                        'disabled' => 'Disabled',
+                    ]),
             ])
             ->actions([
                 Action::make('flow')
                     ->label('Editor')
                     ->icon('heroicon-o-cpu-chip')
+                    ->color('primary')
                     ->url(fn (Workflow $record) => static::getUrl('flow', ['record' => $record])),
                 ViewAction::make(),
                 EditAction::make(),

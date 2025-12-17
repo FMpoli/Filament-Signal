@@ -99,20 +99,29 @@ const TriggerNode = ({ id, data, selected }) => {
     // Handle collapse and update isNew
     const handleCollapse = () => {
         setIsExpanded(false);
-        if (data.isNew) {
-            setNodes((nds) => nds.map((node) => {
-                if (node.id === id) {
-                    return {
-                        ...node,
-                        data: {
-                            ...node.data,
-                            isNew: false
-                        }
-                    };
+
+        setNodes((nds) => nds.map((node) => {
+            if (node.id === id) {
+                // Reset Z-Index
+                const newStyle = { ...node.style };
+                if (newStyle.zIndex === 1000) {
+                    delete newStyle.zIndex;
                 }
-                return node;
-            }));
-        }
+
+                // Handle isNew
+                const newData = { ...node.data };
+                if (data.isNew) {
+                    newData.isNew = false;
+                }
+
+                return {
+                    ...node,
+                    style: newStyle,
+                    data: newData
+                };
+            }
+            return node;
+        }));
     };
 
     // Handle toggle expansion
@@ -121,6 +130,16 @@ const TriggerNode = ({ id, data, selected }) => {
             handleCollapse();
         } else {
             setIsExpanded(true);
+            // Bring node to front when expanding
+            setNodes((nds) => nds.map((node) => {
+                if (node.id === id) {
+                    return {
+                        ...node,
+                        style: { ...node.style, zIndex: 1000 }
+                    };
+                }
+                return node;
+            }));
         }
     };
 
@@ -159,6 +178,7 @@ const TriggerNode = ({ id, data, selected }) => {
                 min-w-[350px]
                 transition-all duration-200
                 hover:shadow-md
+                ${isExpanded ? 'z-50' : ''}
             `}>
                 {/* Header */}
                 <div className="bg-gradient-to-r from-orange-500 to-orange-600 px-4 py-3 flex items-center justify-between box-border rounded-t-lg">

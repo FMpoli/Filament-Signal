@@ -15,7 +15,9 @@ class MakeSignalNodeCommand extends Command
                             {--type= : The type of node (trigger, filter, action)}
                             {--color= : The header color (orange, purple, blue, green, red, gray)}
                             {--icon= : Icon name (bolt, filter, bell, mail, code, webhook)}
-                            {--description= : A short description of what the node does}';
+                            {--description= : A short description of what the node does}
+                            {--vendor= : The vendor namespace (e.g., voodflow)}
+                            {--author= : The author name}';
 
     /**
      * The console command description.
@@ -135,6 +137,9 @@ class MakeSignalNodeCommand extends Command
         // Get vendor namespace
         $vendor = $this->option('vendor') ?? $this->ask('Vendor namespace (e.g. app, voodflow)', 'voodflow');
 
+        // Get author
+        $author = $this->option('author') ?? $this->ask('Author name', 'Voodflow');
+
         // Summary
         $this->info('');
         $this->info('📋 Node Configuration:');
@@ -143,6 +148,7 @@ class MakeSignalNodeCommand extends Command
             [
                 ['Name', $name],
                 ['Vendor', $vendor],
+                ['Author', $author],
                 ['Category', $type],
                 ['Type ID', strtolower($vendor) . '_' . \Illuminate\Support\Str::snake($name)],
                 ['Description', $description],
@@ -158,7 +164,7 @@ class MakeSignalNodeCommand extends Command
         // Generate files
         $nodeTypeId = strtolower($vendor) . '_' . \Illuminate\Support\Str::snake($name);
         $this->generateReactComponent($name, $type, $color, $icon, $description);
-        $this->generatePhpHandler($name, $type, $nodeTypeId, $description, $color, $icon);
+        $this->generatePhpHandler($name, $type, $nodeTypeId, $description, $color, $icon, $author);
         $this->updateNodeRegistry($name, $type);
 
         $this->info('');
@@ -225,7 +231,7 @@ class MakeSignalNodeCommand extends Command
     /**
      * Generate PHP handler class
      */
-    protected function generatePhpHandler(string $name, string $type, string $nodeTypeId, string $description, string $color, string $icon): void
+    protected function generatePhpHandler(string $name, string $type, string $nodeTypeId, string $description, string $color, string $icon, string $author): void
     {
         $stub = $this->getPhpStub();
         $nodeConfig = $this->nodeTypes[$type];
@@ -239,6 +245,7 @@ class MakeSignalNodeCommand extends Command
             '{{GROUP}}',
             '{{HAS_INPUT}}',
             '{{HAS_OUTPUT}}',
+            '{{AUTHOR}}',
         ], [
             $name,
             $nodeTypeId,
@@ -248,6 +255,7 @@ class MakeSignalNodeCommand extends Command
             ucfirst($type) . 's', // e.g. Filters, Actions
             $nodeConfig['hasInputHandle'] ? 'true' : 'false',
             $nodeConfig['hasOutputHandle'] ? 'true' : 'false',
+            $author,
         ], $stub);
 
         $dir = $this->getPackagePath() . '/src/Nodes';
@@ -597,7 +605,7 @@ class {{NAME}}Node implements NodeInterface
     public static function metadata(): array
     {
         return [
-            'author' => 'Voodflow',
+            'author' => '{{AUTHOR}}',
             'version' => '1.0.0',
             'color' => '{{COLOR}}',
             'icon' => '{{ICON}}',

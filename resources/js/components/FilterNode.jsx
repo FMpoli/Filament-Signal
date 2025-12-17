@@ -21,20 +21,28 @@ const FilterNode = ({ id, data }) => {
     // Handle collapse and update isNew
     const handleCollapse = () => {
         setIsExpanded(false);
-        if (data.isNew) {
-            setNodes((nds) => nds.map((node) => {
-                if (node.id === id) {
-                    return {
-                        ...node,
-                        data: {
-                            ...node.data,
-                            isNew: false
-                        }
-                    };
+
+        setNodes((nds) => nds.map((node) => {
+            if (node.id === id) {
+                // Reset Z-Index
+                const newStyle = { ...node.style };
+                if (newStyle.zIndex === 1000) {
+                    delete newStyle.zIndex;
                 }
-                return node;
-            }));
-        }
+
+                const newData = { ...node.data };
+                if (data.isNew) {
+                    newData.isNew = false;
+                }
+
+                return {
+                    ...node,
+                    style: newStyle,
+                    data: newData
+                };
+            }
+            return node;
+        }));
     };
 
     // Handle toggle expansion
@@ -43,6 +51,16 @@ const FilterNode = ({ id, data }) => {
             handleCollapse();
         } else {
             setIsExpanded(true);
+            // Bring node to front when expanding
+            setNodes((nds) => nds.map((node) => {
+                if (node.id === id) {
+                    return {
+                        ...node,
+                        style: { ...node.style, zIndex: 1000 }
+                    };
+                }
+                return node;
+            }));
         }
     };
 
@@ -284,6 +302,7 @@ const FilterNode = ({ id, data }) => {
                 ${isConnected ? 'border-purple-500' : 'border-slate-300 dark:border-slate-600'}
                 shadow-lg min-w-[300px] max-w-[400px]
                 transition-all duration-200
+                ${isExpanded ? 'z-50' : ''}
             `}>
                 <Handle
                     type="target"

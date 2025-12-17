@@ -7,7 +7,6 @@ import ReactFlow, {
     addEdge,
     Background,
     Controls,
-    MiniMap,
     Handle,
     Position,
     useReactFlow,
@@ -119,7 +118,8 @@ function FlowCanvas({ initialNodes, initialEdges, initialViewport, livewireId, e
                         category: category,
                         description: node.description,
                         icon: node.icon,
-                        color: node.color
+                        color: node.color,
+                        author: node.author || 'Unknown'
                     };
                 });
             }
@@ -263,6 +263,7 @@ function FlowCanvas({ initialNodes, initialEdges, initialViewport, livewireId, e
         baseData.filterFieldsMap = filterFieldsMap;
         return { ...n, data: baseData };
     }));
+
 
     const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
     const [menu, setMenu] = useState(null);
@@ -564,6 +565,7 @@ function FlowCanvas({ initialNodes, initialEdges, initialViewport, livewireId, e
             window.Livewire.on('flow-refresh', handleRefresh);
         }
 
+
         // Also listen for browser events (fallback)
         window.addEventListener('flow-refresh', handleRefresh);
 
@@ -572,9 +574,30 @@ function FlowCanvas({ initialNodes, initialEdges, initialViewport, livewireId, e
         };
     }, [livewireId, eventOptions, filterFieldsMap, availableNodesList, setNodes, setEdges]);
 
+    // Track last saved state to avoid duplicate saves
+    const lastSavedState = useRef(null);
+
     // Sync with Livewire (debounced save)
     useEffect(() => {
         const timer = setTimeout(() => {
+            // Create a hash of current state to compare (include livewireId for isolation)
+            const currentStateHash = JSON.stringify({
+                livewireId: livewireId,
+                nodes: nodes.map(n => ({ id: n.id, type: n.type, position: n.position, data: n.data })),
+                edges: edges.map(e => ({ id: e.id, source: e.source, target: e.target, sourceHandle: e.sourceHandle, targetHandle: e.targetHandle }))
+            });
+
+            // Skip if nothing changed
+            if (lastSavedState.current === currentStateHash) {
+                console.log(`[FlowCanvas:${livewireId}] Skipping save - no changes detected`);
+                return;
+            }
+
+            console.log(`[FlowCanvas:${livewireId}] Saving flow data...`, {
+                nodesCount: nodes.length,
+                edgesCount: edges.length
+            });
+
             // Get all valid node IDs
             const validNodeIds = new Set(nodes.map(node => node.id));
 
@@ -586,17 +609,17 @@ function FlowCanvas({ initialNodes, initialEdges, initialViewport, livewireId, e
             // Remove duplicate edges
             const uniqueEdgesMap = new Map();
             cleanedEdges.forEach(edge => {
-                const key = `${edge.source} -${edge.sourceHandle || 'default'} -${edge.target} -${edge.targetHandle || 'default'} `;
+                const key = `${edge.source}-${edge.sourceHandle || 'default'}-${edge.target}-${edge.targetHandle || 'default'}`;
                 if (!uniqueEdgesMap.has(key)) {
                     uniqueEdgesMap.set(key, edge);
                 }
             });
             const uniqueEdges = Array.from(uniqueEdgesMap.values());
 
-            // If we removed orphaned edges, update the state
+            // Log if we're cleaning edges, but DON'T call setEdges() here
+            // This prevents interference between multiple workflow instances
             if (uniqueEdges.length !== edges.length) {
-                console.log(`[FlowCanvas] Cleaned ${edges.length - uniqueEdges.length} orphaned / duplicate edges`);
-                setEdges(uniqueEdges);
+                console.log(`[FlowCanvas:${livewireId}] Cleaned ${edges.length - uniqueEdges.length} orphaned/duplicate edges (in save only, not in state)`);
             }
 
             const flowData = {
@@ -618,12 +641,21 @@ function FlowCanvas({ initialNodes, initialEdges, initialViewport, livewireId, e
 
             if (window.Livewire && livewireId) {
                 const component = window.Livewire.find(livewireId);
+                console.log(`[FlowCanvas:${livewireId}] ✓ Saving to Livewire`, {
+                    nodes: flowData.nodes.length,
+                    edges: flowData.edges.length
+                });
                 component?.call('saveFlowData', flowData);
-            }
-        }, 1000); // 1s debounce
 
-        return () => clearTimeout(timer);
-    }, [nodes, edges, livewireId, setEdges]);
+                // Update last saved state
+                lastSavedState.current = currentStateHash;
+            }
+        }, 500); // Reduced from 1000ms to 500ms for faster saving
+
+        return () => {
+            clearTimeout(timer);
+        };
+    }, [nodes, edges, livewireId, getViewport]);
 
     const hasTrigger = nodes.some(n => n.type === 'trigger');
     const isEmpty = nodes.length === 0;
@@ -680,7 +712,7 @@ function FlowCanvas({ initialNodes, initialEdges, initialViewport, livewireId, e
             )}
 
             <ReactFlow
-                key={`react - flow - ${colorMode} `}
+                key={`react-flow-${colorMode}`}
                 nodes={nodes}
                 edges={edges}
                 nodeTypes={nodeTypes}
@@ -695,10 +727,14 @@ function FlowCanvas({ initialNodes, initialEdges, initialViewport, livewireId, e
                 defaultViewport={initialViewport}
                 fitView={!initialViewport || (initialViewport.x === 0 && initialViewport.y === 0 && initialViewport.zoom === 1)}
                 colorMode={colorMode}
+                defaultEdgeOptions={{
+                    animated: false,
+                    style: { strokeWidth: 2 },
+                    interactionWidth: 20  // Increased hit area for easier clicking
+                }}
             >
                 <Background variant="dots" gap={12} size={1} />
                 <Controls />
-                <MiniMap />
                 {menu && (
                     <ContextMenu
                         onClick={onPaneClick}
@@ -736,8 +772,8 @@ function FlowCanvas({ initialNodes, initialEdges, initialViewport, livewireId, e
                     nodes,
                     edges,
                     viewport: getViewport(),
-                    // These will be filled by the modal
-                    author: '',
+                    // Get author from Filament auth user
+                    author: window.filamentData?.user?.name || '',
                     license: 'MIT',
                     description: '',
                     version: '1.0.0'

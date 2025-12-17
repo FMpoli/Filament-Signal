@@ -76,19 +76,29 @@ const ExportFlowModal = ({ isOpen, onClose, workflowData, onExport, availableNod
             // Try to get tier from availableNodesMap first (more reliable)
             let tier = 'CORE';
             let nodeName = nodeData.label || nodeType;
+            let author = 'Unknown';
+            let installUrl = null;
+            let price = null;
 
             if (availableNodesMap && availableNodesMap[nodeType]) {
-                tier = availableNodesMap[nodeType].tier || 'CORE';
-                // Use the name from availableNodesMap if available (more accurate)
-                nodeName = availableNodesMap[nodeType].name || nodeName;
+                const nodeMetadata = availableNodesMap[nodeType];
+                tier = nodeMetadata.tier || 'CORE';
+                nodeName = nodeMetadata.name || nodeName;
+                author = nodeMetadata.author || 'Unknown';
+                installUrl = nodeMetadata.installUrl || null;
+                price = nodeMetadata.price || null;
             } else if (nodeData.tier) {
                 // Fallback to node data tier
                 tier = nodeData.tier;
+                author = nodeData.author || 'Unknown';
+                installUrl = nodeData.installUrl || null;
+                price = nodeData.price || null;
             }
 
             const nodeInfo = {
                 type: nodeType,
-                name: nodeName
+                name: nodeName,
+                author: author
             };
 
             // Only add if we haven't seen this type before
@@ -99,21 +109,21 @@ const ExportFlowModal = ({ isOpen, onClose, workflowData, onExport, availableNod
                 seenTypes.free.add(nodeType);
                 analysis.freeNodes.push({
                     ...nodeInfo,
-                    installUrl: nodeData.installUrl || null
+                    installUrl: installUrl
                 });
             } else if (tier === 'PRO' && !seenTypes.pro.has(nodeType)) {
                 seenTypes.pro.add(nodeType);
                 analysis.proNodes.push({
                     ...nodeInfo,
-                    installUrl: nodeData.installUrl || null,
-                    price: nodeData.price || null
+                    installUrl: installUrl,
+                    price: price
                 });
             } else if (tier === 'PAID' && !seenTypes.paid.has(nodeType)) {
                 seenTypes.paid.add(nodeType);
                 analysis.paidNodes.push({
                     ...nodeInfo,
-                    installUrl: nodeData.installUrl || null,
-                    price: nodeData.price || null
+                    installUrl: installUrl,
+                    price: price
                 });
             } else if (!seenTypes.missing.has(nodeType)) {
                 // Unknown tier - treat as missing
@@ -169,7 +179,7 @@ const ExportFlowModal = ({ isOpen, onClose, workflowData, onExport, availableNod
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-            <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-hidden flex flex-col">
+            <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl max-w-3xl w-full mx-4 max-h-[80vh] flex flex-col overflow-hidden">
                 {/* Header */}
                 <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-700">
                     <div className="flex items-center justify-between">
@@ -187,52 +197,54 @@ const ExportFlowModal = ({ isOpen, onClose, workflowData, onExport, availableNod
                     </div>
                 </div>
 
-                {/* Content */}
-                <div className="flex-1 overflow-y-auto px-6 py-4">
+                {/* Content - No scroll */}
+                <div className="px-6 py-4">
                     <form onSubmit={handleSubmit} id="export-form">
-                        {/* Metadata Fields */}
-                        <div className="space-y-4 mb-6">
-                            <div>
-                                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                                    Author
-                                </label>
-                                <input
-                                    type="text"
-                                    value={formData.author}
-                                    onChange={(e) => setFormData({ ...formData, author: e.target.value })}
-                                    className="w-full px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                                    placeholder="Your name or organization"
-                                />
-                            </div>
+                        {/* Metadata Fields - 3 columns */}
+                        <div className="mb-4">
+                            <div className="grid grid-cols-3 gap-4 mb-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                                        Author
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={formData.author}
+                                        onChange={(e) => setFormData({ ...formData, author: e.target.value })}
+                                        className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                                        placeholder="Your name"
+                                    />
+                                </div>
 
-                            <div>
-                                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                                    License
-                                </label>
-                                <select
-                                    value={formData.license}
-                                    onChange={(e) => setFormData({ ...formData, license: e.target.value })}
-                                    className="w-full px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                                >
-                                    <option value="MIT">MIT</option>
-                                    <option value="Apache-2.0">Apache 2.0</option>
-                                    <option value="GPL-3.0">GPL 3.0</option>
-                                    <option value="BSD-3-Clause">BSD 3-Clause</option>
-                                    <option value="Proprietary">Proprietary</option>
-                                </select>
-                            </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                                        License
+                                    </label>
+                                    <select
+                                        value={formData.license}
+                                        onChange={(e) => setFormData({ ...formData, license: e.target.value })}
+                                        className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                                    >
+                                        <option value="MIT">MIT</option>
+                                        <option value="Apache-2.0">Apache 2.0</option>
+                                        <option value="GPL-3.0">GPL 3.0</option>
+                                        <option value="BSD-3-Clause">BSD 3-Clause</option>
+                                        <option value="Proprietary">Proprietary</option>
+                                    </select>
+                                </div>
 
-                            <div>
-                                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                                    Version
-                                </label>
-                                <input
-                                    type="text"
-                                    value={formData.version}
-                                    onChange={(e) => setFormData({ ...formData, version: e.target.value })}
-                                    className="w-full px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                                    placeholder="1.0.0"
-                                />
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                                        Version
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={formData.version}
+                                        onChange={(e) => setFormData({ ...formData, version: e.target.value })}
+                                        className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                                        placeholder="1.0.0"
+                                    />
+                                </div>
                             </div>
 
                             <div>
@@ -242,8 +254,8 @@ const ExportFlowModal = ({ isOpen, onClose, workflowData, onExport, availableNod
                                 <textarea
                                     value={formData.description}
                                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                                    rows={4}
-                                    className="w-full px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-orange-500 focus:border-transparent resize-none"
+                                    rows={2}
+                                    className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-orange-500 focus:border-transparent resize-none"
                                     placeholder="Describe what this workflow does..."
                                 />
                             </div>
@@ -273,7 +285,23 @@ const ExportFlowModal = ({ isOpen, onClose, workflowData, onExport, availableNod
                                                     {nodeAnalysis.freeNodes.map((node, idx) => (
                                                         <li key={idx} className="flex items-center gap-2">
                                                             <span className="w-1.5 h-1.5 rounded-full bg-amber-600 dark:bg-amber-400"></span>
-                                                            {node.name}
+                                                            {node.author && node.author !== 'Unknown' ? (
+                                                                <span>
+                                                                    {node.author} - {node.name}
+                                                                    {node.installUrl && (
+                                                                        <a
+                                                                            href={node.installUrl}
+                                                                            target="_blank"
+                                                                            rel="noopener noreferrer"
+                                                                            className="ml-2 text-amber-800 dark:text-amber-300 underline hover:no-underline"
+                                                                        >
+                                                                            Install
+                                                                        </a>
+                                                                    )}
+                                                                </span>
+                                                            ) : (
+                                                                <span>{node.name}</span>
+                                                            )}
                                                         </li>
                                                     ))}
                                                 </ul>
@@ -289,7 +317,24 @@ const ExportFlowModal = ({ isOpen, onClose, workflowData, onExport, availableNod
                                                     {nodeAnalysis.proNodes.map((node, idx) => (
                                                         <li key={idx} className="flex items-center gap-2">
                                                             <span className="w-1.5 h-1.5 rounded-full bg-amber-600 dark:bg-amber-400"></span>
-                                                            {node.name} {node.price && `($${node.price})`}
+                                                            {node.author && node.author !== 'Unknown' ? (
+                                                                <span>
+                                                                    {node.author} - {node.name}
+                                                                    {node.price && ` ($${node.price})`}
+                                                                    {node.installUrl && (
+                                                                        <a
+                                                                            href={node.installUrl}
+                                                                            target="_blank"
+                                                                            rel="noopener noreferrer"
+                                                                            className="ml-2 text-amber-800 dark:text-amber-300 underline hover:no-underline"
+                                                                        >
+                                                                            Get
+                                                                        </a>
+                                                                    )}
+                                                                </span>
+                                                            ) : (
+                                                                <span>{node.name} {node.price && `($${node.price})`}</span>
+                                                            )}
                                                         </li>
                                                     ))}
                                                 </ul>
@@ -305,7 +350,24 @@ const ExportFlowModal = ({ isOpen, onClose, workflowData, onExport, availableNod
                                                     {nodeAnalysis.paidNodes.map((node, idx) => (
                                                         <li key={idx} className="flex items-center gap-2">
                                                             <span className="w-1.5 h-1.5 rounded-full bg-amber-600 dark:bg-amber-400"></span>
-                                                            {node.name} {node.price && `($${node.price})`}
+                                                            {node.author && node.author !== 'Unknown' ? (
+                                                                <span>
+                                                                    {node.author} - {node.name}
+                                                                    {node.price && ` ($${node.price})`}
+                                                                    {node.installUrl && (
+                                                                        <a
+                                                                            href={node.installUrl}
+                                                                            target="_blank"
+                                                                            rel="noopener noreferrer"
+                                                                            className="ml-2 text-amber-800 dark:text-amber-300 underline hover:no-underline"
+                                                                        >
+                                                                            Get
+                                                                        </a>
+                                                                    )}
+                                                                </span>
+                                                            ) : (
+                                                                <span>{node.name} {node.price && `($${node.price})`}</span>
+                                                            )}
                                                         </li>
                                                     ))}
                                                 </ul>

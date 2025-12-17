@@ -14,9 +14,26 @@ const ConditionalNode = ({ id, data }) => {
 
     const handleCollapse = () => {
         setIsExpanded(false);
-        if (data.isNew) {
-            updateNodeData({ isNew: false });
-        }
+
+        setNodes((nds) => nds.map((node) => {
+            if (node.id === id) {
+                // Reset Z-Index
+                const newStyle = { ...node.style };
+                if (newStyle.zIndex === 1000) {
+                    delete newStyle.zIndex;
+                }
+
+                // Handle isNew
+                let newData = { ...node.data };
+                if (data.isNew) {
+                    newData = { ...newData, isNew: false };
+                }
+
+                return { ...node, style: newStyle, data: newData };
+            }
+            return node;
+        }));
+
         save(label, description);
     };
 
@@ -88,6 +105,7 @@ const ConditionalNode = ({ id, data }) => {
                 border-amber-500
                 shadow-lg min-w-[280px] max-w-[350px]
                 transition-all duration-200
+                ${isExpanded ? 'z-50' : ''}
             `}>
                 <Handle
                     type="target"
@@ -135,7 +153,18 @@ const ConditionalNode = ({ id, data }) => {
                     {!isExpanded ? (
                         <div
                             className="cursor-pointer group flex flex-col gap-1"
-                            onClick={() => setIsExpanded(true)}
+                            onClick={() => {
+                                setIsExpanded(true);
+                                setNodes((nds) => nds.map((node) => {
+                                    if (node.id === id) {
+                                        return {
+                                            ...node,
+                                            style: { ...node.style, zIndex: 1000 }
+                                        };
+                                    }
+                                    return node;
+                                }));
+                            }}
                         >
                             <div className="font-medium text-slate-700 dark:text-slate-200">
                                 {label}
