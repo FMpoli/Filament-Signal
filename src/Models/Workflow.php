@@ -64,12 +64,13 @@ class Workflow extends Model
     public function getTriggerTypeAttribute(): ?string
     {
         $triggerNode = $this->getTriggerNode();
-        
-        if (!$triggerNode) {
+
+        if (! $triggerNode) {
             return null;
         }
 
         $config = $triggerNode->config ?? [];
+
         return $config['selectedEvent'] ?? null;
     }
 
@@ -102,12 +103,13 @@ class Workflow extends Model
             $manifestPath = storage_path("app/voodflow/nodes/{$type}/manifest.json");
             if (file_exists($manifestPath)) {
                 $manifest = json_decode(file_get_contents($manifestPath), true);
+
                 return $manifest['icon'] ?? 'heroicon-o-puzzle-piece';
             }
         }
 
         // Default icons for built-in types
-        return match($type) {
+        return match ($type) {
             'trigger' => 'heroicon-o-bolt',
             'action' => 'heroicon-o-play',
             'filter' => 'heroicon-o-funnel',

@@ -91,6 +91,7 @@ class NodeRegistry
 
                 if (class_exists($className) && in_array(NodeInterface::class, class_implements($className))) {
                     $this->register($className);
+
                     // Manifest-based registration succeeded – stop further scanning for this directory
                     return;
                 }

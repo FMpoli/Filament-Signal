@@ -96,13 +96,14 @@ class WorkflowResource extends Resource
                         if (empty($nodes)) {
                             return '—';
                         }
+
                         return count($nodes) . ' nodes';
                     })
                     ->badge()
                     ->color('gray')
                     ->icon('heroicon-o-squares-2x2')
                     ->wrap(false),
-                
+
                 // Workflow Name
                 Tables\Columns\TextColumn::make('name')
                     ->searchable()
@@ -110,7 +111,7 @@ class WorkflowResource extends Resource
                     ->weight('medium')
                     ->description(fn (Workflow $record) => $record->description)
                     ->limit(30),
-                
+
                 // Author
                 Tables\Columns\TextColumn::make('user.name')
                     ->label('Author')
@@ -118,38 +119,39 @@ class WorkflowResource extends Resource
                     ->sortable()
                     ->icon('heroicon-o-user')
                     ->default('—'),
-                
+
                 // Trigger Type (with icon and tooltip)
                 Tables\Columns\TextColumn::make('trigger_info')
                     ->label('Trigger')
                     ->state(function (Workflow $record) {
                         $triggerNode = $record->getTriggerNode();
-                        
-                        if (!$triggerNode) {
+
+                        if (! $triggerNode) {
                             return 'None';
                         }
-                        
+
                         $config = $triggerNode->config ?? [];
-                        
+
                         // Try different possible field names
-                        $event = $config['selectedEvent'] 
-                              ?? $config['event'] 
+                        $event = $config['selectedEvent']
+                              ?? $config['event']
                               ?? $config['eventClass']
                               ?? $config['trigger_event']
                               ?? null;
-                        
-                        if (!$event) {
+
+                        if (! $event) {
                             // If there's any config, it's configured but we don't recognize the structure
-                            if (!empty($config)) {
+                            if (! empty($config)) {
                                 return 'Event'; // Generic fallback
                             }
+
                             return 'Unconfigured';
                         }
-                        
+
                         $eventLower = strtolower($event);
                         $parts = explode('\\', $event);
                         $className = end($parts);
-                        
+
                         // Detect trigger type based on event class name
                         if (str_contains($eventLower, 'schedule') || str_contains($eventLower, 'cron')) {
                             return 'Schedule';
@@ -159,19 +161,19 @@ class WorkflowResource extends Resource
                             return 'Subflow';
                         } elseif (str_contains($eventLower, 'manual') || str_contains($eventLower, 'button')) {
                             return 'Manual';
-                        } elseif (str_contains($eventLower, 'eloquent') || 
+                        } elseif (str_contains($eventLower, 'eloquent') ||
                                  str_contains(strtolower($className), 'created') ||
                                  str_contains(strtolower($className), 'updated') ||
                                  str_contains(strtolower($className), 'deleted') ||
                                  str_contains(strtolower($className), 'saved')) {
                             return 'Event';
                         }
-                        
+
                         // Default to Event for any other internal event
                         return 'Event';
                     })
                     ->badge()
-                    ->color(fn (string $state): string => match($state) {
+                    ->color(fn (string $state): string => match ($state) {
                         'Schedule' => 'info',
                         'Webhook' => 'success',
                         'Event' => 'warning',
@@ -180,7 +182,7 @@ class WorkflowResource extends Resource
                         'Unconfigured' => 'danger',
                         default => 'gray',
                     })
-                    ->icon(fn (string $state): string => match($state) {
+                    ->icon(fn (string $state): string => match ($state) {
                         'Schedule' => 'heroicon-o-clock',
                         'Webhook' => 'heroicon-o-globe-alt',
                         'Event' => 'heroicon-o-bolt',
@@ -191,21 +193,24 @@ class WorkflowResource extends Resource
                     })
                     ->tooltip(function (Workflow $record) {
                         $triggerNode = $record->getTriggerNode();
-                        if (!$triggerNode) return 'No trigger configured';
-                        
+                        if (! $triggerNode) {
+                            return 'No trigger configured';
+                        }
+
                         $config = $triggerNode->config ?? [];
                         $event = $config['selectedEvent'] ?? $config['event'] ?? null;
-                        
+
                         if ($event) {
                             $parts = explode('\\', $event);
+
                             return end($parts);
                         }
-                        
+
                         return 'Trigger configured';
                     })
                     ->wrap(false)
                     ->alignCenter(),
-                
+
                 // Execution Count
                 Tables\Columns\TextColumn::make('executions_count')
                     ->label('Runs')
@@ -215,21 +220,21 @@ class WorkflowResource extends Resource
                     ->badge()
                     ->color('gray')
                     ->icon('heroicon-o-play'),
-                
+
                 // Last Run Status
                 Tables\Columns\TextColumn::make('last_execution_status')
                     ->label('Last Run')
                     ->state(function (Workflow $record) {
                         $lastExecution = $record->executions()->latest()->first();
-                        
-                        if (!$lastExecution) {
+
+                        if (! $lastExecution) {
                             return 'Never';
                         }
-                        
+
                         return $lastExecution->status ?? 'Unknown';
                     })
                     ->badge()
-                    ->color(fn (string $state): string => match($state) {
+                    ->color(fn (string $state): string => match ($state) {
                         'completed' => 'success',
                         'success' => 'success',
                         'failed' => 'danger',
@@ -239,7 +244,7 @@ class WorkflowResource extends Resource
                         'Never' => 'gray',
                         default => 'gray',
                     })
-                    ->icon(fn (string $state): string => match($state) {
+                    ->icon(fn (string $state): string => match ($state) {
                         'completed', 'success' => 'heroicon-o-check-circle',
                         'failed', 'error' => 'heroicon-o-x-circle',
                         'running' => 'heroicon-o-arrow-path',
@@ -248,10 +253,11 @@ class WorkflowResource extends Resource
                     })
                     ->description(function (Workflow $record) {
                         $lastExecution = $record->executions()->latest()->first();
+
                         return $lastExecution?->created_at?->diffForHumans() ?? '—';
                     })
                     ->alignCenter(),
-                
+
                 // Average Duration
                 Tables\Columns\TextColumn::make('avg_duration')
                     ->label('Avg Time')
@@ -260,11 +266,11 @@ class WorkflowResource extends Resource
                             ->whereNotNull('finished_at')
                             ->selectRaw('AVG(TIMESTAMPDIFF(SECOND, started_at, finished_at)) as avg_seconds')
                             ->value('avg_seconds');
-                        
-                        if (!$avgDuration) {
+
+                        if (! $avgDuration) {
                             return '—';
                         }
-                        
+
                         if ($avgDuration < 60) {
                             return round($avgDuration, 1) . 's';
                         } elseif ($avgDuration < 3600) {
@@ -275,7 +281,7 @@ class WorkflowResource extends Resource
                     })
                     ->alignCenter()
                     ->toggleable(isToggledHiddenByDefault: true),
-                
+
                 // Status
                 Tables\Columns\TextColumn::make('status')
                     ->badge()
@@ -285,14 +291,14 @@ class WorkflowResource extends Resource
                         'danger' => 'disabled',
                     ])
                     ->sortable(),
-                
+
                 // Created At
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Created')
                     ->dateTime('d M Y')
                     ->sortable()
                     ->description(fn (Workflow $record) => $record->created_at?->diffForHumans()),
-                
+
                 Tables\Columns\TextColumn::make('updated_at')
                     ->dateTime()
                     ->sortable()

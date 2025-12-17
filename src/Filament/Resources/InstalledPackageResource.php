@@ -2,14 +2,15 @@
 
 namespace Voodflow\Voodflow\Filament\Resources;
 
+use BackedEnum;
+use Filament\Actions\Action;
+use Filament\Actions\EditAction;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Actions\Action;
-use Filament\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Table;
@@ -17,15 +18,16 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use Voodflow\Voodflow\Filament\Resources\InstalledPackageResource\Pages;
 use Voodflow\Voodflow\Models\InstalledPackage;
-use BackedEnum;
 use ZipArchive;
 
 class InstalledPackageResource extends Resource
 {
     protected static ?string $model = InstalledPackage::class;
 
-    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-puzzle-piece';
+    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-puzzle-piece';
+
     protected static ?string $navigationLabel = 'Node Plugins';
+
     protected static ?string $modelLabel = 'Plugin';
 
     public static function form(Schema $schema): Schema

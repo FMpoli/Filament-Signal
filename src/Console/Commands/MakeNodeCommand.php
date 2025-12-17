@@ -45,7 +45,7 @@ class MakeNodeCommand extends Command
         $this->newLine();
         $this->info("📁 Location: {$nodeDir}");
         $this->info('📝 Files created:');
-        $this->line("   - manifest.json");
+        $this->line('   - manifest.json');
         $this->line("   - {$nodeClass}.php");
         $this->line("   - components/{$nodeClass}.jsx");
         $this->newLine();
@@ -634,9 +634,15 @@ JSX;
             ],
         ];
 
-        if ($nodeInfo['author_url']) $manifest['author_url'] = $nodeInfo['author_url'];
-        if ($nodeInfo['repository']) $manifest['repository'] = $nodeInfo['repository'];
-        if ($nodeInfo['license']) $manifest['license'] = ['type' => $nodeInfo['license']];
+        if ($nodeInfo['author_url']) {
+            $manifest['author_url'] = $nodeInfo['author_url'];
+        }
+        if ($nodeInfo['repository']) {
+            $manifest['repository'] = $nodeInfo['repository'];
+        }
+        if ($nodeInfo['license']) {
+            $manifest['license'] = ['type' => $nodeInfo['license']];
+        }
 
         file_put_contents($nodeDir . '/manifest.json', json_encode($manifest, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
     }
