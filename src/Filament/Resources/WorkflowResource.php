@@ -98,7 +98,8 @@ class WorkflowResource extends Resource
                         ]);
                     })
                     ->html()
-                    ->width('120px'),
+                    ->wrap(false)
+                    ->width('150px'),
                 
                 // Workflow Name
                 Tables\Columns\TextColumn::make('name')
@@ -125,7 +126,8 @@ class WorkflowResource extends Resource
                         ]);
                     })
                     ->html()
-                    ->width('100px')
+                    ->wrap(false)
+                    ->width('120px')
                     ->alignCenter(),
                 
                 // Execution Count
