@@ -257,8 +257,8 @@ class WorkflowResource extends Resource
                     ->label('Avg Time')
                     ->state(function (Workflow $record) {
                         $avgDuration = $record->executions()
-                            ->whereNotNull('completed_at')
-                            ->selectRaw('AVG(TIMESTAMPDIFF(SECOND, created_at, completed_at)) as avg_seconds')
+                            ->whereNotNull('finished_at')
+                            ->selectRaw('AVG(TIMESTAMPDIFF(SECOND, started_at, finished_at)) as avg_seconds')
                             ->value('avg_seconds');
                         
                         if (!$avgDuration) {
