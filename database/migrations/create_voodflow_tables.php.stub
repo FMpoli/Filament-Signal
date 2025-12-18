@@ -1,0 +1,237 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        $workflowsTable = config('voodflow.table_names.workflows', 'voodflow_workflows');
+        $nodesTable = config('voodflow.table_names.nodes', 'voodflow_nodes');
+        $edgesTable = config('voodflow.table_names.edges', 'voodflow_edges');
+        $executionsTable = config('voodflow.table_names.executions', 'voodflow_executions');
+        $executionNodesTable = config('voodflow.table_names.execution_nodes', 'voodflow_execution_nodes');
+        $modelIntegrationsTable = config('voodflow.table_names.model_integrations', 'voodflow_model_integrations');
+
+        // ==================== CORE VOODFLOW TABLES ====================
+
+        // 1. Workflows
+        Schema::create($workflowsTable, function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('user_id')->nullable()->constrained()->nullOnDelete();
+            $table->string('name');
+            $table->text('description')->nullable();
+            $table->enum('status', ['draft', 'active', 'disabled'])->default('draft');
+            $table->json('metadata')->nullable();
+            $table->timestamps();
+        });
+
+        // 2. Nodes
+        Schema::create($nodesTable, function (Blueprint $table) use ($workflowsTable) {
+            $table->id();
+            $table->foreignId('workflow_id')->constrained($workflowsTable)->cascadeOnDelete();
+            $table->string('type');
+            $table->json('config')->nullable();
+            $table->json('position')->nullable();
+            $table->timestamps();
+        });
+
+        // 3. Edges
+        Schema::create($edgesTable, function (Blueprint $table) use ($workflowsTable, $nodesTable) {
+            $table->id();
+            $table->foreignId('workflow_id')->constrained($workflowsTable)->cascadeOnDelete();
+            $table->foreignId('source_node_id')->constrained($nodesTable)->cascadeOnDelete();
+            $table->foreignId('target_node_id')->constrained($nodesTable)->cascadeOnDelete();
+            $table->string('source_handle')->nullable();
+            $table->string('target_handle')->nullable();
+            $table->timestamps();
+        });
+
+        // 4. Executions
+        Schema::create($executionsTable, function (Blueprint $table) use ($workflowsTable) {
+            $table->id();
+            $table->foreignId('workflow_id')->constrained($workflowsTable)->cascadeOnDelete();
+            $table->enum('status', ['pending', 'running', 'completed', 'failed'])->default('pending');
+            $table->json('trigger_data')->nullable();
+            $table->timestamp('started_at')->nullable();
+            $table->timestamp('finished_at')->nullable();
+            $table->timestamps();
+        });
+
+        // 5. Execution Nodes
+        Schema::create($executionNodesTable, function (Blueprint $table) use ($executionsTable, $nodesTable) {
+            $table->id();
+            $table->foreignId('execution_id')->constrained($executionsTable)->cascadeOnDelete();
+            $table->foreignId('node_id')->constrained($nodesTable)->cascadeOnDelete();
+            $table->enum('status', ['pending', 'running', 'completed', 'failed', 'skipped'])->default('pending');
+            $table->json('input')->nullable();
+            $table->json('output')->nullable();
+            $table->text('error')->nullable();
+            $table->timestamp('started_at')->nullable();
+            $table->timestamp('finished_at')->nullable();
+            $table->timestamps();
+        });
+
+        // 6. Model Integrations
+        Schema::create($modelIntegrationsTable, function (Blueprint $table) {
+            $table->id();
+            $table->string('model_class')->unique();
+            $table->string('display_name');
+            $table->json('tracked_events')->nullable();
+            $table->boolean('is_active')->default(true);
+            $table->timestamps();
+        });
+
+        // ==================== CREDENTIALS SYSTEM ====================
+
+        // 7. Credentials (Outbound)
+        Schema::create('voodflow_credentials', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            
+            // Metadata
+            $table->string('name');
+            $table->text('description')->nullable();
+            
+            // Type and provider
+            $table->enum('type', ['basic_auth', 'oauth2', 'api_token', 'ssh_key', 'certificate', 'custom']);
+            $table->string('provider', 100)->nullable()->comment('gmail, stripe, openai, smtp, etc.');
+            
+            // Credential data (encrypted by Laravel)
+            $table->text('credentials')->comment('Encrypted JSON with sensitive data');
+            
+            // Provider metadata (non-sensitive)
+            $table->json('metadata')->nullable()->comment('Provider-specific configuration');
+            
+            // OAuth2 specific fields
+            $table->string('oauth_state')->nullable();
+            $table->text('oauth_callback_url')->nullable();
+            $table->timestamp('expires_at')->nullable()->comment('For tokens that expire');
+            
+            // Status and audit
+            $table->enum('status', ['active', 'expired', 'revoked', 'error'])->default('active');
+            $table->timestamp('last_used_at')->nullable();
+            $table->text('last_error')->nullable();
+            
+            $table->timestamps();
+            
+            // Indexes
+            $table->index(['user_id', 'type']);
+            $table->index('provider');
+            $table->index('status');
+        });
+
+        // 8. OAuth2 Scopes
+        Schema::create('voodflow_credential_scopes', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('credential_id')->constrained('voodflow_credentials')->cascadeOnDelete();
+            $table->string('scope');
+            
+            // Unique constraint to avoid duplicate scopes
+            $table->unique(['credential_id', 'scope']);
+        });
+
+        // 9. Webhook Credentials (Inbound)
+        Schema::create('voodflow_webhook_credentials', function (Blueprint $table) use ($workflowsTable) {
+            $table->id();
+            $table->foreignId('workflow_id')->constrained($workflowsTable)->cascadeOnDelete();
+            
+            // Webhook authentication type
+            $table->enum('auth_type', ['none', 'secret_key', 'signature', 'bearer_token', 'basic_auth'])->default('secret_key');
+            
+            // Secret/Token (will be encrypted)
+            $table->text('secret')->comment('Encrypted secret/token for webhook validation');
+            
+            // Validation configuration (header names, signature algorithm, etc.)
+            $table->json('validation_config')->nullable()->comment('Header names, signature algorithm, etc.');
+            
+            // Metadata
+            $table->boolean('is_active')->default(true);
+            $table->timestamp('last_verified_at')->nullable();
+            
+            $table->timestamps();
+            
+            // Index
+            $table->index('workflow_id');
+        });
+
+        // 10. Credential Access Audit Logs
+        Schema::create('voodflow_credential_access_logs', function (Blueprint $table) use ($nodesTable, $workflowsTable) {
+            $table->id();
+            $table->foreignId('credential_id')->constrained('voodflow_credentials')->cascadeOnDelete();
+            $table->foreignId('node_id')->nullable()->constrained($nodesTable)->nullOnDelete();
+            $table->foreignId('workflow_id')->nullable()->constrained($workflowsTable)->nullOnDelete();
+            
+            // What was done
+            $table->string('action', 100)->comment('Action performed: get_client, send_email, make_api_request, etc.');
+            $table->json('params')->nullable()->comment('Sanitized parameters (NO credentials)');
+            
+            // Result
+            $table->enum('status', ['success', 'failure', 'unauthorized'])->default('success');
+            $table->text('error_message')->nullable();
+            
+            // Network metadata
+            $table->string('ip_address', 45)->nullable();
+            $table->text('user_agent')->nullable();
+            
+            // Security flags
+            $table->boolean('is_suspicious')->default(false);
+            $table->text('suspicious_reason')->nullable();
+            
+            $table->timestamp('created_at')->useCurrent();
+            
+            // Indexes for performance and security monitoring
+            $table->index('credential_id');
+            $table->index('node_id');
+            $table->index('workflow_id');
+            $table->index('is_suspicious');
+            $table->index(['credential_id', 'created_at']);
+            $table->index('created_at');
+        });
+
+        // ==================== MARKETPLACE ====================
+
+        // 11. Installed Packages (Dynamic nodes)
+        Schema::create('voodflow_installed_packages', function (Blueprint $table) {
+            $table->id();
+            $table->string('name')->unique();
+            $table->string('version');
+            $table->string('type')->default('node'); // node, integration, etc.
+            $table->string('author')->nullable();
+            $table->text('description')->nullable();
+            $table->string('license_type')->nullable(); // free, paid, subscription
+            $table->string('license_key')->nullable();
+            $table->timestamp('license_expires_at')->nullable();
+            $table->json('manifest')->nullable();
+            $table->string('installation_path');
+            $table->enum('status', ['active', 'disabled', 'error'])->default('active');
+            $table->timestamp('installed_at')->useCurrent();
+            $table->timestamps();
+        });
+    }
+
+    public function down(): void
+    {
+        $workflowsTable = config('voodflow.table_names.workflows', 'voodflow_workflows');
+        $nodesTable = config('voodflow.table_names.nodes', 'voodflow_nodes');
+        $edgesTable = config('voodflow.table_names.edges', 'voodflow_edges');
+        $executionsTable = config('voodflow.table_names.executions', 'voodflow_executions');
+        $executionNodesTable = config('voodflow.table_names.execution_nodes', 'voodflow_execution_nodes');
+        $modelIntegrationsTable = config('voodflow.table_names.model_integrations', 'voodflow_model_integrations');
+
+        // Drop in reverse order (respects foreign keys)
+        Schema::dropIfExists('voodflow_installed_packages');
+        Schema::dropIfExists('voodflow_credential_access_logs');
+        Schema::dropIfExists('voodflow_webhook_credentials');
+        Schema::dropIfExists('voodflow_credential_scopes');
+        Schema::dropIfExists('voodflow_credentials');
+        Schema::dropIfExists($modelIntegrationsTable);
+        Schema::dropIfExists($executionNodesTable);
+        Schema::dropIfExists($executionsTable);
+        Schema::dropIfExists($edgesTable);
+        Schema::dropIfExists($nodesTable);
+        Schema::dropIfExists($workflowsTable);
+    }
+};

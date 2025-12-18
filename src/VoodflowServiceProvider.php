@@ -230,9 +230,7 @@ class VoodflowServiceProvider extends PackageServiceProvider
     protected function getMigrations(): array
     {
         return [
-            'create_voodflow_table',
-            'create_voodflow_installed_packages_table',
-            'add_user_id_to_workflows_table',
+            'create_voodflow_tables', // Unified migration stub
         ];
     }
 }
