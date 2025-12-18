@@ -26,7 +26,7 @@ class CredentialProxyTest extends TestCase
         $data = $proxy->execute('get_api_client');
 
         $this->assertEquals('secret-key-123', $data['api_key']);
-        
+
         // Verify audit log was created
         $this->assertDatabaseHas('voodflow_credential_access_logs', [
             'credential_id' => $credential->id,
@@ -50,8 +50,8 @@ class CredentialProxyTest extends TestCase
 
         // Node only has 'other.scope', but tries to access SMTP
         $proxy = new CredentialProxy(
-            $credential, 
-            nodeId: 10, 
+            $credential,
+            nodeId: 10,
             allowedScopes: ['other.scope']
         );
 
@@ -69,7 +69,7 @@ class CredentialProxyTest extends TestCase
         ]);
 
         $proxy = new CredentialProxy($credential, nodeId: 10);
-        
+
         // Passing sensitive data in params
         $proxy->execute('get_api_client', ['password' => 'my-plain-password']);
 

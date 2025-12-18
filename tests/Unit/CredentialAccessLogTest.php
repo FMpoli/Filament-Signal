@@ -25,7 +25,7 @@ class CredentialAccessLogTest extends TestCase
         ]);
 
         $log->markAsSuspicious('Too many requests from this node');
-        
+
         $this->assertTrue($log->refresh()->is_suspicious);
         $this->assertEquals('Too many requests from this node', $log->suspicious_reason);
     }

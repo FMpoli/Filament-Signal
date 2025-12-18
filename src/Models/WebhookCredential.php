@@ -46,7 +46,7 @@ class WebhookCredential extends Model
         if ($this->auth_type === 'secret_key') {
             $headerName = $this->validation_config['header_name'] ?? 'X-Webhook-Secret';
             $providedSecret = $headers[$headerName] ?? null;
-            
+
             return hash_equals($this->secret, $providedSecret);
         }
 
@@ -54,9 +54,9 @@ class WebhookCredential extends Model
             $headerName = $this->validation_config['signature_header'] ?? 'X-Webhook-Signature';
             $providedSignature = $headers[$headerName] ?? null;
             $algorithm = $this->validation_config['algorithm'] ?? 'sha256';
-            
+
             $computedSignature = hash_hmac($algorithm, $body, $this->secret);
-            
+
             return hash_equals($computedSignature, $providedSignature);
         }
 

@@ -189,6 +189,6 @@ class CredentialProxy
      */
     public function __sleep()
     {
-        throw new \Voodflow\Voodflow\Exceptions\CredentialSerializationException();
+        throw new \Voodflow\Voodflow\Exceptions\CredentialSerializationException;
     }
 }

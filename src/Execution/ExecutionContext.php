@@ -70,11 +70,12 @@ class ExecutionContext
     /**
      * Get credential proxy for secure access
      *
-     * @param int|string $credentialId Credential ID or name
-     * @param array $nodeManifest Node manifest with required scopes
+     * @param  int|string  $credentialId  Credential ID or name
+     * @param  array  $nodeManifest  Node manifest with required scopes
+     *
      * @throws UnauthorizedCredentialAccessException
      */
-    public function getCredential(int|string $credentialId, array $nodeManifest = []): CredentialProxy
+    public function getCredential(int | string $credentialId, array $nodeManifest = []): CredentialProxy
     {
         // Load credential
         if (is_numeric($credentialId)) {

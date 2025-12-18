@@ -52,7 +52,7 @@ class TestCase extends Orchestra
     {
         config()->set('database.default', 'testing');
 
-        $migration = include __DIR__.'/../database/migrations/create_voodflow_tables.php.stub';
+        $migration = include __DIR__ . '/../database/migrations/create_voodflow_tables.php.stub';
         $migration->up();
     }
 }

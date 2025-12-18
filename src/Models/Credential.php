@@ -117,7 +117,7 @@ class Credential extends Model
     {
         // Remove old scopes
         $this->scopes()->whereNotIn('scope', $scopes)->delete();
-        
+
         // Add new scopes
         foreach ($scopes as $scope) {
             $this->addScope($scope);

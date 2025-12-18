@@ -60,7 +60,7 @@ class CredentialModelTest extends TestCase
     {
         $this->expectException(\Voodflow\Voodflow\Exceptions\CredentialSerializationException::class);
 
-        $credential = new Credential();
+        $credential = new Credential;
         serialize($credential);
     }
 }
